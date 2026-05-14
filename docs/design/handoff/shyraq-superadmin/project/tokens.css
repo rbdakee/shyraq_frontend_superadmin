@@ -1,0 +1,118 @@
+/* Shyraq SuperAdmin — Design Tokens */
+:root {
+  /* Neutral scale (warm-tinted) */
+  --bg-canvas: #f4f3f1;
+  --bg-app: #faf9f7;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f6f5f3;
+  --bg-surface-hover: #f1efec;
+  --bg-elevated: #ffffff;
+
+  --border-subtle: #ece9e4;
+  --border-default: #e2dfd9;
+  --border-strong: #cfccc5;
+
+  --text-primary: #191410;
+  --text-secondary: #303030;
+  --text-tertiary: #6e6862;
+  --text-quaternary: #a8a39c;
+  --text-inverse: #ffffff;
+
+  /* Brand / primary — #007BE0 */
+  --brand: #007be0;
+  --brand-hover: #006bc4;
+  --brand-active: #0058a6;
+  --brand-soft: #e6f1fc;
+  --brand-soft-border: #b8d6f5;
+  --brand-text-on-soft: #0058a6;
+
+  /* Success — #47D848 (lime-green) */
+  --success: #47d848;
+  --success-strong: #2eb53b;
+  --success-soft: #e6f9e7;
+  --success-soft-border: #b8e9be;
+  --success-text: #1d7a2b;
+
+  /* Warning — #FFAF36 (orange) */
+  --warning: #ffaf36;
+  --warning-strong: #e69420;
+  --warning-soft: #fff3df;
+  --warning-soft-border: #f5d9a3;
+  --warning-text: #8a5a10;
+
+  /* Error — keep red */
+  --error: #e5484d;
+  --error-strong: #c8313a;
+  --error-soft: #fbe9ea;
+  --error-soft-border: #f0bfc2;
+  --error-text: #a52129;
+
+  /* Info — same hue as brand */
+  --info: #007be0;
+  --info-soft: #e6f1fc;
+  --info-text: #0058a6;
+
+  /* Roles */
+  --role-super: #8859d3;
+  --role-super-soft: #f0e9fa;
+  --role-super-text: #5b32a0;
+  --role-support: #007be0;
+  --role-support-soft: #e6f1fc;
+  --role-support-text: #0058a6;
+
+  /* Radii */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 0 rgba(25, 20, 16, 0.04);
+  --shadow-md: 0 1px 2px rgba(25, 20, 16, 0.06), 0 4px 12px rgba(25, 20, 16, 0.04);
+  --shadow-lg: 0 4px 24px rgba(25, 20, 16, 0.08), 0 1px 2px rgba(25, 20, 16, 0.06);
+  --shadow-overlay: 0 24px 60px rgba(25, 20, 16, 0.18), 0 2px 8px rgba(25, 20, 16, 0.08);
+
+  /* Typography */
+  --font-sans: "Geist", "Geist Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01", "ss03";
+}
+
+button {
+  font-family: inherit;
+  font-feature-settings: inherit;
+}
+
+/* Artboard base */
+.ab {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ab--login,
+.ab--centered {
+  align-items: center;
+  justify-content: center;
+}
