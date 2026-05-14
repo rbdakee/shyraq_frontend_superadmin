@@ -1345,7 +1345,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 - [x] **B0** Pre-flight checklist
 - [x] **B1** Foundation (Vite + Tailwind + tooling + tokens + OpenAPI)
-- [ ] **B2** Auth + Shell (login, refresh, logout, sidebar, topbar)
+- [x] **B2** Auth + Shell (login, refresh, logout, sidebar, topbar)
 - [ ] **B3** Dashboard + System Status + Error pages
 - [ ] **B4** DataTable + Kindergartens list (offset pagination)
 - [ ] **B5** Kindergartens — wizard + archive/restore + admin invite
