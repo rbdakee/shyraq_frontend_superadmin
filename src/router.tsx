@@ -3,6 +3,10 @@ import { Toaster } from 'sonner';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { Shell } from '@/components/layout/shell';
 import LoginPage from '@/routes/login';
+import DashboardPage from '@/routes/dashboard';
+import SystemStatusPage from '@/routes/system-status';
+import NotFoundPage from '@/routes/_404';
+import ServerErrorPage from '@/routes/_500';
 
 // eslint-disable-next-line react-refresh/only-export-components
 const RootLayout = () => (
@@ -19,11 +23,12 @@ export const router = createBrowserRouter([
       { path: '/login', element: <LoginPage /> },
       {
         element: <AuthGuard />,
+        errorElement: <ServerErrorPage />,
         children: [
           {
             element: <Shell />,
             children: [
-              { path: '/', element: <div>dashboard</div> },
+              { path: '/', element: <DashboardPage /> },
               { path: '/kindergartens', element: <div>kindergartens</div> },
               { path: '/kindergartens/new', element: <div>kindergartens/new</div> },
               {
@@ -48,15 +53,12 @@ export const router = createBrowserRouter([
                 element: <div>operations/schedule-rollout</div>,
               },
               { path: '/operations/lifecycle-dlq', element: <div>operations/lifecycle-dlq</div> },
-              { path: '/system-status', element: <div>system-status</div> },
+              { path: '/system-status', element: <SystemStatusPage /> },
             ],
           },
         ],
       },
-      { path: '/404', element: <div>404 not found</div> },
-      { path: '/403', element: <div>403 forbidden</div> },
-      { path: '/500', element: <div>500 server error</div> },
-      { path: '*', element: <div>not found</div> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

@@ -9,6 +9,7 @@ Onboarding for any Claude Code session in this repo. **Read top to bottom before
 **Shyraq SuperAdmin** — внутренний веб-инструмент команды Shyraq для управления SaaS-платформой детских садов: тенанты, подписки, фичефлаги, операторские триггеры (cron'ы), DLQ.
 
 **Не путать:**
+
 - **Admin Web** (отдельный проект) — для сотрудников ОДНОГО садика (`role=admin`)
 - **Parent App / Staff App** — мобильные приложения (Expo)
 - **SuperAdmin** (этот репо) — для команды Shyraq (`role=super_admin` / `support`)
@@ -21,30 +22,38 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 **Read THESE before guessing.** Никогда не выдумывать endpoint'ы, поля DTO или бизнес-логику.
 
-| Аспект | Файл |
-|---|---|
-| Архитектура фронта (стек, folder structure, deployment, conventions) | [`docs/architecture.md`](docs/architecture.md) |
-| Endpoints (полный референс backend API для super-admin) | [`docs/endpoints.md`](docs/endpoints.md) |
-| Бизнес-процессы super-admin | [`docs/superadmin_BP.md`](docs/superadmin_BP.md) |
-| Дизайн-спека (страницы, контент, функционал) | [`docs/DESIGN.md`](docs/DESIGN.md) |
-| Открытые вопросы (что НЕ делать без решения) | [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md) |
-| Implementation tracker (батчи, acceptance, открытые TODO) | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) |
-| Дизайн-handoff (HTML/CSS/JS прототип всех экранов) | [`docs/design/handoff/shyraq-superadmin/`](docs/design/handoff/shyraq-superadmin/) |
-| Design tokens (palette, typography, radii, shadows) | [`docs/design/handoff/shyraq-superadmin/project/tokens.css`](docs/design/handoff/shyraq-superadmin/project/tokens.css) |
-| Backend OpenAPI (live JSON) | `http://13.60.189.214:3000/docs-json` |
-| Backend Swagger UI (live) | `http://13.60.189.214:3000/docs` |
+| Аспект                                                               | Файл                                                                                                                   |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Архитектура фронта (стек, folder structure, deployment, conventions) | [`docs/architecture.md`](docs/architecture.md)                                                                         |
+| Endpoints (полный референс backend API для super-admin)              | [`docs/endpoints.md`](docs/endpoints.md)                                                                               |
+| Бизнес-процессы super-admin                                          | [`docs/superadmin_BP.md`](docs/superadmin_BP.md)                                                                       |
+| Дизайн-спека (страницы, контент, функционал)                         | [`docs/DESIGN.md`](docs/DESIGN.md)                                                                                     |
+| Открытые вопросы (что НЕ делать без решения)                         | [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md)                                                                     |
+| Implementation tracker (батчи, acceptance, открытые TODO)            | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)                                                           |
+| Дизайн-handoff (HTML/CSS/JS прототип всех экранов)                   | [`docs/design/handoff/shyraq-superadmin/`](docs/design/handoff/shyraq-superadmin/)                                     |
+| Design tokens (palette, typography, radii, shadows)                  | [`docs/design/handoff/shyraq-superadmin/project/tokens.css`](docs/design/handoff/shyraq-superadmin/project/tokens.css) |
+| Backend OpenAPI (live JSON)                                          | `http://13.60.189.214:3000/docs-json`                                                                                  |
+| Backend Swagger UI (live)                                            | `http://13.60.189.214:3000/docs`                                                                                       |
 
 **Backend code reference** (читать ТОЛЬКО при критических неопределённостях):
 
-| Аспект | Файл |
-|---|---|
+| Аспект              | Файл                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------- |
 | Backend архитектура | [`../backend_shyraq_v2/docs/architecture.md`](../backend_shyraq_v2/docs/architecture.md) |
-| Backend endpoints | [`../backend_shyraq_v2/docs/endpoints.md`](../backend_shyraq_v2/docs/endpoints.md) |
-| Backend BP | [`../backend_shyraq_v2/docs/Shyraq BP.md`](../backend_shyraq_v2/docs/Shyraq%20BP.md) |
-| Backend DB schema | [`../backend_shyraq_v2/docs/schema.dbml`](../backend_shyraq_v2/docs/schema.dbml) |
-| Backend module code | `../backend_shyraq_v2/src/modules/<x>/` |
+| Backend endpoints   | [`../backend_shyraq_v2/docs/endpoints.md`](../backend_shyraq_v2/docs/endpoints.md)       |
+| Backend BP          | [`../backend_shyraq_v2/docs/Shyraq BP.md`](../backend_shyraq_v2/docs/Shyraq%20BP.md)     |
+| Backend DB schema   | [`../backend_shyraq_v2/docs/schema.dbml`](../backend_shyraq_v2/docs/schema.dbml)         |
+| Backend module code | `../backend_shyraq_v2/src/modules/<x>/`                                                  |
 
 **Правило:** локальные docs в `docs/` — первичны. Backend repo читать только если в наших docs нет ответа ИЛИ есть подозрение на расхождение со spec'ом. После расхождения — обновить наши docs.
+
+**Документы первичны, код вторичен (first-document approach).** Никогда не реализуем фичу до того, как в docs зафиксировано однозначное решение. Порядок изменений в любом не-тривиальном изменении:
+
+1. Обновить **`docs/DESIGN.md`** / **`docs/endpoints.md`** / **`docs/OPEN_QUESTIONS.md`** — решить архитектуру, контракты, edge-cases, открытые вопросы.
+2. Обновить **`docs/IMPLEMENTATION_PLAN.md`** — добавить task/acceptance в нужный батч.
+3. **Код** — субагенты (или main agent в обычном режиме) реализуют строго по обновлённым docs.
+
+Если в процессе разработки обнаружено противоречие docs ↔ код или внутри самих docs — **остановить батч**, добавить запись в `OPEN_QUESTIONS.md`, обсудить с пользователем, обновить docs, **потом** продолжить. "Закодим как удобнее, потом обновим docs" — антипаттерн.
 
 ---
 
@@ -52,10 +61,10 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 **Dev server:** `http://13.60.189.214:3000`
 
-| Что | URL |
-|---|---|
-| API base (все endpoints) | `http://13.60.189.214:3000/api/v1/` |
-| Swagger UI | `http://13.60.189.214:3000/docs` |
+| Что                               | URL                                   |
+| --------------------------------- | ------------------------------------- |
+| API base (все endpoints)          | `http://13.60.189.214:3000/api/v1/`   |
+| Swagger UI                        | `http://13.60.189.214:3000/docs`      |
 | OpenAPI JSON (для `pnpm gen:api`) | `http://13.60.189.214:3000/docs-json` |
 
 **Полный путь endpoint'а** — `/api/v1/<route>`. Например, super-admin login: `POST http://13.60.189.214:3000/api/v1/saas/auth/login`. Префикс `/api/v1/` глобальный для **всех** endpoints. Swagger UI/JSON — на корне домена, **не** под `/api/v1/`.
@@ -74,15 +83,15 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 Структура папок и обоснование — [`docs/architecture.md §3`](docs/architecture.md#3-структура-проекта).
 
-| Слой | Что разрешено | Что запрещено |
-|---|---|---|
-| `api/` | `ky`, openapi-types, чистые async-функции | TanStack Query hooks, React, JSX, i18n |
-| `hooks/` | TanStack Query, вызовы `api/*`, query keys | прямой `fetch`, JSX |
-| `routes/` | React, JSX, `hooks/*`, `components/*`, `react-router-dom` | прямой `fetch`, прямой импорт `api/*` (только через hooks) |
-| `components/ui/` | shadcn primitives | бизнес-логика, прямой backend-доступ |
-| `components/{layout,data-table,forms,feedback}/` | UI + переиспользуемые wrappers | бизнес-логика домена (это в routes) |
-| `lib/` | чистые функции, без React | TanStack Query, JSX |
-| `stores/` | Zustand UI state | сервер-state (он в TanStack Query) |
+| Слой                                             | Что разрешено                                             | Что запрещено                                              |
+| ------------------------------------------------ | --------------------------------------------------------- | ---------------------------------------------------------- |
+| `api/`                                           | `ky`, openapi-types, чистые async-функции                 | TanStack Query hooks, React, JSX, i18n                     |
+| `hooks/`                                         | TanStack Query, вызовы `api/*`, query keys                | прямой `fetch`, JSX                                        |
+| `routes/`                                        | React, JSX, `hooks/*`, `components/*`, `react-router-dom` | прямой `fetch`, прямой импорт `api/*` (только через hooks) |
+| `components/ui/`                                 | shadcn primitives                                         | бизнес-логика, прямой backend-доступ                       |
+| `components/{layout,data-table,forms,feedback}/` | UI + переиспользуемые wrappers                            | бизнес-логика домена (это в routes)                        |
+| `lib/`                                           | чистые функции, без React                                 | TanStack Query, JSX                                        |
+| `stores/`                                        | Zustand UI state                                          | сервер-state (он в TanStack Query)                         |
 
 Нарушения — `eslint-plugin-import/no-restricted-paths` + code-review.
 
@@ -99,13 +108,13 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 ### 5.2 Нет хардкоду
 
-| Хардкод запрещён | Где жить должно |
-|---|---|
-| `'http://13.60.189.214:3000'` в коде | `import.meta.env.VITE_API_BASE_URL` через `env.ts` |
-| Магические числа (TTL, лимиты, offsets) | Константы в `lib/constants.ts` или TS-enum |
-| Цвета `#fafaf9` | CSS variables через Tailwind theme |
-| Пиксели `padding: 28` без причины | Tailwind spacing utilities |
-| Backend error codes как строки в UI | Через `lib/error-map.ts` → i18n |
+| Хардкод запрещён                           | Где жить должно                                            |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `'http://13.60.189.214:3000'` в коде       | `import.meta.env.VITE_API_BASE_URL` через `env.ts`         |
+| Магические числа (TTL, лимиты, offsets)    | Константы в `lib/constants.ts` или TS-enum                 |
+| Цвета `#fafaf9`                            | CSS variables через Tailwind theme                         |
+| Пиксели `padding: 28` без причины          | Tailwind spacing utilities                                 |
+| Backend error codes как строки в UI        | Через `lib/error-map.ts` → i18n                            |
 | URL-пути `/saas/kindergartens/${id}` в JSX | `routes.kindergartens.detail(id)` helper в `lib/routes.ts` |
 
 **Допустимый хардкод:** константы спецификаций, которые не меняются (E.164 regex, ISO 8601 формат). Это OK.
@@ -153,6 +162,7 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 - Не писать комментарии про WHAT (`// fetch users` над `useUsers()`).
 
 **TODOs и памятки на будущее — разрешены и ожидаемы.** Правила:
+
 - Каждый `// TODO` в коде должен иметь parallel-запись в [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) → раздел "TODO backlog" с тем же текстом, ссылкой на файл/строку, и owner'ом (по умолчанию — current batch).
 - Формат: `// TODO(B5): wire to /admin/* when backend supports super-admin scope (see OPEN_QUESTIONS#b3)`.
 - При завершении батча — пройтись по TODO'шкам, удалить выполненные, открытые синкнуть в `IMPLEMENTATION_PLAN.md`.
@@ -165,6 +175,7 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 **Источник палитры/типографики:** [`docs/design/handoff/shyraq-superadmin/project/tokens.css`](docs/design/handoff/shyraq-superadmin/project/tokens.css).
 
 **Перенос в наш Tailwind:**
+
 - Все `--bg-*`, `--text-*`, `--border-*`, `--brand*`, semantic (`--success/warning/error/info`), role colors, radii, shadows — копируем в `src/styles/globals.css`.
 - Tailwind theme extend читает CSS variables: `colors: { brand: 'var(--brand)' }`.
 - Никаких inline `style={{...}}` в коде, кроме случаев когда Tailwind не покрывает (сложные dynamic transforms, animations).
@@ -178,16 +189,19 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 ## 7. Testing
 
 **Минимальный gate перед merge:**
+
 - `pnpm typecheck` — exit 0
 - `pnpm lint` — exit 0
 - `pnpm test` — все unit suites green
 
 **Unit tests (Vitest):**
+
 - Чистые функции в `lib/` — обязательно (`format.ts`, `error-map.ts`, `jsonb-i18n.ts`).
 - Сложные хуки (например, `use-debounce`) — да.
 - Простые компоненты с render — нет (e2e покрывает).
 
 **E2E (Playwright) — только critical paths:**
+
 1. Login + logout
 2. Создание садика (atomic bootstrap)
 3. Деактивация садика (destructive confirm)
@@ -250,11 +264,13 @@ E2E пишем в Batch 8 (Polish). Не блокируют разработку
 ### 11.1 Роли
 
 **Главный агент (orchestrator) — НЕ исполнитель.** В этом режиме **запрещено**:
+
 - Открывать/править/писать код руками в `src/` (Read/Edit/Write на исходниках текущего батча).
 - Грепать по `src/` чтобы понять "как сделано" — это работа субагента.
 - Запускать `pnpm dev`/`typecheck`/`lint`/`test` руками **до** финальной верификации (§11.6) — это делают субагенты в своих слайсах.
 
 **Разрешено / обязательно:**
+
 - Читать `CLAUDE.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/DESIGN.md`, `docs/endpoints.md`, `docs/OPEN_QUESTIONS.md` — чтобы понять scope батча и контекст.
 - Декомпозировать батч на независимые/последовательные слайсы (§11.3).
 - Запускать субагентов через `Agent` tool и собирать их репорты.
@@ -262,6 +278,7 @@ E2E пишем в Batch 8 (Polish). Не блокируют разработку
 - Финальный коммит по шаблону `B<N>: <title>` из [`IMPLEMENTATION_PLAN.md §0`](docs/IMPLEMENTATION_PLAN.md#0-working-agreement-правила-игры) — **только после** того как все acceptance items зелёные.
 
 **Субагент (executor) — самодостаточный исполнитель.**
+
 - Получает self-contained бриф (см. §11.4), потому что переписку оркестратора с пользователем не видит.
 - Делает свой слайс — создаёт/правит только указанные файлы.
 - **Сам убеждается, что код работает** до того как репортит "done": `pnpm typecheck` + `pnpm lint` (на тронутых файлах минимум), `pnpm test` если добавлял тесты, ручной запуск `pnpm dev` + browser-проверка golden path если трогал UI.
@@ -273,24 +290,25 @@ E2E пишем в Batch 8 (Polish). Не блокируют разработку
 
 Оркестратор сам выбирает модель по сложности слайса. **Главный агент всегда остаётся на Opus 4.7** — это уровень оркестратора. Субагентам Opus 4.7 **не отдаём** (это перерасход; решает чуть лучше, но стоит дороже и медленнее).
 
-| Сложность слайса | Модель субагента | Когда применять |
-|---|---|---|
-| **Высокая** — multi-file, новая абстракция, нужна архитектурная мысль, есть "решить как лучше" | **`claude-opus-4-6[1m]`** | Generic `<DataTable>` + sub-components; `<DestructiveConfirm>` + integration; refresh-flow с single-flight mutex; 2-step wizard kindergarten/new с правильной error/redirect логикой; новая reusable инфраструктура forms |
-| **Низкая** — точечная правка, strict execution по подробному брифу, изолированный модуль, чистые функции | **`claude-sonnet-4-6`** | Чистые функции в `lib/` (`formatPhoneE164`, `slugify`) + Vitest tests; добавить колонку в существующий DataTable; перевод i18n-namespace; добавить shadcn компонент через CLI + минимальная wrapper-настройка; зарегистрировать роут с placeholder-компонентом |
+| Сложность слайса                                                                                         | Модель субагента          | Когда применять                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Высокая** — multi-file, новая абстракция, нужна архитектурная мысль, есть "решить как лучше"           | **`claude-opus-4-6[1m]`** | Generic `<DataTable>` + sub-components; `<DestructiveConfirm>` + integration; refresh-flow с single-flight mutex; 2-step wizard kindergarten/new с правильной error/redirect логикой; новая reusable инфраструктура forms                                      |
+| **Низкая** — точечная правка, strict execution по подробному брифу, изолированный модуль, чистые функции | **`claude-sonnet-4-6`**   | Чистые функции в `lib/` (`formatPhoneE164`, `slugify`) + Vitest tests; добавить колонку в существующий DataTable; перевод i18n-namespace; добавить shadcn компонент через CLI + минимальная wrapper-настройка; зарегистрировать роут с placeholder-компонентом |
 
 **Правило отбраковки:** если бриф содержит фразу "реши как лучше / выбери паттерн / спроектируй" — это **Opus 4.6**. Sonnet 4.6 — только когда бриф настолько детальный, что от субагента требуется буквально "сделай ровно вот это".
 
 **Готовые проектные субагенты** в [`.claude/agents/`](.claude/agents/) — используй через параметр `subagent_type` в `Agent` tool (имя без `.md`):
 
-| `subagent_type` | Model | Назначение | Tools |
-|---|---|---|---|
-| `coder-opus` | `claude-opus-4-6[1m]` | Архитектурные/multi-file/design-decisions слайсы. DataTable generic, wizard, refresh-flow, новая инфраструктура | Read/Edit/Write/Glob/Grep/Bash + Notebook + ToolSearch |
-| `coder-sonnet` | `claude-sonnet-4-6` | Strict-execution/tactical слайсы. Pure функции в `lib/` + тесты, добавить колонку, i18n-namespace, deps install, placeholder route | Read/Edit/Write/Glob/Grep/Bash + Notebook + ToolSearch |
-| `reviewer-opus` | `claude-opus-4-6[1m]` | Глубокий review после coder'а или перед коммитом нетривиального изменения. Layer rules + spec drift + security + acceptance | Read/Glob/Grep/Bash (READ-ONLY) |
-| `reviewer-sonnet` | `claude-sonnet-4-6` | Лёгкий review для tactical слайсов. Эскалирует на `reviewer-opus` если упёрся в архитектурный вопрос | Read/Glob/Grep/Bash (READ-ONLY) |
-| `reviewer-codex` | Codex CLI (отдельная модельная семья) | **Second-opinion** review через локальный `codex review` CLI. Запускай когда хочешь независимую точку зрения / sanity check после `reviewer-opus` | Bash + Read/Glob/Grep (READ-ONLY) |
+| `subagent_type`   | Model                                 | Назначение                                                                                                                                        | Tools                                                  |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `coder-opus`      | `claude-opus-4-6[1m]`                 | Архитектурные/multi-file/design-decisions слайсы. DataTable generic, wizard, refresh-flow, новая инфраструктура                                   | Read/Edit/Write/Glob/Grep/Bash + Notebook + ToolSearch |
+| `coder-sonnet`    | `claude-sonnet-4-6`                   | Strict-execution/tactical слайсы. Pure функции в `lib/` + тесты, добавить колонку, i18n-namespace, deps install, placeholder route                | Read/Edit/Write/Glob/Grep/Bash + Notebook + ToolSearch |
+| `reviewer-opus`   | `claude-opus-4-6[1m]`                 | Глубокий review после coder'а или перед коммитом нетривиального изменения. Layer rules + spec drift + security + acceptance                       | Read/Glob/Grep/Bash (READ-ONLY)                        |
+| `reviewer-sonnet` | `claude-sonnet-4-6`                   | Лёгкий review для tactical слайсов. Эскалирует на `reviewer-opus` если упёрся в архитектурный вопрос                                              | Read/Glob/Grep/Bash (READ-ONLY)                        |
+| `reviewer-codex`  | Codex CLI (отдельная модельная семья) | **Second-opinion** review через локальный `codex review` CLI. Запускай когда хочешь независимую точку зрения / sanity check после `reviewer-opus` | Bash + Read/Glob/Grep (READ-ONLY)                      |
 
 **Использование** (пример):
+
 ```
 Agent({
   subagent_type: "coder-opus",
@@ -317,6 +335,7 @@ Agent({
    - **Последовательно**: слайс B читает артефакт слайса A (новые типы из `pnpm gen:api`, новый компонент, новый hook).
 
 **Пример декомпозиции B4 (DataTable + KG list):**
+
 - Слайс 1 (Sonnet 4.6, можно параллельно с 4): `pnpm add @tanstack/react-table` + shadcn install `table dropdown-menu badge skeleton alert select popover`. Чистая механика.
 - Слайс 2 (Opus 4.6): generic `<DataTable<T>>` + sub-components (`toolbar`, `pagination`, `empty`, `loading`, `error`, `row-actions`). Архитектурный слайс — куча design decisions.
 - Слайс 3 (Sonnet 4.6, после 1): `src/api/kindergartens.ts#listKindergartens` + `useKindergartens` hook + `useDebounce`. Строго по `endpoints.md §1.1`.
@@ -365,4 +384,3 @@ Agent({
 - **Не запускай > 3–4 субагентов параллельно** без необходимости — координация становится дороже параллелизма.
 - **Не используй субагентный воркфлоу без явного триггера от пользователя.** Обычный режим (сам пишешь код) — дефолтный. При сомнениях — спроси: "перейти в субагентный режим?"
 - **Не отправляй субагенту Opus 4.7.** Это уровень оркестратора; для тактики достаточно Opus 4.6 / Sonnet 4.6.
-

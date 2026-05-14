@@ -5,10 +5,12 @@ import ruCommon from '@/locales/ru/common.json';
 import ruAuth from '@/locales/ru/auth.json';
 import ruErrors from '@/locales/ru/errors.json';
 import ruShell from '@/locales/ru/shell.json';
+import ruDashboard from '@/locales/ru/dashboard.json';
 import kkCommon from '@/locales/kk/common.json';
 import kkAuth from '@/locales/kk/auth.json';
 import kkErrors from '@/locales/kk/errors.json';
 import kkShell from '@/locales/kk/shell.json';
+import kkDashboard from '@/locales/kk/dashboard.json';
 
 try {
   const oldLang = localStorage.getItem('shyraq.sa.lang');
@@ -31,8 +33,20 @@ const initialLocale = useUiStore.getState().locale;
 
 void i18n.use(initReactI18next).init({
   resources: {
-    ru: { common: ruCommon, auth: ruAuth, errors: ruErrors, shell: ruShell },
-    kk: { common: kkCommon, auth: kkAuth, errors: kkErrors, shell: kkShell },
+    ru: {
+      common: ruCommon,
+      auth: ruAuth,
+      errors: ruErrors,
+      shell: ruShell,
+      dashboard: ruDashboard,
+    },
+    kk: {
+      common: kkCommon,
+      auth: kkAuth,
+      errors: kkErrors,
+      shell: kkShell,
+      dashboard: kkDashboard,
+    },
   },
   lng: initialLocale,
   fallbackLng: 'ru',

@@ -1,0 +1,36 @@
+{
+  "title": "[KK-TBD] Главная",
+  "subtitle": "[KK-TBD] Обзор платформы Shyraq",
+  "health": {
+    "title": "[KK-TBD] Статус системы",
+    "ok": "[KK-TBD] Все системы работают нормально",
+    "degraded": "[KK-TBD] Сервисы нестабильны",
+    "error": "[KK-TBD] Health недоступен",
+    "components": { "db": "PostgreSQL", "redis": "Redis", "api": "API process" },
+    "status": { "up": "up", "down": "down" },
+    "updated_ago": "[KK-TBD] обновлено {{seconds}} сек назад",
+    "updated_now": "[KK-TBD] обновлено только что",
+    "details": "[KK-TBD] Подробнее →"
+  },
+  "quick": {
+    "title": "[KK-TBD] Быстрые действия",
+    "create_kg": "[KK-TBD] Создать садик",
+    "monthly_run": "[KK-TBD] Monthly billing run",
+    "rollout": "[KK-TBD] Schedule rollout",
+    "failed_jobs": "[KK-TBD] Failed jobs"
+  },
+  "platform": {
+    "title": "[KK-TBD] Платформа",
+    "active_kgs": "[KK-TBD] Активных садиков",
+    "archived_kgs": "[KK-TBD] Архивных",
+    "active_subscriptions": "[KK-TBD] Активных подписок",
+    "placeholder": "—"
+  },
+  "system_status": {
+    "history_title": "[KK-TBD] История последних 10 проверок",
+    "history_empty": "[KK-TBD] Ожидание данных…",
+    "refresh": "[KK-TBD] Обновить",
+    "result_ok": "OK",
+    "result_degraded": "Degraded"
+  }
+}

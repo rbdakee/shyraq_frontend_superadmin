@@ -332,7 +332,7 @@ pnpm --version    # >= 9
     "gen:api": "openapi-typescript http://13.60.189.214:3000/docs-json -o src/api/types/openapi.d.ts"
     ```
 
-    Запустить `pnpm gen:api`. Файл должен сгенериться (~300-500KB). Закоммитить.
+    Запустить `pnpm gen:api`. Файл должен сгенериться (> 100KB, typical 500-600KB depending on backend schema). Закоммитить.
 
 16. **ESLint + Prettier + Husky + lint-staged:**
 
@@ -617,9 +617,11 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B2
    - `useHealthReady()` → `useQuery` с `queryKey: queryKeys.health.ready()`, `refetchInterval: 30_000`, `retry: 0`, `staleTime: 0`.
 
 3. **Reusable components:**
-   - `src/components/ui/stat.tsx` — Stat card (label + value + optional badge + optional divider). Из `primitives.jsx#Stat`.
-   - `src/components/ui/health-row.tsx` — строка `Component / Status / Last check` с pulse-dot.
-   - `src/components/ui/quick-action.tsx` — карточка-кнопка с icon + label + optional badge (для warning/error).
+
+   > ⚠️ Все четыре виджета — domain-specific UI компоненты, не shadcn primitives. Лежат в `components/feedback/` согласно CLAUDE.md §4 (ui/ только для shadcn).
+   - `src/components/feedback/stat.tsx` — Stat card (label + value + optional badge + optional divider). Из `primitives.jsx#Stat`.
+   - `src/components/feedback/health-row.tsx` — строка `Component / Status / Last check` с pulse-dot.
+   - `src/components/feedback/quick-action.tsx` — карточка-кнопка с icon + label + optional badge (для warning/error).
    - `src/components/feedback/pulse-dot.tsx` — анимированный dot (зелёный/красный/жёлтый).
 
 4. **Dashboard (`src/routes/dashboard.tsx`):**
@@ -1361,9 +1363,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID                  | File / Owner | Description | Linked OPEN_QUESTIONS |
-| ------------------- | ------------ | ----------- | --------------------- |
-| _(пусто на старте)_ |              |             |                       |
+| ID          | File / Owner                             | Description                                                                                                                          | Linked OPEN_QUESTIONS                                                                    |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| TODO(B4)#01 | src/routes/dashboard.tsx (Platform card) | Wire `active_kgs` / `archived_kgs` / `active_subscriptions` via `useKindergartens({is_active,limit:1}).total` once B4 ships the hook | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) for active_subscriptions |
 
 Формат добавления:
 

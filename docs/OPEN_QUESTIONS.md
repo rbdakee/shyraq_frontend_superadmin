@@ -5,6 +5,7 @@
 **Принцип:** этот документ — единственное место, где живут "не решено". `architecture.md`, `endpoints.md`, `superadmin_BP.md` — однозначные, отражают текущие MVP-решения.
 
 **Легенда статусов:**
+
 - `open` — нужно решение, никто не работает
 - `in-progress` — обсуждается / прорабатывается
 - `parked` — отложено до конкретного триггера
@@ -19,10 +20,12 @@
 **Контекст:** в [`architecture.md §6.2`](architecture.md#62-хранение-токенов) на MVP refresh-токен хранится в `localStorage`. Альтернатива — httpOnly cookie от backend (`Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Strict; Path=/saas/auth`).
 
 **Вопросы:**
+
 - Когда нужно мигрировать на httpOnly cookie?
 - Триггер — compliance аудит (SOC2 / ISO 27001) или конкретный security-инцидент?
 
 **Варианты:**
+
 1. Остаться на localStorage пока приложение за VPN/IP-allowlist (текущий MVP).
 2. Мигрировать сейчас (preempt compliance) — требует backend-изменений в `/saas/auth/*` для поддержки cookie-flow + CSRF token.
 
@@ -37,10 +40,12 @@
 **Контекст:** [`architecture.md §1`](architecture.md#1-контекст-и-ограничения) — на MVP WS не используется. Backend WS-gateway (B9) для super_admin автоподписывает только `user:{id}` room; cross-kg system events backend сегодня не транслирует.
 
 **Вопросы:**
+
 - Когда backend начнёт слать system-events для super_admin (failed crons, payment fraud, нагрузка)?
 - Какой канал — отдельная WS room (`saas:system`) или REST polling enough?
 
 **Варианты:**
+
 1. WS room `saas:system` — backend выпускает `NotificationPort.notifySystemEvent()`, фронт подключает socket.io-client + слушает.
 2. REST polling каждые N секунд для `GET /saas/system-events?since=...`.
 3. Server-Sent Events — проще WS, но требует backend изменений.
@@ -85,10 +90,12 @@
 **Контекст:** [`endpoints.md §10`](endpoints.md#10-view-as-kindergarten-mvp-placeholder), [`superadmin_BP.md §8`](superadmin_BP.md#8-view-as-kindergarten-support-troubleshooting-mvp-placeholder). Сегодня большинство `/admin/*` endpoints требуют JWT с `kindergarten_id` claim. Super_admin JWT — без `kindergarten_id`. View-as kg не работает.
 
 **Варианты реализации:**
+
 1. **Расширить `/admin/*` controllers:** разрешить super_admin JWT с `?kindergarten_id=<uuid>` query. ChildAccessGuard/KindergartenScopeGuard поддержат `@SuperAdminScope({ allowExplicitKgQueryParam: true })`. POST/PATCH/DELETE остаются заблокированы для super_admin (audit-trail safety).
 2. **Short-lived impersonation JWT:** `POST /saas/impersonate { kindergarten_id }` → 5-минутный JWT с подмешенным `kindergarten_id` + запись в audit_logs. Сложнее, но чище.
 
 **Вопросы:**
+
 - Какой объём read-only нужен на view-as? (дети, группы, staff, инвойсы, stories, attendance?)
 - Нужны ли write-actions через view-as (вообще запрещено) или только в impersonation-mode?
 
@@ -125,6 +132,7 @@
 ### B.6 Cross-kg metrics aggregation endpoint — `open`
 
 **Контекст:** на dashboard `/` хочется видеть:
+
 - Total MRR (active subscriptions)
 - Total invoices created this month
 - Total active children across all kgs
@@ -135,6 +143,7 @@
 **Вопрос:** Backend выставляет `GET /saas/metrics/overview` или фронт собирает из существующих endpoints?
 
 **Варианты:**
+
 1. Один агрегат-endpoint — простой UI, дешевле трафик.
 2. N запросов клиента + локальная агрегация — больше нагрузки.
 
@@ -159,6 +168,7 @@
 **Контекст:** аудит live Swagger (2026-05-13) показал, что `GET /saas/kindergartens/{id}` и `PATCH /saas/kindergartens/{id}` **не существуют** на backend. Сегодня доступны только: `GET /saas/kindergartens` (список), `POST /saas/kindergartens` (create), `POST .../archive`, `POST .../restore`, `POST .../admin/invite`.
 
 **Что блокирует на фронте:**
+
 - `/kindergartens/:id` — tab "Обзор" (нет детального API → можно показать только то, что прилетает в `GET /saas/kindergartens` row)
 - `/kindergartens/:id/settings` — tab "Настройки" (PATCH невозможен)
 - Любой read-only impersonation (см. также [B.3](#b3-read-only-super-admin-доступ-к-admin-resources--parked))
@@ -178,6 +188,7 @@
 **Контекст:** в live Swagger **отсутствует** весь модуль `/saas/saas-subscriptions` (list/create/update). Таблица `saas_subscriptions` в БД есть (`schema.dbml#L1335-1347`), но REST-controller'а над ней не написан.
 
 **Что блокирует:**
+
 - `/subscriptions` — cross-kg список подписок
 - `/kindergartens/:id/subscription` — tab подписки в детали kg
 - Dashboard MRR-виджет (если когда-то решим добавлять)
@@ -197,6 +208,7 @@
 **Контекст:** в live Swagger **отсутствует** весь модуль `/saas/feature-flags` (list/create/update/delete). Таблица `feature_flags` в БД есть, но controller не написан.
 
 **Что блокирует:**
+
 - `/feature-flags` — cross-kg список и create-modal
 - `/kindergartens/:id/flags` — per-kg tab
 
@@ -213,6 +225,7 @@
 **Контекст:** в live Swagger **отсутствует** весь модуль `/saas/users` (list/create/update). Таблица `saas_users` в БД есть и используется для логина (`POST /saas/auth/login`), но CRUD-controller'а над ней не написан.
 
 **Что блокирует:**
+
 - `/users` — список SaaS-пользователей
 - `/users/new` — создание нового super_admin / support
 - `/users/:id` — редактирование, смена пароля, деактивация
@@ -260,11 +273,13 @@
 **Контекст:** [`superadmin_BP.md §3.1`](superadmin_BP.md#31-создание-подписки-для-нового-садика). Таблица `saas_subscriptions` есть, но cron на её billing нет. Не понятно, как Shyraq выставляет счёт **садику** (не родителю — это уже работает через `tariff_plans`).
 
 **Вопросы:**
+
 - Платформа выставляет счёт садику автоматически (cron 1-го числа каждый месяц/года) или вручную?
 - Через какой канал — отдельный B2B-инвойс в SAP/1C, прямой банковский транш, online-карта?
 - Кому уходит invoice — на admin'а садика по email, или sales-менеджеру в Shyraq?
 
 **Варианты:**
+
 1. **Manual (текущий MVP):** super_admin сортирует `/subscriptions` по `next_billing_at`, выставляет счета off-platform.
 2. **Cron + email:** backend cron `saas-billing:invoice-generate` → email сгенерированного PDF на admin садика + super_admin.
 3. **Cron + payment-provider:** автосписание с привязанной карты юрлица (требует saved payment method per kg).
@@ -278,6 +293,7 @@
 **Контекст:** [B.4 Audit log infrastructure](#b4-audit-log-infrastructure--open) — техническая часть. Здесь — бизнес-вопрос.
 
 **Вопросы:**
+
 - Какой compliance стандарт целевой? (SOC2 Type 1/2, ISO 27001, ЗРК "О персональных данных")
 - Какие операции требуют логирования: создание/деактивация kg, изменение тарифов, mark-paid, refund-process, изменение прав staff?
 - Сколько хранить логи (1 год / 5 лет / forever)?
@@ -293,6 +309,7 @@
 **Контекст:** [`superadmin_BP.md §0`](superadmin_BP.md#0-actors). Сегодня в backend для всех `/saas/*` controllers требуется `role IN ('super_admin', 'support')`. Разделения прав внутри **на уровне эндпойнтов нет**.
 
 **Вопросы:**
+
 - Должен ли `support` НЕ мочь:
   - Удалять садики (deactivate)?
   - Создавать новых SaaS-пользователей?
@@ -301,6 +318,7 @@
 - На уровне backend (response 403) или только UI (hide buttons)?
 
 **Варианты:**
+
 1. **UI-only restriction:** фронт прячет destructive-кнопки для support. Не security, но улучшает UX.
 2. **Backend RBAC:** `@Roles('super_admin')` на write-эндпойнтах + 403 для support. Требует backend-изменений на ~10 контроллерах.
 
@@ -315,6 +333,7 @@
 **Контекст:** [B.3 Read-only super-admin доступ](#b3-read-only-super-admin-доступ-к-admin-resources--parked) — техника. Здесь — продуктовый вопрос про объём.
 
 **Вопросы:**
+
 - Какие entities super_admin / support должен видеть глазами kg-admin'а?
   - [ ] Дети (список + детали)
   - [ ] Группы + mentors
@@ -342,6 +361,7 @@
 **Контекст:** [B.6 Cross-kg metrics aggregation](#b6-cross-kg-metrics-aggregation-endpoint--open) — техника. Здесь — продуктовый scope.
 
 **Вопросы:**
+
 - Какие KPI должны быть на main dashboard `/`?
   - MRR / ARR
   - Total active kgs / new this month / churned this month
@@ -360,6 +380,7 @@
 **Контекст:** [`architecture.md §1`](architecture.md#1-контекст-и-ограничения) — i18n RU+KK через i18next. Translation strings — кто их пишет?
 
 **Вопросы:**
+
 - Native KK speaker в команде Shyraq для перевода UI strings?
 - Готовы ли использовать машинный перевод (DeepL/Google Translate) для initial pass + human review?
 - Где хранить glossary KK-терминов (садик, ребёнок, родитель, тариф, инвойс…)?
@@ -375,6 +396,7 @@
 **Контекст:** [`superadmin_BP.md §2.3`](superadmin_BP.md#23-деактивация-садика). При деактивации kg backend cascade-архивирует детей и cancel'яет SaaS-подписку. Но **неоплаченные invoices родителям не отменяются**.
 
 **Вопросы:**
+
 - Что делать с pending/overdue invoices при деактивации kg?
   - Auto-cancel (потеря revenue)
   - Оставить (родители продолжают видеть в Parent App?)
@@ -382,6 +404,20 @@
 - Что с invoices в `partial` статусе (частичная оплата) — refund'ить разницу или оставить?
 
 **Зависимости:** product, finance.
+
+---
+
+### B.14 `errors.json` flat `forbidden` key vs nested error-page group — `open`
+
+**Контекст:** brief B3 Slice 1 запросил добавить nested `"forbidden": { title, subtitle, cta_home }` в `errors.json` рядом с существующим flat `"forbidden": "Доступ запрещён"`. Два ключа с одинаковым именем в одном JSON-объекте невозможны.
+
+**Решение в B3 Slice 1:** nested группа для страницы 403 названа `"forbidden_page"` (не `"forbidden"`). Код error-page в slice 5 должен использовать `t('errors:forbidden_page.title')` и т.д.
+
+**Вопрос:** принять `forbidden_page` как canonical naming для error-page i18n ключей, или переименовать flat API-error ключ (например в `forbidden_api`) чтобы освободить имя `forbidden` для nested группы?
+
+**Зависимости:** slice 5 (error pages) + все места где используется `t('errors:forbidden')` для toast'ов.
+
+**Триггер:** до старта B3 Slice 5 (error pages).
 
 ---
 

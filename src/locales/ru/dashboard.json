@@ -1,0 +1,36 @@
+{
+  "title": "Главная",
+  "subtitle": "Обзор платформы Shyraq",
+  "health": {
+    "title": "Статус системы",
+    "ok": "Все системы работают нормально",
+    "degraded": "Сервисы нестабильны",
+    "error": "Health недоступен",
+    "components": { "db": "PostgreSQL", "redis": "Redis", "api": "API process" },
+    "status": { "up": "up", "down": "down" },
+    "updated_ago": "обновлено {{seconds}} сек назад",
+    "updated_now": "обновлено только что",
+    "details": "Подробнее →"
+  },
+  "quick": {
+    "title": "Быстрые действия",
+    "create_kg": "Создать садик",
+    "monthly_run": "Monthly billing run",
+    "rollout": "Schedule rollout",
+    "failed_jobs": "Failed jobs"
+  },
+  "platform": {
+    "title": "Платформа",
+    "active_kgs": "Активных садиков",
+    "archived_kgs": "Архивных",
+    "active_subscriptions": "Активных подписок",
+    "placeholder": "—"
+  },
+  "system_status": {
+    "history_title": "История последних 10 проверок",
+    "history_empty": "Ожидание данных…",
+    "refresh": "Обновить",
+    "result_ok": "OK",
+    "result_degraded": "Degraded"
+  }
+}
