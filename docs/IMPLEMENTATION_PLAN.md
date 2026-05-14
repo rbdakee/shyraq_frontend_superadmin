@@ -41,11 +41,11 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B<N>
 
 ### URLs
 
-| Что | URL |
-|---|---|
-| Backend base | `http://13.60.189.214:3000` |
-| API prefix (для всех endpoints) | `/api/v1/` |
-| Swagger UI | `http://13.60.189.214:3000/docs` |
+| Что                               | URL                                   |
+| --------------------------------- | ------------------------------------- |
+| Backend base                      | `http://13.60.189.214:3000`           |
+| API prefix (для всех endpoints)   | `/api/v1/`                            |
+| Swagger UI                        | `http://13.60.189.214:3000/docs`      |
 | Swagger JSON (для `pnpm gen:api`) | `http://13.60.189.214:3000/docs-json` |
 
 > **Внимание:** Swagger UI/JSON живут на корне домена, **не** под `/api/v1/`. Все остальные endpoints — под `/api/v1/`.
@@ -53,6 +53,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B<N>
 ### Vite dev proxy
 
 В `vite.config.ts`:
+
 ```ts
 server: {
   proxy: {
@@ -72,27 +73,27 @@ VITE_APP_VERSION=0.1.0
 
 ### Available endpoints (in-scope, MVP)
 
-| Method | Path | Auth | Async? |
-|---|---|---|---|
-| POST | `/api/v1/saas/auth/login` | public | sync |
-| POST | `/api/v1/saas/auth/refresh` | public | sync |
-| POST | `/api/v1/saas/auth/logout` | Bearer | sync |
-| GET | `/api/v1/saas/kindergartens` | Bearer | sync |
-| POST | `/api/v1/saas/kindergartens` | Bearer | sync (atomic TX) |
-| POST | `/api/v1/saas/kindergartens/{id}/archive` | Bearer | sync (cascade) |
-| POST | `/api/v1/saas/kindergartens/{id}/restore` | Bearer | sync |
-| POST | `/api/v1/saas/kindergartens/{id}/admin/invite` | Bearer | sync (best-effort SMS) |
-| POST | `/api/v1/saas/billing/monthly-run` | Bearer | **202 async** (BullMQ) |
-| POST | `/api/v1/saas/billing/discount-expire-run` | Bearer | **202 async** |
-| POST | `/api/v1/saas/billing/overdue-run` | Bearer | **202 async** |
-| POST | `/api/v1/saas/content/birthday-run` | Bearer | **200 sync** (с counters) |
-| POST | `/api/v1/saas/content/story-cleanup-run` | Bearer | **200 sync** |
-| POST | `/api/v1/saas/content/publish-scheduled-run` | Bearer | **200 sync** |
-| GET | `/api/v1/admin/lifecycle/failed-jobs` | Bearer | sync |
-| POST | `/api/v1/admin/lifecycle/failed-jobs/{id}/retry` | Bearer | 202 async |
-| POST | `/api/v1/admin/schedule/week-rollout/run` | Bearer | sync (минуты) |
-| GET | `/api/v1/health` | public | sync |
-| GET | `/api/v1/health/ready` | public | sync |
+| Method | Path                                             | Auth   | Async?                    |
+| ------ | ------------------------------------------------ | ------ | ------------------------- |
+| POST   | `/api/v1/saas/auth/login`                        | public | sync                      |
+| POST   | `/api/v1/saas/auth/refresh`                      | public | sync                      |
+| POST   | `/api/v1/saas/auth/logout`                       | Bearer | sync                      |
+| GET    | `/api/v1/saas/kindergartens`                     | Bearer | sync                      |
+| POST   | `/api/v1/saas/kindergartens`                     | Bearer | sync (atomic TX)          |
+| POST   | `/api/v1/saas/kindergartens/{id}/archive`        | Bearer | sync (cascade)            |
+| POST   | `/api/v1/saas/kindergartens/{id}/restore`        | Bearer | sync                      |
+| POST   | `/api/v1/saas/kindergartens/{id}/admin/invite`   | Bearer | sync (best-effort SMS)    |
+| POST   | `/api/v1/saas/billing/monthly-run`               | Bearer | **202 async** (BullMQ)    |
+| POST   | `/api/v1/saas/billing/discount-expire-run`       | Bearer | **202 async**             |
+| POST   | `/api/v1/saas/billing/overdue-run`               | Bearer | **202 async**             |
+| POST   | `/api/v1/saas/content/birthday-run`              | Bearer | **200 sync** (с counters) |
+| POST   | `/api/v1/saas/content/story-cleanup-run`         | Bearer | **200 sync**              |
+| POST   | `/api/v1/saas/content/publish-scheduled-run`     | Bearer | **200 sync**              |
+| GET    | `/api/v1/admin/lifecycle/failed-jobs`            | Bearer | sync                      |
+| POST   | `/api/v1/admin/lifecycle/failed-jobs/{id}/retry` | Bearer | 202 async                 |
+| POST   | `/api/v1/admin/schedule/week-rollout/run`        | Bearer | sync (минуты)             |
+| GET    | `/api/v1/health`                                 | public | sync                      |
+| GET    | `/api/v1/health/ready`                           | public | sync                      |
 
 ### NOT available (blocker'ы, см. OPEN_QUESTIONS)
 
@@ -106,11 +107,13 @@ VITE_APP_VERSION=0.1.0
 ### Точные DTO для критичных операций
 
 **Auth:**
+
 - `RefreshTokenDto` (используется и в refresh, и в logout): `{ refreshToken: string }` — **camelCase**, ровно 64 символа, обязательное поле даже в logout.
 - `SuperAdminAuthResponseDto`: `{ access_token, refresh_token, token_type: 'Bearer', expires_in: 900, pending_role_select: false, roles: RoleResponseDto[] }` — **snake_case** в response.
 - `RoleResponseDto`: `{ role: string, kindergarten_id: null, group_id: null }` — для super_admin всегда `kg_id=null`.
 
 **Kindergartens:**
+
 - `CreateKindergartenDto`: `{ name (req), slug (req), address?, phone?, plan?, settings?, admin: CreateKindergartenAdminDto (req) }`.
 - `CreateKindergartenAdminDto`: `{ full_name (req), phone (req), locale?: 'ru' | 'kk' }`. **Locale enum = `'ru' | 'kk'`** (НЕ `kz`!).
 - `KindergartenDto`: `{ id, name, slug, address (nullable), phone (nullable), plan, settings (object), is_active, archived_at (nullable ISO), created_at, updated_at }`.
@@ -120,25 +123,30 @@ VITE_APP_VERSION=0.1.0
 - Archive/restore возвращают `KindergartenDto` целиком.
 
 **Billing triggers (все возвращают 202):**
+
 - `TriggerMonthlyRunDto`: `{ kindergarten_id?: string, period_start?: string }` — но `kindergarten_id` backend отвергает с 400 ([B.12](OPEN_QUESTIONS.md#b12)). Frontend НЕ отправляет это поле.
 - `TriggerDiscountExpireRunDto`: `{ now?: string }`.
 - `TriggerOverdueRunDto`: `{ now?: string }`.
 - Все три ответа: `{ job_id: string, status: string }`.
 
 **Content triggers (все возвращают 200 sync):**
+
 - `RunTriggerDto`: `{ now?: string }` — **только этот параметр**, НЕТ `kindergarten_id` или `date`.
 - Ответ `RunTriggerResponseDto`: `{ triggered_at: ISO, processed_count: number, skipped_count: number, kindergartens_processed: number }`.
 
 **Schedule rollout:**
+
 - `RunWeeklyRolloutDto`: `{ fromMonday?: string }` — **camelCase**.
 - Ответ `RolloutSummaryResponseDto`: `{ fromMonday: string, source: string, kindergartens: KindergartenWeeklyRolloutResultDto[], totals: RolloutTotalsDto }` — **camelCase везде**.
 
 **Lifecycle DLQ:**
+
 - Query: `?limit=number&cursor=string` (cursor — opaque base64, не int offset).
 - Ответ `ListLifecycleFailedJobsResponseDto`: `{ items: FailedJobItemDto[], next_cursor: string | null }`.
 - Retry endpoint: POST с **пустым телом `{}`** (DTO type=object). Ответ: `{ enqueued: boolean, job_id: string }`.
 
 **Health:**
+
 - `HealthStatusDto` (`/health`): `{ status, version, uptime_seconds, timestamp }` — всегда 200.
 - `HealthReadyDto` (`/health/ready`): `{ status: 'ok' | 'degraded', checks: object }` — Swagger декларирует только 200; 503 не подтверждён ([B.13](OPEN_QUESTIONS.md#b13-healthready-503-contract--open)). Frontend смотрит на `status` поле, **не** на HTTP-код.
 
@@ -173,6 +181,7 @@ pnpm --version    # >= 9
 ```
 
 Также проверить локально:
+
 - [ ] Git репо инициализирован, `.gitignore` включает `node_modules`, `dist`, `.env*`, `.DS_Store`, `*.log`
 - [ ] `CLAUDE.md` прочитан (корень репо)
 - [ ] `docs/architecture.md`, `docs/DESIGN.md`, `docs/endpoints.md`, `docs/OPEN_QUESTIONS.md` прочитаны overview-уровнем
@@ -189,22 +198,27 @@ pnpm --version    # >= 9
 **Time:** 2–3 часа
 
 ### Inputs
+
 - [`docs/architecture.md §2-3`](architecture.md#2-стек) — стек и folder structure
 - [`docs/design/handoff/shyraq-superadmin/project/tokens.css`](design/handoff/shyraq-superadmin/project/tokens.css) — дизайн-токены (копировать)
 
 ### Tasks
 
 1. **Init Vite project:**
+
    ```bash
    pnpm create vite@latest . -- --template react-ts
    pnpm install
    ```
+
    Удалить дефолтный boilerplate (`App.css`, `assets/react.svg`, дефолтный CSS из `App.tsx`).
 
 2. **Tailwind v4 setup:**
+
    ```bash
    pnpm add tailwindcss @tailwindcss/vite
    ```
+
    Подключить `@tailwindcss/vite()` plugin в `vite.config.ts`. Создать `src/styles/globals.css` с `@import "tailwindcss";`. Импортировать в `main.tsx`.
 
 3. **Перенос design tokens** из `docs/design/handoff/.../tokens.css` в `src/styles/globals.css`:
@@ -214,6 +228,7 @@ pnpm --version    # >= 9
    - Расширить Tailwind theme через `@theme` директиву (Tailwind v4 синтаксис) — мапить CSS vars на токены: `--color-brand: var(--brand)`, `--color-bg-canvas: var(--bg-canvas)`, etc.
 
 4. **Folder structure** (создать пустые папки + index файлы — где Vite требует):
+
    ```
    src/api/   src/api/types/
    src/hooks/
@@ -227,9 +242,11 @@ pnpm --version    # >= 9
    ```
 
 5. **shadcn/ui init:**
+
    ```bash
    pnpm dlx shadcn@latest init
    ```
+
    Конфиг: TypeScript ✓, Tailwind v4 ✓, alias `@/*` → `src/*`, default style "new-york", base color "neutral", CSS variables ✓.
    **Не устанавливать пока компоненты** — будем по требованию в следующих батчах.
 
@@ -240,6 +257,7 @@ pnpm --version    # >= 9
 8. **`src/lib/cn.ts`:** утилита `clsx + tailwind-merge` (стандартный shadcn helper).
 
 9. **Env validation (`src/env.ts`):**
+
    ```ts
    import { z } from 'zod';
    const schema = z.object({
@@ -248,11 +266,13 @@ pnpm --version    # >= 9
    });
    export const env = schema.parse(import.meta.env);
    ```
+
    Создать `.env.example` (committed) и `.env.local` (gitignored):
    - `.env.example` — содержит `VITE_API_BASE_URL=/api/v1` и `VITE_APP_VERSION=0.1.0`
    - `.env.local` — копия `.env.example` (для dev)
 
 10. **Vite dev proxy** (`vite.config.ts`):
+
     ```ts
     server: {
       proxy: {
@@ -265,54 +285,73 @@ pnpm --version    # >= 9
     ```
 
 11. **TanStack Query setup:**
+
     ```bash
     pnpm add @tanstack/react-query
     pnpm add -D @tanstack/react-query-devtools
     ```
+
     `src/main.tsx` — `<QueryClientProvider client={queryClient}>` с:
+
     ```ts
-    new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } } })
+    new QueryClient({
+      defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
+    });
     ```
+
     Devtools только в `import.meta.env.DEV`.
 
 12. **React Router setup:**
+
     ```bash
     pnpm add react-router-dom
     ```
+
     `src/router.tsx` — `createBrowserRouter` со скелетом всех routes из [`docs/DESIGN.md §2.1`](DESIGN.md#21-sitemap). Каждый route возвращает `<div>{routeName}</div>` placeholder. Обернуть в `<RouterProvider>` в `main.tsx`.
 
 13. **i18next:**
+
     ```bash
     pnpm add i18next react-i18next i18next-browser-languagedetector
     ```
+
     `src/lib/i18n.ts` — init с RU + KK, default `ru`, fallbackLng `ru`, languageDetector с `localStorage` под ключом `shyraq.sa.lang`. Создать `src/locales/{ru,kk}/common.json` с одним ключом `app.title: "Shyraq SuperAdmin"`.
 
 14. **Sonner (toasts):** `pnpm add sonner`. `<Toaster position="top-right" richColors />` в `App.tsx`.
 
 15. **OpenAPI codegen:**
+
     ```bash
     pnpm add -D openapi-typescript
     pnpm add openapi-fetch
     ```
+
     `package.json` script:
+
     ```json
     "gen:api": "openapi-typescript http://13.60.189.214:3000/docs-json -o src/api/types/openapi.d.ts"
     ```
+
     Запустить `pnpm gen:api`. Файл должен сгенериться (~300-500KB). Закоммитить.
 
 16. **ESLint + Prettier + Husky + lint-staged:**
+
     ```bash
     pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin \
       eslint-plugin-react-hooks eslint-plugin-react-refresh prettier \
       eslint-config-prettier eslint-plugin-import husky lint-staged
     ```
+
     `eslint.config.js` (flat config) + `.prettierrc` + `package.json` scripts:
+
     ```json
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
     ```
+
     Husky setup: `pnpm dlx husky init` + `.husky/pre-commit` → `pnpm lint-staged`. `lint-staged` config в `package.json`:
+
     ```json
     "lint-staged": { "*.{ts,tsx}": ["eslint --fix", "prettier --write"], "*.{json,md,css}": ["prettier --write"] }
     ```
@@ -358,6 +397,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
 **Time:** 3–4 часа
 
 ### Inputs
+
 - [`docs/endpoints.md §0`](endpoints.md#0-аутентификация-и-токены) — auth endpoints
 - [`docs/architecture.md §6`](architecture.md#6-auth-и-токены) — token storage strategy
 - [`docs/DESIGN.md §3`](DESIGN.md#3-shell--layout) + [`§5.1`](DESIGN.md#51-login)
@@ -380,17 +420,23 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
    - `tryRefreshOnce()` — single-flight через module-level Promise mutex: первый параллельный 401 запускает refresh, остальные ждут результат.
 
 3. **API auth functions (`src/api/auth.ts`):**
+
    ```ts
    export async function login({ email, password }: { email: string; password: string }) {
-     return client.post('saas/auth/login', { json: { email, password } }).json<SuperAdminAuthResponse>();
+     return client
+       .post('saas/auth/login', { json: { email, password } })
+       .json<SuperAdminAuthResponse>();
    }
    export async function refresh(refreshToken: string) {
-     return client.post('saas/auth/refresh', { json: { refreshToken } }).json<SuperAdminAuthResponse>();
+     return client
+       .post('saas/auth/refresh', { json: { refreshToken } })
+       .json<SuperAdminAuthResponse>();
    }
    export async function logout(refreshToken: string) {
      await client.post('saas/auth/logout', { json: { refreshToken } });
    }
    ```
+
    Типы — из openapi-typescript artifact (`SuperAdminAuthResponseDto`). Для type-safety использовать `openapi-fetch` если удобнее.
 
    > **Важно:** оба `refresh` и `logout` принимают `refreshToken` (camelCase, ровно 64 символа). В response поля snake_case (`access_token`, `refresh_token`).
@@ -402,6 +448,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
 
 5. **Query keys (`src/hooks/query-keys.ts`):**
    Централизованный объект:
+
    ```ts
    export const queryKeys = {
      auth: { me: () => ['auth', 'me'] as const },
@@ -441,12 +488,15 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
        <Sidebar />
        <div className="flex flex-col flex-1 min-w-0">
          <Topbar />
-         <main className="flex-1 overflow-auto"><Outlet /></main>
+         <main className="flex-1 overflow-auto">
+           <Outlet />
+         </main>
        </div>
      </div>
      ```
 
 9. **UI store (`src/stores/ui-store.ts`):** `pnpm add zustand`. Store:
+
    ```ts
    interface UiStore {
      sidebarCollapsed: boolean;
@@ -455,25 +505,32 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
      setLocale: (l: 'ru' | 'kk') => void;
    }
    ```
+
    Persist через `zustand/middleware/persist` в localStorage под `shyraq.sa.ui`.
 
 10. **Router updates (`src/router.tsx`):**
+
     ```tsx
     createBrowserRouter([
       { path: '/login', element: <LoginPage /> },
       {
-        element: <AuthGuard><Shell /></AuthGuard>,
+        element: (
+          <AuthGuard>
+            <Shell />
+          </AuthGuard>
+        ),
         children: [
           { index: true, element: <DashboardPage /> },
           { path: 'kindergartens', element: <KindergartensPage /> },
           // ...все остальные routes из DESIGN §2.1, пока placeholders
         ],
       },
-      { path: '*', element: <NotFoundPage /> },  // создать в B3
+      { path: '*', element: <NotFoundPage /> }, // создать в B3
     ]);
     ```
 
 11. **i18n (`src/locales/{ru,kk}/auth.json`):**
+
     ```json
     {
       "title": "Войдите в кабинет",
@@ -482,9 +539,14 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B1
       "password": "Пароль",
       "submit": "Войти",
       "forgot": "Забыли пароль?",
-      "errors": { "invalid_credentials": "Неверный email или пароль", "rate_limit": "Превышен лимит попыток. Повторите через час.", "session_expired": "Сессия истекла, войдите снова" }
+      "errors": {
+        "invalid_credentials": "Неверный email или пароль",
+        "rate_limit": "Превышен лимит попыток. Повторите через час.",
+        "session_expired": "Сессия истекла, войдите снова"
+      }
     }
     ```
+
     Также `common.json`: `logout`, `change_password`, `version`.
 
 12. **Error map (`src/lib/error-map.ts`):**
@@ -528,6 +590,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B2
 **Time:** 2–3 часа
 
 ### Inputs
+
 - [`docs/endpoints.md §9`](endpoints.md#9-health--system-status) — health endpoints
 - [`docs/DESIGN.md §5.2`](DESIGN.md#52----dashboard), [`§5.15`](DESIGN.md#515-system-status), [`§5.16`](DESIGN.md#516-error-pages)
 - Visual reference:
@@ -538,6 +601,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B2
 ### Tasks
 
 1. **Health API (`src/api/health.ts`):**
+
    ```ts
    export async function getHealth() {
      return client.get('health').json<HealthStatusDto>();
@@ -546,6 +610,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B2
      return client.get('health/ready').json<HealthReadyDto>();
    }
    ```
+
    Типы: `{ status, version, uptime_seconds, timestamp }` для `/health`; `{ status: 'ok' | 'degraded', checks: object }` для `/ready`.
 
 2. **Hooks (`src/hooks/use-health.ts`):**
@@ -613,6 +678,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
 **Time:** 4–5 часов
 
 ### Inputs
+
 - [`docs/endpoints.md §1.1`](endpoints.md#11-get-saaskindergartens--список) — List API контракт
 - [`docs/DESIGN.md §4.2`](DESIGN.md#42-datatable--переиспользуемая-таблица), [`§5.3`](DESIGN.md#53-kindergartens--список-садиков)
 - Visual reference: `screens-kg.jsx` → `ScreenKindergartens`
@@ -625,12 +691,19 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
 
 3. **`<DataTable>` (`src/components/data-table/data-table.tsx`):**
    Generic компонент `<DataTable<T>>`:
+
    ```ts
    interface DataTableProps<T> {
      data: T[];
      columns: ColumnDef<T>[];
      toolbar?: ReactNode;
-     pagination?: { hasNext: boolean; hasPrev: boolean; onNext: () => void; onPrev: () => void; rangeLabel: string };
+     pagination?: {
+       hasNext: boolean;
+       hasPrev: boolean;
+       onNext: () => void;
+       onPrev: () => void;
+       rangeLabel: string;
+     };
      state: 'loading' | 'loaded' | 'empty' | 'error';
      emptyState?: { title: string; description?: string; cta?: ReactNode };
      errorState?: { error: AppError; onRetry: () => void };
@@ -650,6 +723,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
    Добавить variants для status semantics: `success`, `warning`, `error`, `info`, `neutral`, `purple` (super_admin), `blue` (support). Также `dot` модификатор. По цветам [DESIGN §4.8](DESIGN.md#48-цветовая-семантика-статусов).
 
 5. **API (`src/api/kindergartens.ts`):**
+
    ```ts
    export interface ListKindergartensParams {
      plan?: string;
@@ -660,12 +734,16 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
      offset?: number;
    }
    export async function listKindergartens(params: ListKindergartensParams = {}) {
-     return client.get('saas/kindergartens', { searchParams: params }).json<KindergartenListResponse>();
+     return client
+       .get('saas/kindergartens', { searchParams: params })
+       .json<KindergartenListResponse>();
    }
    ```
+
    Типы — из openapi.d.ts (`KindergartenListResponseDto`, `KindergartenDto`).
 
 6. **Hook (`src/hooks/use-kindergartens.ts`):**
+
    ```ts
    export function useKindergartens(params: ListKindergartensParams) {
      return useQuery({
@@ -753,6 +831,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
 > **Scope note:** изначальный план включал tabs (Overview / Settings / Subscription / Flags / View-as) с полноценным detail page. На MVP **GET/PATCH /saas/kindergartens/{id}` не существуют** ([B.8](OPEN_QUESTIONS.md#b8)), модули subscriptions/flags ([B.9](OPEN_QUESTIONS.md#b9), [B.10](OPEN_QUESTIONS.md#b10)) тоже отсутствуют. Поэтому detail page = упрощённый: данные читаются из list-cache (backend list возвращает полный `KindergartenDto`), редактирование settings — заблокировано. Заглушки для остальных табов делаются в **B7**.
 
 ### Inputs
+
 - [`docs/endpoints.md §1.2-1.5`](endpoints.md#12-post-saaskindergartens--создать-тенанта-atomic-bootstrap) — KG endpoints
 - [`docs/superadmin_BP.md §2`](superadmin_BP.md#2-kindergarten-lifecycle-tenant-management) — KG lifecycle BP
 - [`docs/DESIGN.md §5.4-5.5`](DESIGN.md#54-kindergartensnew--создать-садик) + [`§4.5`](DESIGN.md#45-destructive-confirmations) (destructive)
@@ -765,6 +844,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
 1. **shadcn install:** `tabs`, `dialog`, `accordion`, `radio-group`, `switch`, `separator`, `textarea`.
 
 2. **API extensions (`src/api/kindergartens.ts`):**
+
    ```ts
    export async function createKindergarten(body: CreateKindergartenDto) {
      return client.post('saas/kindergartens', { json: body }).json<CreateKindergartenResponse>();
@@ -776,7 +856,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
      return client.post(`saas/kindergartens/${id}/restore`).json<KindergartenDto>();
    }
    export async function inviteAdmin(id: string, body: { phone: string }) {
-     return client.post(`saas/kindergartens/${id}/admin/invite`, { json: body }).json<InviteAdminResponse>();
+     return client
+       .post(`saas/kindergartens/${id}/admin/invite`, { json: body })
+       .json<InviteAdminResponse>();
    }
    ```
 
@@ -801,7 +883,11 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
        name: z.string().min(1).max(255),
        slug: z.string().regex(/^[a-z0-9-]+$/),
        address: z.string().max(500).optional().or(z.literal('')),
-       phone: z.string().regex(/^\+[1-9]\d{1,14}$/).optional().or(z.literal('')),
+       phone: z
+         .string()
+         .regex(/^\+[1-9]\d{1,14}$/)
+         .optional()
+         .or(z.literal('')),
        plan: z.string().default('standard'),
        settings: z.record(z.unknown()).default({}),
      });
@@ -836,7 +922,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
      const kg = queryClient
        .getQueriesData({ queryKey: queryKeys.kindergartens.all })
        .flatMap(([, data]) => (data as KindergartenListResponse | undefined)?.items ?? [])
-       .find(k => k.id === id);
+       .find((k) => k.id === id);
      ```
      Если в cache нет — fetch свежий list с фильтром `?name_search=` или через `?archived=true` если архив. Если всё равно нет → 404.
    - Page header: name, slug, badges (active/inactive, plan, "Архив" если archived), back link "← Садики".
@@ -859,16 +945,18 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B4
    Все 4 на B5 рендерят `<BlockedFeature reason="b8" />` или аналогичный компонент (создаём в B7).
 
 9. **Destructive confirm (`src/components/feedback/destructive-confirm.tsx`):**
+
    ```tsx
    interface DestructiveConfirmProps {
-     trigger: ReactNode;  // обычно Button
+     trigger: ReactNode; // обычно Button
      title: string;
      description: ReactNode;
      confirmationField?: { label: string; expectedValue: string };
-     confirmLabel: string;  // e.g. "⚠ Архивировать"
+     confirmLabel: string; // e.g. "⚠ Архивировать"
      onConfirm: () => Promise<void> | void;
    }
    ```
+
    - shadcn `<Dialog>` обёртка.
    - Если `confirmationField` задан — input + confirm button disabled пока не совпадает.
    - Если не задан — простой Yes/Cancel.
@@ -914,6 +1002,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B5
 **Time:** 5–6 часов
 
 ### Inputs
+
 - [`docs/endpoints.md §5-8`](endpoints.md#5-billing-operations-manual-triggers--saasbilling) — exact contracts
 - [`docs/superadmin_BP.md §5-6`](superadmin_BP.md#5-operational-cron-triggers)
 - [`docs/DESIGN.md §5.11-5.14`](DESIGN.md#511-operationsbilling--manual-billing-triggers)
@@ -942,16 +1031,22 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B5
    - `src/api/schedule-rollout.ts`:
      ```ts
      export async function runWeeklyRollout(body: { fromMonday?: string }) {
-       return client.post('admin/schedule/week-rollout/run', { json: body }).json<RolloutSummaryResponse>();
+       return client
+         .post('admin/schedule/week-rollout/run', { json: body })
+         .json<RolloutSummaryResponse>();
      }
      ```
    - `src/api/lifecycle-jobs.ts`:
      ```ts
      export async function listFailedJobs(params: { limit?: number; cursor?: string }) {
-       return client.get('admin/lifecycle/failed-jobs', { searchParams: params }).json<ListFailedJobsResponse>();
+       return client
+         .get('admin/lifecycle/failed-jobs', { searchParams: params })
+         .json<ListFailedJobsResponse>();
      }
      export async function retryFailedJob(id: string) {
-       return client.post(`admin/lifecycle/failed-jobs/${id}/retry`, { json: {} }).json<{ enqueued: boolean; job_id: string }>();
+       return client
+         .post(`admin/lifecycle/failed-jobs/${id}/retry`, { json: {} })
+         .json<{ enqueued: boolean; job_id: string }>();
      }
      ```
 
@@ -1078,14 +1173,16 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B6
 ### Tasks
 
 1. **`<BlockedFeature>` component (`src/components/feedback/blocked-feature.tsx`):**
+
    ```tsx
    interface BlockedFeatureProps {
-     blockerCode: 'b8' | 'b9' | 'b10' | 'b11';  // OPEN_QUESTIONS reference
-     featureName: string;  // e.g. "Управление подписками SaaS"
-     description?: ReactNode;  // override default
-     actionsBelow?: ReactNode;  // optional CTAs
+     blockerCode: 'b8' | 'b9' | 'b10' | 'b11'; // OPEN_QUESTIONS reference
+     featureName: string; // e.g. "Управление подписками SaaS"
+     description?: ReactNode; // override default
+     actionsBelow?: ReactNode; // optional CTAs
    }
    ```
+
    Layout — по `screens-extra.jsx#ErrorPageLayout` или `ScreenKgViewAs`:
    - Большой Lucide icon (`Wrench` / `Construction` / `Lock`)
    - Heading: "{featureName} недоступно"
@@ -1144,6 +1241,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B7
 **Time:** 3–4 часа
 
 ### Inputs
+
 - [`docs/DESIGN.md §6-8`](DESIGN.md#6-cross-cutting-ux) — cross-cutting + responsive + a11y
 - Visual reference: `screens-misc.jsx` → `ScreenGlobalSearch`, `ScreenStates`, `ScreenMobileAlert`, `ScreenFlagCreate` (для overlays-паттернов, даже если flags заблокированы)
 
@@ -1245,8 +1343,8 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 Отмечай батчи по мере завершения:
 
-- [ ] **B0** Pre-flight checklist
-- [ ] **B1** Foundation (Vite + Tailwind + tooling + tokens + OpenAPI)
+- [x] **B0** Pre-flight checklist
+- [x] **B1** Foundation (Vite + Tailwind + tooling + tokens + OpenAPI)
 - [ ] **B2** Auth + Shell (login, refresh, logout, sidebar, topbar)
 - [ ] **B3** Dashboard + System Status + Error pages
 - [ ] **B4** DataTable + Kindergartens list (offset pagination)
@@ -1263,11 +1361,12 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID | File / Owner | Description | Linked OPEN_QUESTIONS |
-|---|---|---|---|
-| _(пусто на старте)_ | | | |
+| ID                  | File / Owner | Description | Linked OPEN_QUESTIONS |
+| ------------------- | ------------ | ----------- | --------------------- |
+| _(пусто на старте)_ |              |             |                       |
 
 Формат добавления:
+
 ```
 | TODO(B5)#01 | src/routes/kindergartens/index.tsx:42 | Hardcoded plans list — заменить на API когда backend выкатит | — |
 ```
@@ -1278,19 +1377,19 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 Известные риски и митигация:
 
-| # | Риск | Вероятность | Митигация |
-|---|---|---|---|
-| R1 | Backend Swagger остаётся неполным (пустые DTO для некоторых endpoints) | Низкая | Аудит выполнен 2026-05-14 (re-confirmed). Точечные пересверки на каждом батче через `pnpm gen:api` + git diff. |
-| R2 | Backend response shape изменится в процессе | Средняя | Все DTO зафиксированы в этом плане. `pnpm gen:api` перед каждой сессией → если diff в openapi.d.ts — остановиться, обновить план. |
-| R3 | CORS на dev backend не настроен | Низкая | Vite proxy убирает проблему в dev. Production — same-origin через reverse proxy. |
-| R4 | Backend временно лежит | Низкая | Все API hooks имеют error state. UI gracefully degrades. |
-| R5 | Backend меняется в процессе разработки | Средняя | `pnpm gen:api` перед каждой сессией. Diff в openapi.d.ts → обновить план до начала кодинга. |
-| R6 | Blocker модули (subs/flags/users) выкатываются — нужно срочно реализовать | Средняя | Placeholders из B7 быстро заменяются на real implementation. Архитектура DataTable / forms готова в B4-B6 — переиспользуем. |
-| R7 | KK переводы блокируют production | Высокая | Placeholder `[KK]` в B8, real translations — после native speaker (см. [C.6](OPEN_QUESTIONS.md#c6)). |
-| R8 | Backend контракт `monthly-run` изменится (B.12 закроется → kindergarten_id примут) | Низкая | Поле scoped в B6 как hidden — раскомментирование = 1 строка. |
-| R9 | `/health/ready` 503 контракт неясен ([B.13](OPEN_QUESTIONS.md#b13-healthready-503-contract--open)) | Низкая | Frontend смотрит на `status` поле, а не HTTP-код. Если backend начнёт возвращать 503 — добавить обработку в `health.ts`. |
-| R10 | `cursor` в DLQ оказывается не opaque base64, а int | Низкая | Тип в коде — `string \| null`. Если backend сменит формат — изменение прозрачно для UI. |
-| R11 | Lifecycle DLQ retry endpoint требует не-пустое body | Низкая | Сейчас отправляем `{}`. Если будет 400 — посмотреть в Network → исправить. |
+| #   | Риск                                                                                               | Вероятность | Митигация                                                                                                                         |
+| --- | -------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Backend Swagger остаётся неполным (пустые DTO для некоторых endpoints)                             | Низкая      | Аудит выполнен 2026-05-14 (re-confirmed). Точечные пересверки на каждом батче через `pnpm gen:api` + git diff.                    |
+| R2  | Backend response shape изменится в процессе                                                        | Средняя     | Все DTO зафиксированы в этом плане. `pnpm gen:api` перед каждой сессией → если diff в openapi.d.ts — остановиться, обновить план. |
+| R3  | CORS на dev backend не настроен                                                                    | Низкая      | Vite proxy убирает проблему в dev. Production — same-origin через reverse proxy.                                                  |
+| R4  | Backend временно лежит                                                                             | Низкая      | Все API hooks имеют error state. UI gracefully degrades.                                                                          |
+| R5  | Backend меняется в процессе разработки                                                             | Средняя     | `pnpm gen:api` перед каждой сессией. Diff в openapi.d.ts → обновить план до начала кодинга.                                       |
+| R6  | Blocker модули (subs/flags/users) выкатываются — нужно срочно реализовать                          | Средняя     | Placeholders из B7 быстро заменяются на real implementation. Архитектура DataTable / forms готова в B4-B6 — переиспользуем.       |
+| R7  | KK переводы блокируют production                                                                   | Высокая     | Placeholder `[KK]` в B8, real translations — после native speaker (см. [C.6](OPEN_QUESTIONS.md#c6)).                              |
+| R8  | Backend контракт `monthly-run` изменится (B.12 закроется → kindergarten_id примут)                 | Низкая      | Поле scoped в B6 как hidden — раскомментирование = 1 строка.                                                                      |
+| R9  | `/health/ready` 503 контракт неясен ([B.13](OPEN_QUESTIONS.md#b13-healthready-503-contract--open)) | Низкая      | Frontend смотрит на `status` поле, а не HTTP-код. Если backend начнёт возвращать 503 — добавить обработку в `health.ts`.          |
+| R10 | `cursor` в DLQ оказывается не opaque base64, а int                                                 | Низкая      | Тип в коде — `string \| null`. Если backend сменит формат — изменение прозрачно для UI.                                           |
+| R11 | Lifecycle DLQ retry endpoint требует не-пустое body                                                | Низкая      | Сейчас отправляем `{}`. Если будет 400 — посмотреть в Network → исправить.                                                        |
 
 ---
 
