@@ -1,25 +1,47 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import { useUiStore } from '@/stores/ui-store';
 import ruCommon from '@/locales/ru/common.json';
+import ruAuth from '@/locales/ru/auth.json';
+import ruErrors from '@/locales/ru/errors.json';
+import ruShell from '@/locales/ru/shell.json';
 import kkCommon from '@/locales/kk/common.json';
+import kkAuth from '@/locales/kk/auth.json';
+import kkErrors from '@/locales/kk/errors.json';
+import kkShell from '@/locales/kk/shell.json';
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      ru: { common: ruCommon },
-      kk: { common: kkCommon },
-    },
-    fallbackLng: 'ru',
-    defaultNS: 'common',
-    interpolation: { escapeValue: false },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      lookupLocalStorage: 'shyraq.sa.lang',
-      caches: ['localStorage'],
-    },
-  });
+try {
+  const oldLang = localStorage.getItem('shyraq.sa.lang');
+  const uiPersist = localStorage.getItem('shyraq.sa.ui');
+  if (oldLang && !uiPersist) {
+    localStorage.setItem(
+      'shyraq.sa.ui',
+      JSON.stringify({
+        state: { sidebarCollapsed: false, locale: oldLang === 'kk' ? 'kk' : 'ru' },
+        version: 0,
+      }),
+    );
+  }
+  localStorage.removeItem('shyraq.sa.lang');
+} catch {
+  // localStorage unavailable — ignore.
+}
+
+const initialLocale = useUiStore.getState().locale;
+
+void i18n.use(initReactI18next).init({
+  resources: {
+    ru: { common: ruCommon, auth: ruAuth, errors: ruErrors, shell: ruShell },
+    kk: { common: kkCommon, auth: kkAuth, errors: kkErrors, shell: kkShell },
+  },
+  lng: initialLocale,
+  fallbackLng: 'ru',
+  defaultNS: 'common',
+  interpolation: { escapeValue: false },
+});
+
+useUiStore.subscribe((s, prev) => {
+  if (s.locale !== prev.locale) void i18n.changeLanguage(s.locale);
+});
 
 export default i18n;

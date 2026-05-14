@@ -1,0 +1,20 @@
+{
+  "validation": "Өрістердің дұрыстығын тексеріңіз",
+  "invalid_credentials": "Email немесе құпиясөз қате",
+  "invalid_token": "Сессия жарамсыз",
+  "invalid_refresh": "Сессия аяқталды",
+  "token_revoked": "Сессия қайтарып алынды",
+  "rate_limit": "Сұраныс шегінен асып кеттіңіз",
+  "too_many_requests": "Тым көп сұраныс. Кейінірек қайталаңыз.",
+  "invariant_violation": "Енгізілген деректердің дұрыстығын тексеріңіз",
+  "forbidden": "Қол жеткізу тыйым салынған",
+  "kindergarten_not_found": "Балабақша табылмады",
+  "kindergarten_slug_taken": "Slug басқа балабақшамен алынған",
+  "kindergarten_archived": "Балабақша мұрағатта",
+  "lifecycle_job_not_found": "Тапсырма табылмады",
+  "lifecycle_job_not_in_failed_state": "Тапсырма қате күйінде емес",
+  "invalid_date_range": "Дата ауқымы қате",
+  "service_unavailable": "Қызмет уақытша қолжетімсіз",
+  "internal_error": "Сервердің ішкі қатесі",
+  "unknown_error": "Белгісіз қате"
+}

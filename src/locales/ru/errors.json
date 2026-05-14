@@ -1,0 +1,20 @@
+{
+  "validation": "Проверьте корректность полей",
+  "invalid_credentials": "Неверный email или пароль",
+  "invalid_token": "Сессия недействительна",
+  "invalid_refresh": "Сессия истекла",
+  "token_revoked": "Сессия была отозвана",
+  "rate_limit": "Превышен лимит запросов",
+  "too_many_requests": "Слишком много запросов. Повторите позже.",
+  "invariant_violation": "Проверьте корректность введённых данных",
+  "forbidden": "Доступ запрещён",
+  "kindergarten_not_found": "Садик не найден",
+  "kindergarten_slug_taken": "Slug уже занят другим садиком",
+  "kindergarten_archived": "Садик находится в архиве",
+  "lifecycle_job_not_found": "Задача не найдена",
+  "lifecycle_job_not_in_failed_state": "Задача не в состоянии ошибки",
+  "invalid_date_range": "Некорректный диапазон дат",
+  "service_unavailable": "Сервис временно недоступен",
+  "internal_error": "Внутренняя ошибка сервера",
+  "unknown_error": "Неизвестная ошибка"
+}

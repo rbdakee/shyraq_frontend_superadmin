@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Главная",
+    "kindergartens": "Садики",
+    "subscriptions": "Подписки",
+    "feature_flags": "Feature Flags",
+    "users": "Пользователи",
+    "operations": "Операции",
+    "billing": "Биллинг",
+    "content": "Контент",
+    "schedule_rollout": "Rollout недели",
+    "lifecycle_dlq": "Failed jobs",
+    "system_status": "Статус системы"
+  },
+  "user_menu": {
+    "profile": "Мой профиль",
+    "change_password": "Сменить пароль",
+    "logout": "Выйти",
+    "docs": "Документация"
+  },
+  "role": {
+    "super_admin": "Super Admin",
+    "support": "Support"
+  },
+  "lang": {
+    "ru": "Русский",
+    "kk": "Қазақша"
+  }
+}

@@ -107,8 +107,9 @@ export default tseslint.config(
               from: 'src/components/**',
               message: 'lib/ must not import components/',
             },
+            // i18n.ts is exempt: it subscribes to ui-store to sync locale → i18next
             {
-              target: 'src/lib/**',
+              target: 'src/lib/!(i18n).ts',
               from: 'src/stores/**',
               message: 'lib/ must not import stores/',
             },

@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "dashboard": "Басты",
+    "kindergartens": "Балабақшалар",
+    "subscriptions": "Жазылымдар",
+    "feature_flags": "Feature Flags",
+    "users": "Қолданушылар",
+    "operations": "Операциялар",
+    "billing": "Биллинг",
+    "content": "Контент",
+    "schedule_rollout": "Апта rollout",
+    "lifecycle_dlq": "Failed jobs",
+    "system_status": "Жүйе статусы"
+  },
+  "user_menu": {
+    "profile": "Менің профилім",
+    "change_password": "Құпиясөзді өзгерту",
+    "logout": "Шығу",
+    "docs": "Құжаттама"
+  },
+  "role": {
+    "super_admin": "Super Admin",
+    "support": "Support"
+  },
+  "lang": {
+    "ru": "Русский",
+    "kk": "Қазақша"
+  }
+}
