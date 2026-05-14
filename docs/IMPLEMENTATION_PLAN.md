@@ -1348,7 +1348,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 - [x] **B0** Pre-flight checklist
 - [x] **B1** Foundation (Vite + Tailwind + tooling + tokens + OpenAPI)
 - [x] **B2** Auth + Shell (login, refresh, logout, sidebar, topbar)
-- [ ] **B3** Dashboard + System Status + Error pages
+- [x] **B3** Dashboard + System Status + Error pages
 - [ ] **B4** DataTable + Kindergartens list (offset pagination)
 - [ ] **B5** Kindergartens — wizard + archive/restore + admin invite
 - [ ] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
