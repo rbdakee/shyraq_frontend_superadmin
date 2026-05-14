@@ -254,7 +254,7 @@
 
 ---
 
-### B.13 `/health/ready` 503 contract — `open`
+### B.13 `/health/ready` 503 contract — `resolved`
 
 **Контекст:** Swagger описывает только 200 для `/health/ready` (`status: ok|degraded`). Наша документация (и UX дашборда) предполагает 503 при degraded.
 
@@ -263,6 +263,8 @@
 **MVP-обработка фронта:** воспринимать **и** `HTTP 503` **и** `HTTP 200 + status='degraded'` как degraded. Защита от обеих интерпретаций.
 
 **Зависимости:** уточнить у backend / прогнать readiness-check с остановленным Redis.
+
+**Решено (2026-05-14):** B3 backend research (commit `110607e`, plan §10) подтвердил: `/health/ready` всегда возвращает `200` благодаря `@HttpCode(HttpStatus.OK)` на handler'е; индикаторы (`checkDb`, `checkRedis`) ловят свои exceptions внутри и не бросают. Status conveyed через body: `{ status: 'ok' | 'degraded', checks: { db: 'up'|'down', redis: 'up'|'down' } }`. Backend'овский `docs/endpoints.md` line 31 ошибочно утверждает 503-on-down — это backend-doc bug, не наша забота. **Frontend treatment:** plain `useQuery({ refetchInterval: 30_000, retry: 0, staleTime: 0 })` без специальной обработки в `api/client.ts`. Сетевой fail (server unreachable) — distinct "health недоступен" state через `isError`, NOT degraded.
 
 ---
 
@@ -407,7 +409,7 @@
 
 ---
 
-### B.14 `errors.json` flat `forbidden` key vs nested error-page group — `open`
+### B.14 `errors.json` flat `forbidden` key vs nested error-page group — `resolved`
 
 **Контекст:** brief B3 Slice 1 запросил добавить nested `"forbidden": { title, subtitle, cta_home }` в `errors.json` рядом с существующим flat `"forbidden": "Доступ запрещён"`. Два ключа с одинаковым именем в одном JSON-объекте невозможны.
 
@@ -418,6 +420,13 @@
 **Зависимости:** slice 5 (error pages) + все места где используется `t('errors:forbidden')` для toast'ов.
 
 **Триггер:** до старта B3 Slice 5 (error pages).
+
+**Решено (2026-05-14):** оба ключа canonical, разные surfaces:
+
+- `errors:forbidden` (flat, string) — для API 403 toast'ов через `lib/error-map.ts` (унаследовано с B2).
+- `errors:forbidden_page` (nested: `{ title, subtitle, cta_home }`) — для страницы `/_403` (используется в `src/routes/_403.tsx`).
+
+Никакого переименования не требуется. Будущие nested-группы для других error-pages (404, 500) следуют той же конвенции `{slug}_page`.
 
 ---
 

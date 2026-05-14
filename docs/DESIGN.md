@@ -13,12 +13,14 @@
 > На MVP блокированные страницы рисуем как placeholder'ы (см. паттерн `ScreenKgViewAs` в handoff'е) с info-alert + ссылкой на блокер. Sidebar items могут оставаться. Полная имплементация — после backend roadmap.
 
 **Зафиксированные решения** (из обсуждения):
+
 - Layout: **Sidebar (left, collapsible) + Topbar**
 - Тема: **только Light** на MVP
 - Dashboard KPI: **минимум** — health-виджет + quick links (нет backend агрегата метрик)
 - Destructive confirmations: **modal с вводом slug/email** для hard-actions; простой OK/Cancel для soft
 
 **Источники истины:**
+
 - Список endpoints — [`endpoints.md`](endpoints.md)
 - Бизнес-процессы — [`superadmin_BP.md`](superadmin_BP.md)
 - Stack и структура — [`architecture.md`](architecture.md)
@@ -93,12 +95,12 @@ Feature Flags       /feature-flags        icon: Flag
 
 ### 3.1 Sidebar (left, 240px collapsed → 64px)
 
-| Элемент | Описание |
-|---|---|
-| **Logo + name** | Top, 64px height. Полное название "Shyraq SuperAdmin" в expanded, только logo в collapsed. Click → `/`. |
-| **Nav items** | Иконка + label. Active state: filled background + accent text. Hover: subtle background. |
-| **Operations group** | Accordion-секция. Шевронная иконка справа. Сохраняет состояние в Zustand. |
-| **Collapse toggle** | Bottom-left button. Сохраняет состояние в Zustand + localStorage. |
+| Элемент              | Описание                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Logo + name**      | Top, 64px height. Полное название "Shyraq SuperAdmin" в expanded, только logo в collapsed. Click → `/`. |
+| **Nav items**        | Иконка + label. Active state: filled background + accent text. Hover: subtle background.                |
+| **Operations group** | Accordion-секция. Шевронная иконка справа. Сохраняет состояние в Zustand.                               |
+| **Collapse toggle**  | Bottom-left button. Сохраняет состояние в Zustand + localStorage.                                       |
 
 Tooltip с label показывается при наведении в collapsed-режиме.
 
@@ -110,13 +112,13 @@ Tooltip с label показывается при наведении в collapsed
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-| Элемент | Описание |
-|---|---|
-| **Hamburger `≡`** | Collapse/expand sidebar (mobile-mode — открывает drawer) |
-| **Breadcrumbs** | Reflects current route: `Главная / Садики / Солнышко / Настройки`. Каждый сегмент — link, кроме последнего. |
-| **Global search** | Только на routes где это применимо (см. §4.3). На остальных — пусто. Расширяется в overlay при focus. |
-| **Language switcher** | Dropdown `RU` ⇄ `KK`. Применяется немедленно (i18next.changeLanguage), persist в localStorage. |
-| **User menu** | Avatar (инициалы) + ФИО + chevron. Dropdown: `Мой профиль` (placeholder, нет endpoint), `Сменить пароль`, `Выйти`. |
+| Элемент               | Описание                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Hamburger `≡`**     | Collapse/expand sidebar (mobile-mode — открывает drawer)                                                           |
+| **Breadcrumbs**       | Reflects current route: `Главная / Садики / Солнышко / Настройки`. Каждый сегмент — link, кроме последнего.        |
+| **Global search**     | Только на routes где это применимо (см. §4.3). На остальных — пусто. Расширяется в overlay при focus.              |
+| **Language switcher** | Dropdown `RU` ⇄ `KK`. Применяется немедленно (i18next.changeLanguage), persist в localStorage.                     |
+| **User menu**         | Avatar (инициалы) + ФИО + chevron. Dropdown: `Мой профиль` (placeholder, нет endpoint), `Сменить пароль`, `Выйти`. |
 
 ### 3.3 Page chrome (внутри outlet)
 
@@ -146,24 +148,24 @@ Page header выровнен с topbar по горизонтали. Subtitle —
 
 ### 4.1 Component library (shadcn/ui base)
 
-| Компонент | Использование |
-|---|---|
-| `Button` | Variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`. Sizes: `sm`, `default`, `lg`, `icon`. |
-| `Input`, `Textarea`, `Select`, `Checkbox`, `Switch`, `RadioGroup`, `Slider` | Form controls. |
-| `Dialog` (`Modal`) | Confirmations, формы создания, детали failed-job. |
-| `Sheet` (slide-over) | Side-panel для quick-edit (где не нужна отдельная страница) — используем sparingly. |
-| `DropdownMenu` | User menu, row-actions в таблицах, language switcher. |
-| `Tabs` | Внутри `/kindergartens/:id`. |
-| `Table` | Базовый table — но обёрнут в наш `<DataTable>` (см. §4.2). |
-| `Badge` | Статусы (active/inactive, plan, processor name). |
-| `Card` | Группировка контента (dashboard, operations triggers). |
-| `Tooltip` | На truncated text, collapsed sidebar items, icon-only buttons. |
-| `Toast` (sonner) | Success/error notifications после mutations. |
-| `Skeleton` | Loading placeholders в таблицах и cards. |
-| `Alert` | Inline-сообщения (warning о placeholder view-as, error в формах). |
-| `Popover` | Filters в таблицах, date pickers. |
-| `Command` (cmdk) | Global search (§4.3). |
-| `Accordion` | Settings JSONB editor, DLQ row expanded details, sidebar Operations group. |
+| Компонент                                                                   | Использование                                                                                                      |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Button`                                                                    | Variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`. Sizes: `sm`, `default`, `lg`, `icon`. |
+| `Input`, `Textarea`, `Select`, `Checkbox`, `Switch`, `RadioGroup`, `Slider` | Form controls.                                                                                                     |
+| `Dialog` (`Modal`)                                                          | Confirmations, формы создания, детали failed-job.                                                                  |
+| `Sheet` (slide-over)                                                        | Side-panel для quick-edit (где не нужна отдельная страница) — используем sparingly.                                |
+| `DropdownMenu`                                                              | User menu, row-actions в таблицах, language switcher.                                                              |
+| `Tabs`                                                                      | Внутри `/kindergartens/:id`.                                                                                       |
+| `Table`                                                                     | Базовый table — но обёрнут в наш `<DataTable>` (см. §4.2).                                                         |
+| `Badge`                                                                     | Статусы (active/inactive, plan, processor name).                                                                   |
+| `Card`                                                                      | Группировка контента (dashboard, operations triggers).                                                             |
+| `Tooltip`                                                                   | На truncated text, collapsed sidebar items, icon-only buttons.                                                     |
+| `Toast` (sonner)                                                            | Success/error notifications после mutations.                                                                       |
+| `Skeleton`                                                                  | Loading placeholders в таблицах и cards.                                                                           |
+| `Alert`                                                                     | Inline-сообщения (warning о placeholder view-as, error в формах).                                                  |
+| `Popover`                                                                   | Filters в таблицах, date pickers.                                                                                  |
+| `Command` (cmdk)                                                            | Global search (§4.3).                                                                                              |
+| `Accordion`                                                                 | Settings JSONB editor, DLQ row expanded details, sidebar Operations group.                                         |
 
 ### 4.2 `<DataTable>` — переиспользуемая таблица
 
@@ -186,6 +188,7 @@ Page header выровнен с topbar по горизонтали. Subtitle —
 ```
 
 **Возможности:**
+
 - Sortable columns (click header — toggle asc/desc/none)
 - Filters via dropdown в toolbar
 - Search через text input (debounced 300ms, передаётся как query param)
@@ -193,6 +196,7 @@ Page header выровнен с topbar по горизонтали. Subtitle —
   - **Offset-based** для `/saas/kindergartens` (backend: `limit` + `offset` + `total` → `KindergartenListResponseDto`). Page-numbers возможны технически, но MVP их не выводит — Prev/Next достаточно.
   - **Cursor-based** для `/admin/lifecycle/failed-jobs` (backend: opaque base64 `cursor` → `next_cursor`). Range-label с total **невозможен** — у BullMQ нет дешёвого count; показываем только "Показано N записей" + `[Далее →]`, и стек предыдущих cursor'ов для `[← Назад]`.
   - Заглушенные routes (`/subscriptions`, `/feature-flags`, `/users`) пока не имеют backend — pagination реализуется когда модули появятся ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) / [B.10](OPEN_QUESTIONS.md#b10-feature-flags-module--blocker-) / [B.11](OPEN_QUESTIONS.md#b11-saas-users-module--blocker-)).
+- **Sort: на MVP — без sortable headers.** Backend list endpoints (`/saas/kindergartens`, `/admin/lifecycle/failed-jobs`) не поддерживают `sort_by`/`order` query params. Когда backend добавит — включаем `ColumnHeader` sort affordance (asc/desc/none). TODO(B?) в backlog.
 - Row actions через `[⋯]` dropdown (3-точка). Опции зависят от entity.
 - Bulk-select (опционально, для feature flags / users — если нужны массовые операции)
 - Empty state: иллюстрация + сообщение + CTA "Создать первый"
@@ -202,6 +206,7 @@ Page header выровнен с topbar по горизонтали. Subtitle —
 ### 4.3 Global search
 
 Активна в topbar на:
+
 - `/` (dashboard) — поиск по садикам
 - `/kindergartens` — поиск по садикам (дублирует toolbar search)
 - `/users` — поиск по пользователям
@@ -283,15 +288,15 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 
 ### 4.6 State patterns
 
-| Состояние | Когда | Что показываем |
-|---|---|---|
-| **Loading (initial)** | Первый fetch, нет cached data | Page shell + skeleton (5 rows для таблицы, 3 cards для grids) |
-| **Loading (refetch)** | Cached data есть, фоновое обновление | Existing data + thin progress-bar сверху таблицы |
-| **Loaded** | Success | Нормальный рендер |
-| **Empty** | 200 OK, но `items.length === 0` | Иллюстрация + текст + CTA |
-| **Error** | 4xx/5xx | `<Alert variant="destructive">` + код + i18n message + кнопка "Повторить" |
-| **Mutation pending** | Submit формы или cron-trigger | Primary CTA — `disabled` + spinner внутри. Background blur не накладываем. |
-| **Mutation success** | 2xx | Toast (3 секунды) + автоматический re-fetch / cache update |
+| Состояние             | Когда                                | Что показываем                                                             |
+| --------------------- | ------------------------------------ | -------------------------------------------------------------------------- |
+| **Loading (initial)** | Первый fetch, нет cached data        | Page shell + skeleton (5 rows для таблицы, 3 cards для grids)              |
+| **Loading (refetch)** | Cached data есть, фоновое обновление | Existing data + thin progress-bar сверху таблицы                           |
+| **Loaded**            | Success                              | Нормальный рендер                                                          |
+| **Empty**             | 200 OK, но `items.length === 0`      | Иллюстрация + текст + CTA                                                  |
+| **Error**             | 4xx/5xx                              | `<Alert variant="destructive">` + код + i18n message + кнопка "Повторить"  |
+| **Mutation pending**  | Submit формы или cron-trigger        | Primary CTA — `disabled` + spinner внутри. Background blur не накладываем. |
+| **Mutation success**  | 2xx                                  | Toast (3 секунды) + автоматический re-fetch / cache update                 |
 
 ### 4.7 Toasts
 
@@ -302,13 +307,13 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 
 ### 4.8 Цветовая семантика статусов
 
-| Статус | Цвет (semantic) | Использование |
-|---|---|---|
-| `success` / `active` / `up` / `paid` | Green | Active subscription, healthy DB, paid invoice |
-| `warning` / `partial` / `paused` / `trial` | Amber | Partial payment, paused subscription, trial period |
-| `error` / `failed` / `down` / `overdue` | Red | Failed job, DB down, overdue invoice |
-| `info` / `pending` | Blue | Pending job, scheduled |
-| `neutral` / `inactive` / `archived` | Gray | Cancelled subscription, archived child |
+| Статус                                     | Цвет (semantic) | Использование                                      |
+| ------------------------------------------ | --------------- | -------------------------------------------------- |
+| `success` / `active` / `up` / `paid`       | Green           | Active subscription, healthy DB, paid invoice      |
+| `warning` / `partial` / `paused` / `trial` | Amber           | Partial payment, paused subscription, trial period |
+| `error` / `failed` / `down` / `overdue`    | Red             | Failed job, DB down, overdue invoice               |
+| `info` / `pending`                         | Blue            | Pending job, scheduled                             |
+| `neutral` / `inactive` / `archived`        | Gray            | Cancelled subscription, archived child             |
 
 Конкретные hex-значения — определит дизайнер.
 
@@ -325,6 +330,7 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 **Layout:** centered card на full-screen background. Без sidebar/topbar.
 
 **Контент:**
+
 - Logo + название "Shyraq SuperAdmin" сверху
 - Карточка (max-width 400px):
   - Поле `Email` (required, email validation)
@@ -334,12 +340,14 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 - Внизу страницы: build version + env (`v0.1.0 · production`)
 
 **Состояния:**
+
 - **Idle** — обычная форма
 - **Submitting** — кнопка disabled + spinner
 - **Error 401** — inline alert над формой: "Неверный email или пароль"
 - **Error 429** — alert: "Превышен лимит попыток. Повторите через 1 час."
 
 **Edge cases:**
+
 - Если в URL есть `?next=/kindergartens/abc` — после успешного login redirect туда.
 - Если в URL есть `?reason=session_expired` — показать info-alert "Сессия истекла, войдите снова".
 
@@ -376,13 +384,14 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 
 **Виджеты:**
 
-| Виджет | Контент | Действия |
-|---|---|---|
-| **Статус системы** | Pulse-indicator (green/red); строки `DB: up`, `Redis: up`; timestamp последней проверки. Polling каждые 30с. | Click → `/system-status` |
+| Виджет               | Контент                                                                                                                                             | Действия                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| **Статус системы**   | Pulse-indicator (green/red); строки `DB: up`, `Redis: up`; timestamp последней проверки. Polling каждые 30с.                                        | Click → `/system-status`                               |
 | **Быстрые действия** | Кнопки: "Создать садик", "Monthly billing run", "Schedule rollout", "Failed jobs (N)". `N` — счётчик из `GET /admin/lifecycle/failed-jobs?limit=1`. | Click → соответствующая страница (или открывает форму) |
-| **Платформа** | Список простых метрик из доступных endpoints: total kgs, total SaaS users | — |
+| **Платформа**        | Список простых метрик из доступных endpoints: total kgs, total SaaS users                                                                           | —                                                      |
 
 **Состояния:**
+
 - Health red → "Статус системы" виджет имеет красный outline + текст "Service degraded"
 - Failed jobs > 0 → "Failed jobs" кнопка имеет amber-badge с цифрой
 
@@ -397,15 +406,22 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 **Layout:** page header + DataTable.
 
 **Header:**
+
 ```
 Садики                                            [+ Новый садик]
 Все тенанты платформы Shyraq
 ```
 
 **Toolbar таблицы:**
-- Search (по name)
-- Filter `Plan`: select multi (standard / pro / enterprise)
-- Filter `Статус`: select (Все / Активные / Неактивные)
+
+- Search (по `name`, debounced 300ms)
+- Filter `Plan`: select (Все / standard / pro / enterprise) → query `plan`
+- Filter `Статус`: select (Все / Активные / Неактивные) → query `is_active` (undefined / true / false)
+- Filter `Архив`: select (Все садики / Только активные / Только архивные) → query `archived` (undefined / false / true)
+
+> Фильтры `Статус` и `Архив` управляют **независимыми** backend params (`is_active`, `archived`). Kindergarten может быть `is_active=false` без `archived_at` (rare, но возможно). См. [`endpoints.md §1.1`](endpoints.md#11-get-saaskindergartens--список).
+
+> **Sort:** заголовки колонок **не** sortable на MVP — backend не поддерживает `sort_by`/`order` query params. Когда backend выкатит — добавим. См. также §4.2.
 
 **Колонки:**
 | Колонка | Содержимое | Ширина |
@@ -419,6 +435,7 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 | Действия | `[⋯]` dropdown | 50px |
 
 **Row actions (`[⋯]`):**
+
 - Открыть детали → `/kindergartens/:id`
 - Редактировать → `/kindergartens/:id/settings`
 - Управление подпиской → `/kindergartens/:id/subscription`
@@ -500,6 +517,7 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 ```
 
 **После submit:**
+
 - Loading state (button → spinner + "Создание...")
 - Success → redirect на `/kindergartens/:id` + toast "Садик создан. Welcome-SMS отправлен на +7 700 123 45 67."
 - Error 409 `kindergarten_slug_taken` → возврат на Step 1, подсветка slug поля + alert.
@@ -534,17 +552,20 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 3 секции (cards):
 
 **Карточка "Статистика":**
+
 - Активных детей: 42
 - Архивных детей: 8
 - Активных staff: 12
 - Групп: 5
 
 **Карточка "Подписка":**
+
 - Plan, status badge, amount + period
 - Started at, Next billing at
 - CTA: "Управлять подпиской" → tab Subscription
 
 **Карточка "Системная информация":**
+
 - ID (`uuid`), copyable
 - Slug
 - Создан / Обновлён (timestamps)
@@ -560,9 +581,11 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 **Backend:** `/saas/saas-subscriptions?kindergarten_id=:id`. См. [`endpoints.md §2`](endpoints.md#2-saas-subscriptions--saassaas-subscriptions).
 
 **Если подписки нет:**
+
 - Empty state + CTA "Создать подписку"
 
 **Если есть:**
+
 - Form с полями: `plan_code` (select), `status` (select), `billing_period` (select monthly/yearly), `amount` (decimal input), `started_at` (date picker), `next_billing_at` (date picker), `cancelled_at` (read-only display если есть)
 - `[Сохранить]` → `PATCH /saas/saas-subscriptions/:id`
 - Под формой — историческая инфо (создана, обновлена)
@@ -575,12 +598,12 @@ Status change to `cancelled` → confirm modal "Отменить подписк�
 
 **Layout:** простая таблица в этом tab'е (не DataTable со всем функционалом):
 
-| Колонка | Содержимое |
-|---|---|
-| Key | `face_id_enabled` (mono font) |
-| Value | JSON snippet, click → expand modal |
-| Создан | relative time |
-| Действия | `[Редактировать]` `[Удалить]` |
+| Колонка  | Содержимое                         |
+| -------- | ---------------------------------- |
+| Key      | `face_id_enabled` (mono font)      |
+| Value    | JSON snippet, click → expand modal |
+| Создан   | relative time                      |
+| Действия | `[Редактировать]` `[Удалить]`      |
 
 CTA в шапке tab'а: `[+ Добавить флаг для этого садика]`.
 
@@ -619,12 +642,14 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 **Layout:** page header + summary cards + DataTable.
 
 **Summary cards (вверху, 4 шт.):**
+
 - Total MRR (client-side aggregation: sum amount / (period==='yearly' ? 12 : 1) where status='active')
 - Active subscriptions count
 - Trial subscriptions count
 - Suspended/cancelled count
 
 **Toolbar:**
+
 - Filter `Статус`: select multi (trial/active/suspended/cancelled)
 - Filter `Plan`: select multi
 - Sort default: `next_billing_at` ASC (ближайшие — наверху)
@@ -650,6 +675,7 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 **Layout:** page header `[+ Новый флаг]` + DataTable.
 
 **Toolbar:**
+
 - Filter `Scope`: select (Все / Глобальные / Per-kg)
 - Filter `Kindergarten`: autocomplete (если выбран `Per-kg`)
 - Search по `key`
@@ -704,6 +730,7 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 **Layout:** page header `[+ Новый пользователь]` + DataTable.
 
 **Toolbar:**
+
 - Filter `Роль`: select (super_admin / support)
 - Filter `Статус`: select (Активные / Неактивные)
 - Search (по email / full_name)
@@ -719,6 +746,7 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 | Действия | `[⋯]` |
 
 **Row actions:**
+
 - Редактировать
 - Сменить пароль (открывает modal)
 - Деактивировать / Активировать (toggle, простой confirm)
@@ -733,12 +761,13 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 **Layout:** centered form max-width 480px.
 
 **Поля:**
-- ФИО * (text)
-- Email * (email validation)
+
+- ФИО \* (text)
+- Email \* (email validation)
 - Телефон (E.164, optional)
-- Пароль * (min 8 chars, "show password" toggle, strength indicator)
-- Подтверждение пароля * (должен совпадать с первым)
-- Роль * (radio: super_admin / support)
+- Пароль \* (min 8 chars, "show password" toggle, strength indicator)
+- Подтверждение пароля \* (должен совпадать с первым)
+- Роль \* (radio: super_admin / support)
 
 **Footer:** `[Отмена]` `[Создать пользователя]`.
 
@@ -753,6 +782,7 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 **Layout:** similar to create form, но pre-filled. Email не редактируем (показывается, input disabled).
 
 **Дополнительные секции:**
+
 - **Карточка "Сменить пароль"** — отдельная под основной формой, с двумя input'ами (new + confirm) и `[Изменить пароль]` button. Не сохраняется вместе с остальным — отдельный submit, отдельный success-toast.
 - **Карточка "Опасная зона"** — destructive section с toggle "Деактивировать пользователя". Confirm modal с вводом email пользователя.
 
@@ -792,12 +822,14 @@ Self-edit: блокировка `Деактивировать` (disabled, toolti
 ```
 
 **Поля:**
+
 - `Period start` — date picker с restriction (только 1-е число месяца). Default — 1-е число текущего месяца.
 - `Kindergarten` — autocomplete select (optional). Default "Все активные".
 
 **Action button:** `[▶ Запустить]` — primary.
 
 **Confirmation modal:**
+
 ```
 Запустить генерацию инвойсов?
 
@@ -810,15 +842,18 @@ Self-edit: блокировка `Деактивировать` (disabled, toolti
 ```
 
 **Submitting state:**
+
 - Card заменяется на loading-view: spinner + "Генерация... может занять минуту" + прогресс-индикатор (indeterminate, т.к. backend не шлёт progress events).
 
 **Success state:**
+
 - Card обновляется с результатом: green-badge "Success", таблица summary (kindergartens_processed, invoices_created, skipped_already_generated), timestamp.
 - Result сохраняется в Zustand store (in-memory) → перезагрузка страницы сбрасывает (это OK, backend идемпотентен).
 
 #### 5.11.2 Card "Discount Expire Run"
 
 Аналогично, но проще:
+
 - Описание: "Закрытие истёкших custom-скидок (status: active → expired)."
 - Поля: только `Kindergarten` (optional).
 - Action: `[▶ Запустить]`
@@ -920,12 +955,14 @@ Date picker — restricted к понедельникам (отключаются
 **Layout:** page header + DataTable.
 
 **Header:**
+
 ```
 Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 Очередь failed jobs из BullMQ lifecycle queue. Auto-cleanup через 30 дней.
 ```
 
 **Toolbar:**
+
 - Filter `Processor`: select (`pro-rata-refund`, etc.)
 - Filter `Kindergarten`: autocomplete
 - Filter `Failed in last`: select (1h / 24h / 7d / all)
@@ -944,6 +981,7 @@ Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 **Row click:** expand accordion с full payload (JSON, syntax-highlighted) + full failed_reason + timestamps (`timestamp`, `finished_on`).
 
 **Retry action:**
+
 - Confirmation modal: "Re-enqueue job `<id>` with same payload?"
 - 202 response → toast "Job ретрайнут. Обновите таблицу через минуту."
 - Errors:
@@ -1044,16 +1082,16 @@ Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 
 ### 6.1 Keyboard shortcuts
 
-| Shortcut | Action |
-|---|---|
-| `Cmd/Ctrl + K` | Open global search |
-| `Cmd/Ctrl + ,` | Open user menu |
-| `Esc` | Close modal / dialog |
-| `/` | Focus search input (когда не в input'е) |
-| `g h` | Go home |
-| `g k` | Go to kindergartens |
-| `g u` | Go to users |
-| `g o` | Go to operations |
+| Shortcut       | Action                                  |
+| -------------- | --------------------------------------- |
+| `Cmd/Ctrl + K` | Open global search                      |
+| `Cmd/Ctrl + ,` | Open user menu                          |
+| `Esc`          | Close modal / dialog                    |
+| `/`            | Focus search input (когда не в input'е) |
+| `g h`          | Go home                                 |
+| `g k`          | Go to kindergartens                     |
+| `g u`          | Go to users                             |
+| `g o`          | Go to operations                        |
 
 Реализуем через `react-hotkeys-hook`. Подсказка в command-palette ("? — все горячие клавиши").
 
@@ -1077,7 +1115,7 @@ JSONB-поля backend'а (`{ru, kz}`) рендерятся через `localize
 [👤 Иван Петров ▾]
                   super_admin@shyraq.kz
                   ── role: super_admin ──
-                  
+
                   👤 Мой профиль (placeholder)
                   🔑 Сменить пароль
                   ──────────────────
@@ -1094,6 +1132,7 @@ JSONB-поля backend'а (`{ru, kz}`) рендерятся через `localize
 ### 6.4 Notifications (toasts)
 
 См. §4.7. Дополнительно:
+
 - Long-running ops (monthly-run) → toast.promise wrapper: "Запуск..." → "Завершено" / "Ошибка".
 - Critical errors (refresh failed) → sticky toast with "Войти снова" CTA → redirect `/login`.
 
@@ -1101,12 +1140,12 @@ JSONB-поля backend'а (`{ru, kz}`) рендерятся через `localize
 
 ## 7. Responsive strategy
 
-| Breakpoint | Range | Поведение |
-|---|---|---|
-| `xl` (default) | ≥ 1280px | Sidebar expanded (240px) + Topbar + page content max-width 1440px centered |
-| `lg` | 1024–1279px | Sidebar collapsed (64px) by default, expand on hover |
-| `md` | 768–1023px | Sidebar — drawer (открывается через hamburger). Tables — horizontal scroll |
-| `sm` | < 768px | **Not supported**. Показываем full-page alert: "SuperAdmin доступен только на desktop / tablet. Используйте экран шириной ≥ 768px." |
+| Breakpoint     | Range       | Поведение                                                                                                                           |
+| -------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `xl` (default) | ≥ 1280px    | Sidebar expanded (240px) + Topbar + page content max-width 1440px centered                                                          |
+| `lg`           | 1024–1279px | Sidebar collapsed (64px) by default, expand on hover                                                                                |
+| `md`           | 768–1023px  | Sidebar — drawer (открывается через hamburger). Tables — horizontal scroll                                                          |
+| `sm`           | < 768px     | **Not supported**. Показываем full-page alert: "SuperAdmin доступен только на desktop / tablet. Используйте экран шириной ≥ 768px." |
 
 Mobile (< 768px) — explicit not supported, т.к. это admin tool. Дизайнер не делает mobile дизайн.
 

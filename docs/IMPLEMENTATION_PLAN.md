@@ -765,7 +765,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
      - Search input (debounced 300ms) → filter `name_search`.
      - Filter `Plan`: shadcn `<Select>` (strings: "Все", "standard", "pro", "enterprise" — список можно hardcode на MVP, см. `// TODO(B5): plans list from backend?` — записать в TODO backlog).
      - Filter `Статус`: select (Все / Активные / Неактивные).
-     - Filter `Архив`: switch (отдельно для архивных).
+     - Filter `Архив`: select 3-value: `Все садики` (omit param) / `Только активные` (`archived=false`) / `Только архивные` (`archived=true`).
    - Columns по [DESIGN §5.3](DESIGN.md#53-kindergartens--список-садиков):
      - Название (name + slug под ним мелким серым)
      - Статус (`is_active` → badge active/inactive; `archived_at` → badge "Архив" если не null)
@@ -795,6 +795,20 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
     - `formatCurrency(amount: number, currency = 'KZT'): string` — `50 000 ₸`.
     - `pnpm add date-fns`.
 
+11. **Platform card wiring (closes 2/3 TODO(B4)#01):**
+    - В `src/routes/dashboard.tsx` Platform card: заменить `value={t('dashboard:platform.placeholder')}` на реальные данные:
+      - `active_kgs`: `const { data: activeKgs } = useKindergartens({ is_active: true, limit: 1 }); value={activeKgs?.total ?? <Skeleton />}`
+      - `archived_kgs`: `const { data: archivedKgs } = useKindergartens({ archived: true, limit: 1 }); value={archivedKgs?.total ?? <Skeleton />}`
+      - `active_subscriptions`: остаётся `—` (blocked by [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).
+    - Loading state: маленький skeleton 24×20 на месте числа.
+    - Error state: показываем `—` без панического alert (Health-карточка уже отражает global health).
+
+12. **PageHeader retrofit:**
+    - После создания `src/components/layout/page-header.tsx` (task 9) — заменить inline page-header markup в:
+      - `src/routes/dashboard.tsx`: title + subtitle.
+      - `src/routes/system-status.tsx`: title + subtitle + actions (Refresh button — это `actions` slot).
+    - Удалить дублирующийся inline-разметочный код.
+
 ### Acceptance criteria
 
 - [ ] `/kindergartens` показывает список реальных садиков из backend
@@ -808,7 +822,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B3
 - [ ] Empty state виден при пустом списке с CTA "Новый садик"
 - [ ] Force error (отключить интернет на dev tools) → error Alert + Retry button
 - [ ] Refetch на window focus НЕ происходит (defaultOptions из B1)
-- [ ] Sort columns (если включён в DataTable) — visual только, backend не поддерживает sort параметры (записать в `// TODO(B?): sort backend support`)
+- [ ] Заголовки колонок **не** sortable на MVP (визуально header без cursor-pointer, без стрелок). Backend `/saas/kindergartens` не поддерживает `sort_by`/`order` — TODO(B?) в backlog для будущего add.
+- [ ] Dashboard `/` Platform card: `active_kgs` и `archived_kgs` показывают реальные числа из backend (через `useKindergartens({...,limit:1}).total`); `active_subscriptions` остаётся `—` (B.9).
+- [ ] `<PageHeader>` используется в `routes/dashboard.tsx` и `routes/system-status.tsx`; inline page-header markup удалён.
 
 ### Commit
 
@@ -1363,9 +1379,10 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID          | File / Owner                             | Description                                                                                                                          | Linked OPEN_QUESTIONS                                                                    |
-| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| TODO(B4)#01 | src/routes/dashboard.tsx (Platform card) | Wire `active_kgs` / `archived_kgs` / `active_subscriptions` via `useKindergartens({is_active,limit:1}).total` once B4 ships the hook | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) for active_subscriptions |
+| ID          | File / Owner                             | Description                                                                                                                                                                  | Linked OPEN_QUESTIONS                                           |
+| ----------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| TODO(B4)#01 | src/routes/dashboard.tsx (Platform card) | **Closing in B4 itself (tasks 11/12):** wire active_kgs и archived_kgs через useKindergartens.total. active_subscriptions остаётся placeholder — moved to TODO(B7)#01 below. | —                                                               |
+| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).             | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) |
 
 Формат добавления:
 
