@@ -1365,7 +1365,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 - [x] **B1** Foundation (Vite + Tailwind + tooling + tokens + OpenAPI)
 - [x] **B2** Auth + Shell (login, refresh, logout, sidebar, topbar)
 - [x] **B3** Dashboard + System Status + Error pages
-- [ ] **B4** DataTable + Kindergartens list (offset pagination)
+- [x] **B4** DataTable + Kindergartens list (offset pagination)
 - [ ] **B5** Kindergartens — wizard + archive/restore + admin invite
 - [ ] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
 - [ ] **B7** Blocked module placeholders (subs/flags/users + KG tabs)
@@ -1379,10 +1379,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID          | File / Owner                                                                                       | Description                                                                                                                                                                  | Linked OPEN_QUESTIONS                                           |
-| ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| TODO(B4)#01 | src/routes/dashboard.tsx (Platform card)                                                           | **Closing in B4 itself (tasks 11/12):** wire active_kgs и archived_kgs через useKindergartens.total. active_subscriptions остаётся placeholder — moved to TODO(B7)#01 below. | —                                                               |
-| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).             | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) |
+| ID          | File / Owner                                                                                       | Description                                                                                                                                                      | Linked OPEN_QUESTIONS                                           |
+| ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)). | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) |
 
 Формат добавления:
 
