@@ -963,16 +963,17 @@ Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 
 **Toolbar:**
 
-- Filter `Processor`: select (`pro-rata-refund`, etc.)
-- Filter `Kindergarten`: autocomplete
-- Filter `Failed in last`: select (1h / 24h / 7d / all)
+- Filter `Processor`: text input (substring match against `name` field; case-sensitive — backend does not normalize).
+  **NB:** backend `/admin/lifecycle/failed-jobs` does not expose `?name=` query param — filter applied **client-side** on current cursor page only. Acceptable on MVP because typical DLQ depth is <50 jobs.
+- **No Kindergarten filter on MVP** — backend doesn't support `?kindergartenId=` query and full-kg-list JOIN would require fetching all active kgs to map UUID→name. See `TODO(B?)#01` in IMPLEMENTATION_PLAN.md backlog. Kindergarten ID still displayed in row (truncated UUID + tooltip with full UUID).
+- **No "Failed in last" filter on MVP** — backend `?failed_in_last=` query not supported. Default retention 30 days; jobs older than that auto-cleaned. See `TODO(B?)#02`.
 
 **Колонки:**
 | Колонка | Содержимое |
 |---|---|
 | ID | mono font, truncated, click → expand |
 | Processor | Badge с name |
-| Kindergarten | name (JOIN на kindergartens) + ID tooltip |
+| Kindergarten | `payload.kindergartenId` truncated UUID (first 8 chars) + full UUID in tooltip. No name JOIN on MVP — see toolbar block above. |
 | Failed reason | truncated 80 chars, click → modal с full stack |
 | Attempts | `3 / 3` (filled rectangles) |
 | Failed at | `finished_on` relative |

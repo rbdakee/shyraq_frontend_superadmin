@@ -1122,7 +1122,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B5
 8. **`/operations/lifecycle-dlq` (`src/routes/operations/lifecycle-dlq.tsx`):**
    - Page header: title "Failed Jobs (Lifecycle DLQ)", subtitle "BullMQ failed-jobs · auto-cleanup через 30 дней", action "↻ Обновить".
    - DataTable из B4. Cursor-based pagination: state `cursor: string | null`, on Next → `setCursor(data.next_cursor)`, on Prev — нужен стек предыдущих cursor'ов.
-   - Toolbar filters: processor name (text input — пока без autocomplete), kindergartenId (опционально, **client-side фильтр** так как backend не поддерживает query — записать в TODO).
+   - Toolbar filters: `processor` (text input, client-side filter on current cursor page only — записать в TODO `processor` filter migration when backend adds `?name=`). **No `kindergartenId` filter on MVP** (D18 — omit; see TODO backlog). **No "failed_in_last" filter on MVP** (backend не поддерживает).
    - Columns:
      - ID (mono, truncated, click → expand row)
      - Processor (badge с `name` — например, `lifecycle:pro-rata-refund`)
@@ -1379,9 +1379,11 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID          | File / Owner                                                                                       | Description                                                                                                                                                      | Linked OPEN_QUESTIONS                                           |
-| ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)). | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) |
+| ID          | File / Owner                                                                                       | Description                                                                                                                                                                                                   | Linked OPEN_QUESTIONS                                           |
+| ----------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).                                              | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-) |
+| TODO(B?)#01 | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ kindergarten filter — реализовать когда backend выкатит `?kindergartenId=` query OR дешёвый kg name JOIN на список. Сегодня MVP омитит фильтр (D18) и показывает только truncated UUID + tooltip.         | —                                                               |
+| TODO(B?)#02 | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ "failed_in_last" filter — backend не поддерживает `?failed_in_last=` query. Если станет нужно — отдельный backend endpoint OR client-side фильтр (бесполезен на cursor-pagination — пропускает страницы). | —                                                               |
 
 Формат добавления:
 
