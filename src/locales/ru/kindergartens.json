@@ -1,0 +1,44 @@
+{
+  "title": "Садики",
+  "subtitle": "Все тенанты платформы Shyraq",
+  "cta_new": "Новый садик",
+  "search_placeholder": "Поиск по названию…",
+  "filters": {
+    "plan": { "label": "План", "all": "Все" },
+    "status": { "label": "Статус", "all": "Все", "active": "Активные", "inactive": "Неактивные" },
+    "archived": {
+      "label": "Архив",
+      "all": "Все садики",
+      "only_active": "Только активные",
+      "only_archived": "Только архивные"
+    }
+  },
+  "columns": {
+    "name": "Название",
+    "status": "Статус",
+    "plan": "План",
+    "subscription": "Подписка",
+    "phone": "Телефон",
+    "created": "Создан",
+    "actions": "Действия"
+  },
+  "status": { "active": "Активен", "inactive": "Неактивен", "archived": "Архив" },
+  "subscription": { "placeholder": "—" },
+  "row_actions": {
+    "open": "Открыть детали",
+    "invite_admin": "Resend admin invite",
+    "archive": "⚠ Архивировать",
+    "restore": "✓ Восстановить"
+  },
+  "empty": {
+    "title": "Пока нет ни одного садика",
+    "description": "Создайте первого тенанта платформы",
+    "cta": "Новый садик"
+  },
+  "pagination": {
+    "range": "Показано {{from}}–{{to}} из {{total}}",
+    "prev": "Назад",
+    "next": "Далее"
+  },
+  "error": { "title": "Не удалось загрузить список", "retry": "Повторить" }
+}

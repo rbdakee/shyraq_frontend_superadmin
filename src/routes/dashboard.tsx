@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Plus, Receipt, CalendarSync, AlertTriangle } from 'lucide-react';
 import { useHealthReady } from '@/hooks/use-health';
+import { useKindergartens } from '@/hooks/use-kindergartens';
 import { useNow } from '@/hooks/use-now';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,11 +10,22 @@ import { PulseDot } from '@/components/feedback/pulse-dot';
 import { HealthRow } from '@/components/feedback/health-row';
 import { QuickAction } from '@/components/feedback/quick-action';
 import { Stat } from '@/components/feedback/stat';
+import { PageHeader } from '@/components/layout/page-header';
 
 export default function DashboardPage() {
   const { t } = useTranslation(['dashboard']);
   const { data, isLoading, isError, dataUpdatedAt } = useHealthReady();
   const now = useNow();
+  const {
+    data: activeKgs,
+    isLoading: activeKgsLoading,
+    isError: activeKgsError,
+  } = useKindergartens({ is_active: true, limit: 1 });
+  const {
+    data: archivedKgs,
+    isLoading: archivedKgsLoading,
+    isError: archivedKgsError,
+  } = useKindergartens({ archived: true, limit: 1 });
 
   const tone = isError
     ? 'error'
@@ -27,10 +39,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold">{t('dashboard:title')}</h1>
-        <p className="text-sm text-text-secondary">{t('dashboard:subtitle')}</p>
-      </header>
+      <PageHeader title={t('dashboard:title')} subtitle={t('dashboard:subtitle')} />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
@@ -112,15 +121,31 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-8">
-            {/* TODO(B4): wire active_kgs via useKindergartens({is_active:true,limit:1}).total once hook lands in B4 */}
             <Stat
               label={t('dashboard:platform.active_kgs')}
-              value={t('dashboard:platform.placeholder')}
+              value={
+                activeKgsLoading ? (
+                  <Skeleton className="h-6 w-12" />
+                ) : activeKgsError ? (
+                  t('dashboard:platform.placeholder')
+                ) : (
+                  (activeKgs?.total ?? t('dashboard:platform.placeholder'))
+                )
+              }
             />
             <Stat
               label={t('dashboard:platform.archived_kgs')}
-              value={t('dashboard:platform.placeholder')}
+              value={
+                archivedKgsLoading ? (
+                  <Skeleton className="h-6 w-12" />
+                ) : archivedKgsError ? (
+                  t('dashboard:platform.placeholder')
+                ) : (
+                  (archivedKgs?.total ?? t('dashboard:platform.placeholder'))
+                )
+              }
             />
+            {/* TODO(B7)#01: wire active_subscriptions when /saas/saas-subscriptions ships (blocked by OPEN_QUESTIONS#B.9) */}
             <Stat
               label={t('dashboard:platform.active_subscriptions')}
               value={t('dashboard:platform.placeholder')}

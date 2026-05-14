@@ -5,6 +5,7 @@ import { Shell } from '@/components/layout/shell';
 import LoginPage from '@/routes/login';
 import DashboardPage from '@/routes/dashboard';
 import SystemStatusPage from '@/routes/system-status';
+import KindergartensListPage from '@/routes/kindergartens';
 import NotFoundPage from '@/routes/_404';
 import ServerErrorPage from '@/routes/_500';
 
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
             element: <Shell />,
             children: [
               { path: '/', element: <DashboardPage /> },
-              { path: '/kindergartens', element: <div>kindergartens</div> },
+              { path: '/kindergartens', element: <KindergartensListPage /> },
               { path: '/kindergartens/new', element: <div>kindergartens/new</div> },
               {
                 path: '/kindergartens/:id',

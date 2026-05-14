@@ -16,6 +16,18 @@ const badgeVariants = cva(
         outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
         ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4 hover:underline',
+        // Status semantic variants — colors from Shyraq design tokens (src/styles/globals.css)
+        success: 'bg-success-soft text-success-text border-success-soft-border',
+        warning: 'bg-warning-soft text-warning-text border-warning-soft-border',
+        error: 'bg-error-soft text-error-text border-error-soft-border',
+        info: 'bg-info-soft text-info-text border-brand-soft-border',
+        neutral: 'bg-muted text-text-secondary border-border-subtle',
+        // Role colors: purple = super_admin, blue = support
+        purple: 'bg-role-super-soft text-role-super-text border-role-super-soft',
+        blue: 'bg-role-support-soft text-role-support-text border-role-support-soft',
+      },
+      dot: {
+        true: 'pl-1.5',
       },
     },
     defaultVariants: {
@@ -27,6 +39,7 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant = 'default',
+  dot,
   asChild = false,
   ...props
 }: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
@@ -36,7 +49,7 @@ function Badge({
     <Comp
       data-slot="badge"
       data-variant={variant}
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, dot }), className)}
       {...props}
     />
   );

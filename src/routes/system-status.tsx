@@ -6,6 +6,7 @@ import { RefreshCcw, AlertCircle } from 'lucide-react';
 import { useHealthReady } from '@/hooks/use-health';
 import { useNow } from '@/hooks/use-now';
 import { queryKeys } from '@/hooks/query-keys';
+import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -94,17 +95,16 @@ export default function SystemStatusPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t('shell:nav.system_status')}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{subtitleText}</p>
-        </div>
-        <Button variant="outline" onClick={onRefresh}>
-          <RefreshCcw className="size-4" />
-          {t('dashboard:system_status.refresh')}
-        </Button>
-      </div>
+      <PageHeader
+        title={t('shell:nav.system_status')}
+        subtitle={subtitleText}
+        actions={
+          <Button variant="outline" onClick={onRefresh}>
+            <RefreshCcw className="size-4" />
+            {t('dashboard:system_status.refresh')}
+          </Button>
+        }
+      />
 
       {/* Top status block */}
       <Card>

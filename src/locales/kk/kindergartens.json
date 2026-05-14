@@ -1,0 +1,53 @@
+{
+  "title": "[KK-TBD] Садики",
+  "subtitle": "[KK-TBD] Все тенанты платформы Shyraq",
+  "cta_new": "[KK-TBD] Новый садик",
+  "search_placeholder": "[KK-TBD] Поиск по названию…",
+  "filters": {
+    "plan": { "label": "[KK-TBD] План", "all": "[KK-TBD] Все" },
+    "status": {
+      "label": "[KK-TBD] Статус",
+      "all": "[KK-TBD] Все",
+      "active": "[KK-TBD] Активные",
+      "inactive": "[KK-TBD] Неактивные"
+    },
+    "archived": {
+      "label": "[KK-TBD] Архив",
+      "all": "[KK-TBD] Все садики",
+      "only_active": "[KK-TBD] Только активные",
+      "only_archived": "[KK-TBD] Только архивные"
+    }
+  },
+  "columns": {
+    "name": "[KK-TBD] Название",
+    "status": "[KK-TBD] Статус",
+    "plan": "[KK-TBD] План",
+    "subscription": "[KK-TBD] Подписка",
+    "phone": "[KK-TBD] Телефон",
+    "created": "[KK-TBD] Создан",
+    "actions": "[KK-TBD] Действия"
+  },
+  "status": {
+    "active": "[KK-TBD] Активен",
+    "inactive": "[KK-TBD] Неактивен",
+    "archived": "[KK-TBD] Архив"
+  },
+  "subscription": { "placeholder": "—" },
+  "row_actions": {
+    "open": "[KK-TBD] Открыть детали",
+    "invite_admin": "[KK-TBD] Resend admin invite",
+    "archive": "[KK-TBD] ⚠ Архивировать",
+    "restore": "[KK-TBD] ✓ Восстановить"
+  },
+  "empty": {
+    "title": "[KK-TBD] Пока нет ни одного садика",
+    "description": "[KK-TBD] Создайте первого тенанта платформы",
+    "cta": "[KK-TBD] Новый садик"
+  },
+  "pagination": {
+    "range": "[KK-TBD] Показано {{from}}–{{to}} из {{total}}",
+    "prev": "[KK-TBD] Назад",
+    "next": "[KK-TBD] Далее"
+  },
+  "error": { "title": "[KK-TBD] Не удалось загрузить список", "retry": "[KK-TBD] Повторить" }
+}
