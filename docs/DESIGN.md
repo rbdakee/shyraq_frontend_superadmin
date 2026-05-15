@@ -1130,6 +1130,8 @@ JSONB-поля backend'а (`{ru, kz}`) рендерятся через `localize
 
 "Выйти" → `POST /saas/auth/logout` → wipe tokens → redirect `/login`.
 
+> **B7/B8 note:** "Мой профиль" и "Сменить пароль" требуют `PATCH /saas/users/:id` ([B.11](OPEN_QUESTIONS.md#b11)). До тех пор оба item рендерятся как `DropdownMenuItem disabled` с tooltip "Требуется backend B.11". "Выйти" — активный.
+
 ### 6.4 Notifications (toasts)
 
 См. §4.7. Дополнительно:
