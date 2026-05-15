@@ -1367,7 +1367,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 - [x] **B3** Dashboard + System Status + Error pages
 - [x] **B4** DataTable + Kindergartens list (offset pagination)
 - [x] **B5** Kindergartens — wizard + archive/restore + admin invite
-- [ ] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
+- [x] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
 - [ ] **B7** Blocked module placeholders (subs/flags/users + KG tabs)
 - [ ] **B8** Polish (command palette, i18n, a11y, build)
 
