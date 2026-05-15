@@ -1383,7 +1383,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 - [x] **B5** Kindergartens — wizard + archive/restore + admin invite
 - [x] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
 - [x] **B7** Blocked module placeholders (subs/flags/users + KG tabs)
-- [ ] **B8** Polish (command palette, i18n, a11y, build)
+- [x] **B8** Polish (command palette, i18n, a11y, build) — _Playwright e2e (task 13) deferred: §B8 acceptance `pnpm test:e2e` + artifacts bullets remain open_
 
 Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8).
 
