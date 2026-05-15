@@ -451,6 +451,31 @@ Until then, MVP behavior (deferred 409 on submit) stays. See `TODO(B?)#03`.
 
 ---
 
+### B.17 DLQ endpoint returns 403 for super_admin (backend RBAC scope) — `open`
+
+**Контекст:** B6 finalization browser walk. `GET /api/v1/admin/lifecycle/failed-jobs?limit=50` returns `403 Forbidden` (`{"message":"Forbidden resource","error":"Forbidden","statusCode":403}`) for the seed super_admin user (`admin@shyraq.local`).
+
+**Affects:** B6 / `/operations/lifecycle-dlq` page.
+
+Frontend code is correct per `endpoints.md §8.1`. UI degrades gracefully with the standard error state + Refresh button (toast via `t('errors:forbidden')` if code-mapped).
+
+**Likely backend cause:** `/admin/*` prefix routes are scoped to kindergarten `admin` role, and the backend RBAC layer doesn't recognize `super_admin` as a superset. The lifecycle DLQ is a platform-ops concern that needs cross-kg visibility — super_admin should pass.
+
+**Action needed from backend team:** either:
+
+1. Extend the `/admin/lifecycle/*` RBAC guard to also allow `super_admin`.
+2. Move the lifecycle endpoints under `/saas/lifecycle/*` (super_admin scope) and update `endpoints.md §8` accordingly.
+
+Frontend can't proceed beyond the empty/403 state without this. `POST /admin/lifecycle/failed-jobs/:id/retry` likely returns the same 403 — confirm once GET works.
+
+**Workaround for testing during dev:** run requests with a kg-admin token to verify DLQ page rendering. Production rollout blocked until super_admin scope is granted.
+
+**Зависимости:** backend RBAC fix.
+
+**Триггер:** before B6 can be marked fully accepted on DLQ tab.
+
+---
+
 ## D. Process / Operational
 
 ### D.1 Когда обновить этот документ — `meta`

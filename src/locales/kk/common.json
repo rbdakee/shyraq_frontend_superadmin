@@ -1,5 +1,11 @@
 {
   "app": {
     "title": "Shyraq SuperAdmin"
+  },
+  "cancel": "Болдырмау",
+  "pagination": {
+    "prev": "Артқа",
+    "next": "Алға",
+    "shown_count": "Көрсетілген: {{count}}"
   }
 }

@@ -83,15 +83,15 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 Структура папок и обоснование — [`docs/architecture.md §3`](docs/architecture.md#3-структура-проекта).
 
-| Слой                                             | Что разрешено                                             | Что запрещено                                              |
-| ------------------------------------------------ | --------------------------------------------------------- | ---------------------------------------------------------- |
-| `api/`                                           | `ky`, openapi-types, чистые async-функции                 | TanStack Query hooks, React, JSX, i18n                     |
-| `hooks/`                                         | TanStack Query, вызовы `api/*`, query keys                | прямой `fetch`, JSX                                        |
-| `routes/`                                        | React, JSX, `hooks/*`, `components/*`, `react-router-dom` | прямой `fetch`, прямой импорт `api/*` (только через hooks) |
-| `components/ui/`                                 | shadcn primitives                                         | бизнес-логика, прямой backend-доступ                       |
-| `components/{layout,data-table,forms,feedback}/` | UI + переиспользуемые wrappers                            | бизнес-логика домена (это в routes)                        |
-| `lib/`                                           | чистые функции, без React                                 | TanStack Query, JSX                                        |
-| `stores/`                                        | Zustand UI state                                          | сервер-state (он в TanStack Query)                         |
+| Слой                                                        | Что разрешено                                             | Что запрещено                                              |
+| ----------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------- |
+| `api/`                                                      | `ky`, openapi-types, чистые async-функции                 | TanStack Query hooks, React, JSX, i18n                     |
+| `hooks/`                                                    | TanStack Query, вызовы `api/*`, query keys                | прямой `fetch`, JSX                                        |
+| `routes/`                                                   | React, JSX, `hooks/*`, `components/*`, `react-router-dom` | прямой `fetch`, прямой импорт `api/*` (только через hooks) |
+| `components/ui/`                                            | shadcn primitives                                         | бизнес-логика, прямой backend-доступ                       |
+| `components/{layout,data-table,forms,feedback,operations}/` | UI + переиспользуемые wrappers                            | бизнес-логика домена (это в routes)                        |
+| `lib/`                                                      | чистые функции, без React                                 | TanStack Query, JSX                                        |
+| `stores/`                                                   | Zustand UI state                                          | сервер-state (он в TanStack Query)                         |
 
 Нарушения — `eslint-plugin-import/no-restricted-paths` + code-review.
 

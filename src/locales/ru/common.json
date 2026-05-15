@@ -1,5 +1,11 @@
 {
   "app": {
     "title": "Shyraq SuperAdmin"
+  },
+  "cancel": "Отмена",
+  "pagination": {
+    "prev": "Назад",
+    "next": "Вперёд",
+    "shown_count": "Показано: {{count}}"
   }
 }

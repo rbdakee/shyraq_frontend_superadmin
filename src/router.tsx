@@ -12,6 +12,10 @@ import KindergartenSettingsPage from '@/routes/kindergartens/$id/settings';
 import KindergartenSubscriptionPage from '@/routes/kindergartens/$id/subscription';
 import KindergartenFlagsPage from '@/routes/kindergartens/$id/flags';
 import KindergartenViewAsPage from '@/routes/kindergartens/$id/view-as';
+import OperationsBillingPage from '@/routes/operations/billing';
+import OperationsContentPage from '@/routes/operations/content';
+import OperationsScheduleRolloutPage from '@/routes/operations/schedule-rollout';
+import OperationsLifecycleDlqPage from '@/routes/operations/lifecycle-dlq';
 import NotFoundPage from '@/routes/_404';
 import ServerErrorPage from '@/routes/_500';
 
@@ -53,13 +57,13 @@ export const router = createBrowserRouter([
               { path: '/users', element: <div>users</div> },
               { path: '/users/new', element: <div>users/new</div> },
               { path: '/users/:id', element: <div>users/:id</div> },
-              { path: '/operations/billing', element: <div>operations/billing</div> },
-              { path: '/operations/content', element: <div>operations/content</div> },
+              { path: '/operations/billing', element: <OperationsBillingPage /> },
+              { path: '/operations/content', element: <OperationsContentPage /> },
               {
                 path: '/operations/schedule-rollout',
-                element: <div>operations/schedule-rollout</div>,
+                element: <OperationsScheduleRolloutPage />,
               },
-              { path: '/operations/lifecycle-dlq', element: <div>operations/lifecycle-dlq</div> },
+              { path: '/operations/lifecycle-dlq', element: <OperationsLifecycleDlqPage /> },
               { path: '/system-status', element: <SystemStatusPage /> },
             ],
           },

@@ -7,12 +7,14 @@ import ruErrors from '@/locales/ru/errors.json';
 import ruShell from '@/locales/ru/shell.json';
 import ruDashboard from '@/locales/ru/dashboard.json';
 import ruKindergartens from '@/locales/ru/kindergartens.json';
+import ruOperations from '@/locales/ru/operations.json';
 import kkCommon from '@/locales/kk/common.json';
 import kkAuth from '@/locales/kk/auth.json';
 import kkErrors from '@/locales/kk/errors.json';
 import kkShell from '@/locales/kk/shell.json';
 import kkDashboard from '@/locales/kk/dashboard.json';
 import kkKindergartens from '@/locales/kk/kindergartens.json';
+import kkOperations from '@/locales/kk/operations.json';
 
 try {
   const oldLang = localStorage.getItem('shyraq.sa.lang');
@@ -42,6 +44,7 @@ void i18n.use(initReactI18next).init({
       shell: ruShell,
       dashboard: ruDashboard,
       kindergartens: ruKindergartens,
+      operations: ruOperations,
     },
     kk: {
       common: kkCommon,
@@ -50,6 +53,7 @@ void i18n.use(initReactI18next).init({
       shell: kkShell,
       dashboard: kkDashboard,
       kindergartens: kkKindergartens,
+      operations: kkOperations,
     },
   },
   lng: initialLocale,
