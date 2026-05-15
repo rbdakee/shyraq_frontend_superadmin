@@ -1,13 +1,15 @@
+import { lazy } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { Shell } from '@/components/layout/shell';
+
+// Eager: small / frequently shown / error pages
 import LoginPage from '@/routes/login';
-import DashboardPage from '@/routes/dashboard';
-import SystemStatusPage from '@/routes/system-status';
-import KindergartensListPage from '@/routes/kindergartens';
-import KindergartenCreatePage from '@/routes/kindergartens/new';
-import KindergartenDetailPage from '@/routes/kindergartens/$id';
+import NotFoundPage from '@/routes/_404';
+import ServerErrorPage from '@/routes/_500';
+
+// Eager: BlockedFeature placeholders (trivial size, no Suspense flash)
 import KindergartenSettingsPage from '@/routes/kindergartens/$id/settings';
 import KindergartenSubscriptionPage from '@/routes/kindergartens/$id/subscription';
 import KindergartenFlagsPage from '@/routes/kindergartens/$id/flags';
@@ -17,12 +19,18 @@ import FeatureFlagsPage from '@/routes/feature-flags';
 import UsersPage from '@/routes/users/index';
 import UsersNewPage from '@/routes/users/new';
 import UsersEditPage from '@/routes/users/$id';
-import OperationsBillingPage from '@/routes/operations/billing';
-import OperationsContentPage from '@/routes/operations/content';
-import OperationsScheduleRolloutPage from '@/routes/operations/schedule-rollout';
-import OperationsLifecycleDlqPage from '@/routes/operations/lifecycle-dlq';
-import NotFoundPage from '@/routes/_404';
-import ServerErrorPage from '@/routes/_500';
+
+/* eslint-disable react-refresh/only-export-components -- lazy route chunks are not HMR components */
+const DashboardPage = lazy(() => import('./routes/dashboard'));
+const SystemStatusPage = lazy(() => import('./routes/system-status'));
+const KindergartensListPage = lazy(() => import('./routes/kindergartens'));
+const KindergartenCreatePage = lazy(() => import('./routes/kindergartens/new'));
+const KindergartenDetailPage = lazy(() => import('./routes/kindergartens/$id'));
+const OperationsBillingPage = lazy(() => import('./routes/operations/billing'));
+const OperationsContentPage = lazy(() => import('./routes/operations/content'));
+const OperationsScheduleRolloutPage = lazy(() => import('./routes/operations/schedule-rollout'));
+const OperationsLifecycleDlqPage = lazy(() => import('./routes/operations/lifecycle-dlq'));
+/* eslint-enable react-refresh/only-export-components */
 
 // eslint-disable-next-line react-refresh/only-export-components
 const RootLayout = () => (

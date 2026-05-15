@@ -1,170 +1,162 @@
 {
-  "title": "[KK-TBD] Садики",
-  "subtitle": "[KK-TBD] Все тенанты платформы Shyraq",
-  "cta_new": "[KK-TBD] Новый садик",
-  "search_placeholder": "[KK-TBD] Поиск по названию…",
+  "title": "Балабақшалар",
+  "subtitle": "Shyraq платформасының барлық тенанттары",
+  "cta_new": "Жаңа балабақша",
+  "search_placeholder": "Аты бойынша іздеу…",
   "filters": {
-    "plan": { "label": "[KK-TBD] План", "all": "[KK-TBD] Все" },
+    "plan": { "label": "Жоспар", "all": "Барлығы" },
     "status": {
-      "label": "[KK-TBD] Статус",
-      "all": "[KK-TBD] Все",
-      "active": "[KK-TBD] Активные",
-      "inactive": "[KK-TBD] Неактивные"
+      "label": "Мәртебе",
+      "all": "Барлығы",
+      "active": "Белсендіler",
+      "inactive": "Белсенді еместер"
     },
     "archived": {
-      "label": "[KK-TBD] Архив",
-      "all": "[KK-TBD] Все садики",
-      "only_active": "[KK-TBD] Только активные",
-      "only_archived": "[KK-TBD] Только архивные"
+      "label": "Мұрағат",
+      "all": "Барлық балабақшалар",
+      "only_active": "Тек белсендіler",
+      "only_archived": "Тек мұрағатталғандар"
     }
   },
   "columns": {
-    "name": "[KK-TBD] Название",
-    "status": "[KK-TBD] Статус",
-    "plan": "[KK-TBD] План",
-    "subscription": "[KK-TBD] Подписка",
-    "phone": "[KK-TBD] Телефон",
-    "created": "[KK-TBD] Создан",
-    "actions": "[KK-TBD] Действия"
+    "name": "Атауы",
+    "status": "Мәртебе",
+    "plan": "Жоспар",
+    "subscription": "Жазылым",
+    "phone": "Телефон",
+    "created": "Жасалған",
+    "actions": "Әрекеттер"
   },
-  "status": {
-    "active": "[KK-TBD] Активен",
-    "inactive": "[KK-TBD] Неактивен",
-    "archived": "[KK-TBD] Архив"
-  },
+  "status": { "active": "Белсенді", "inactive": "Белсенді емес", "archived": "Мұрағат" },
   "subscription": { "placeholder": "—" },
   "row_actions": {
-    "open": "[KK-TBD] Открыть детали",
-    "invite_admin": "[KK-TBD] Resend admin invite",
-    "archive": "[KK-TBD] ⚠ Архивировать",
-    "restore": "[KK-TBD] ✓ Восстановить"
+    "open": "Мәліметтерді ашу",
+    "invite_admin": "Resend admin invite",
+    "archive": "⚠ Мұрағаттау",
+    "restore": "✓ Қалпына келтіру"
   },
   "empty": {
-    "title": "[KK-TBD] Пока нет ни одного садика",
-    "description": "[KK-TBD] Создайте первого тенанта платформы",
-    "cta": "[KK-TBD] Новый садик"
+    "title": "Әлі бірде-бір балабақша жоқ",
+    "description": "Платформаның алғашқы тенантын жасаңыз",
+    "cta": "Жаңа балабақша"
   },
   "pagination": {
-    "range": "[KK-TBD] Показано {{from}}–{{to}} из {{total}}",
-    "prev": "[KK-TBD] Назад",
-    "next": "[KK-TBD] Далее"
+    "range": "{{total}} ішінен {{from}}–{{to}} көрсетілуде",
+    "prev": "Артқа",
+    "next": "Әрі қарай"
   },
-  "error": { "title": "[KK-TBD] Не удалось загрузить список", "retry": "[KK-TBD] Повторить" },
+  "error": { "title": "Тізімді жүктеу мүмкін болмады", "retry": "Қайталау" },
   "wizard": {
-    "title": "[KK-TBD] Создать садик",
-    "steps": { "kg": "[KK-TBD] Садик", "admin": "[KK-TBD] Первый администратор" },
+    "title": "Балабақша жасау",
+    "steps": { "kg": "Балабақша", "admin": "Бірінші әкімші" },
     "kg": {
-      "section_title": "[KK-TBD] Информация о садике",
-      "name_label": "[KK-TBD] Название садика",
-      "name_placeholder": "[KK-TBD] Солнышко",
-      "slug_label": "[KK-TBD] Slug",
-      "slug_placeholder": "[KK-TBD] solnyshko",
-      "slug_hint": "[KK-TBD] Латиница, цифры, дефис. Используется в URL и интеграциях.",
-      "address_label": "[KK-TBD] Адрес",
-      "address_placeholder": "[KK-TBD] Алматы, ул. Абая, 1",
-      "phone_label": "[KK-TBD] Телефон садика",
-      "phone_placeholder": "[KK-TBD] +7 (727) 222-11-00",
-      "plan_label": "[KK-TBD] План",
-      "plan_options": {
-        "standard": "[KK-TBD] Standard",
-        "pro": "[KK-TBD] Pro",
-        "enterprise": "[KK-TBD] Enterprise"
-      },
-      "settings_title": "[KK-TBD] Настройки (advanced)",
+      "section_title": "Балабақша туралы ақпарат",
+      "name_label": "Балабақшаның атауы",
+      "name_placeholder": "Күнбағыс",
+      "slug_label": "Slug",
+      "slug_placeholder": "kunbagys",
+      "slug_hint": "Латын әріптері, сандар, сызықша. URL мен интеграцияларда қолданылады.",
+      "address_label": "Мекенжай",
+      "address_placeholder": "Алматы, Абай к-сі, 1",
+      "phone_label": "Балабақша телефоны",
+      "phone_placeholder": "+7 (727) 222-11-00",
+      "plan_label": "Жоспар",
+      "plan_options": { "standard": "Standard", "pro": "Pro", "enterprise": "Enterprise" },
+      "settings_title": "Параметрлер (кеңейтілген)",
       "settings": {
-        "timezone_label": "[KK-TBD] Часовой пояс",
-        "currency_label": "[KK-TBD] Валюта",
-        "late_pickup_fee_label": "[KK-TBD] Штраф за поздний забор (KZT)",
-        "otp_expiry_label": "[KK-TBD] TTL OTP (секунд)",
-        "grace_label": "[KK-TBD] Дней до overdue"
+        "timezone_label": "Уақыт белдеуі",
+        "currency_label": "Валюта",
+        "late_pickup_fee_label": "Кеш алу айыппұлы (KZT)",
+        "otp_expiry_label": "OTP TTL (секунд)",
+        "grace_label": "Overdue-ға дейінгі күндер"
       }
     },
     "admin": {
-      "section_title": "[KK-TBD] Первый администратор",
-      "full_name_label": "[KK-TBD] ФИО администратора",
-      "full_name_placeholder": "[KK-TBD] Айгерим Касымова",
-      "phone_label": "[KK-TBD] Телефон администратора",
-      "phone_placeholder": "[KK-TBD] +7 (700) 123-45-67",
-      "phone_hint": "[KK-TBD] На этот номер уйдёт welcome-SMS. Если телефон уже зарегистрирован — будет переиспользован существующий пользователь.",
-      "locale_label": "[KK-TBD] Язык интерфейса",
-      "locale_options": { "ru": "[KK-TBD] Русский", "kk": "[KK-TBD] Қазақша" }
+      "section_title": "Бірінші әкімші",
+      "full_name_label": "Әкімшінің толық аты-жөні",
+      "full_name_placeholder": "Айгерім Қасымова",
+      "phone_label": "Әкімшінің телефоны",
+      "phone_placeholder": "+7 (700) 123-45-67",
+      "phone_hint": "Бұл нөмірге welcome-SMS жіберіледі. Телефон бұрыннан тіркелген болса — бар пайдаланушы қолданылады.",
+      "locale_label": "Интерфейс тілі",
+      "locale_options": { "ru": "Русский", "kk": "Қазақша" }
     },
     "buttons": {
-      "next": "[KK-TBD] Далее",
-      "back": "[KK-TBD] Назад",
-      "submit": "[KK-TBD] Создать садик",
-      "cancel": "[KK-TBD] Отмена",
-      "submitting": "[KK-TBD] Создание…"
+      "next": "Әрі қарай",
+      "back": "Артқа",
+      "submit": "Балабақша жасау",
+      "cancel": "Бас тарту",
+      "submitting": "Жасалуда…"
     },
-    "toast_success": "[KK-TBD] Садик создан. Welcome-SMS отправлен на {{phone}}.",
-    "toast_error_slug_taken": "[KK-TBD] Slug уже занят. Выберите другой.",
-    "toast_error_invariant": "[KK-TBD] Проверьте slug и телефоны — невалидный формат.",
-    "toast_error_generic": "[KK-TBD] Не удалось создать садик. Попробуйте ещё раз."
+    "toast_success": "Балабақша жасалды. Welcome-SMS {{phone}} нөміріне жіберілді.",
+    "toast_error_slug_taken": "Slug алынған. Басқасын таңдаңыз.",
+    "toast_error_invariant": "Slug пен телефондарды тексеріңіз — формат дұрыс емес.",
+    "toast_error_generic": "Балабақша жасау мүмкін болмады. Қайталап көріңіз."
   },
   "detail": {
-    "back_link": "[KK-TBD] Садики",
+    "back_link": "Балабақшалар",
     "tabs": {
-      "overview": "[KK-TBD] Обзор",
-      "settings": "[KK-TBD] Настройки",
-      "subscription": "[KK-TBD] Подписка",
-      "flags": "[KK-TBD] Feature Flags",
-      "view_as": "[KK-TBD] View as"
+      "overview": "Шолу",
+      "settings": "Параметрлер",
+      "subscription": "Жазылым",
+      "flags": "Feature Flags",
+      "view_as": "View as"
     },
     "overview": {
-      "system_card_title": "[KK-TBD] Системная информация",
-      "system_id": "[KK-TBD] ID",
-      "system_slug": "[KK-TBD] Slug",
-      "system_plan": "[KK-TBD] План",
-      "system_created_at": "[KK-TBD] Создан",
-      "system_updated_at": "[KK-TBD] Обновлён",
-      "system_archived_at": "[KK-TBD] Архивирован",
-      "contacts_card_title": "[KK-TBD] Контакты",
-      "contacts_address": "[KK-TBD] Адрес",
-      "contacts_phone": "[KK-TBD] Телефон",
+      "system_card_title": "Жүйелік ақпарат",
+      "system_id": "ID",
+      "system_slug": "Slug",
+      "system_plan": "Жоспар",
+      "system_created_at": "Жасалған",
+      "system_updated_at": "Жаңартылған",
+      "system_archived_at": "Мұрағатталған",
+      "contacts_card_title": "Байланыс",
+      "contacts_address": "Мекенжай",
+      "contacts_phone": "Телефон",
       "contacts_empty": "—",
-      "settings_card_title": "[KK-TBD] Настройки (read-only)",
-      "settings_locked_alert": "[KK-TBD] Редактирование настроек будет доступно после backend-релиза (см. OPEN_QUESTIONS#b8)."
+      "settings_card_title": "Параметрлер (тек оқу)",
+      "settings_locked_alert": "Параметрлерді өңдеу backend-релизден кейін қолжетімді болады (OPEN_QUESTIONS#b8 қараңыз)."
     },
     "tab_placeholder": {
-      "title": "[KK-TBD] Скоро будет доступно",
-      "subtitle": "[KK-TBD] Этот раздел появится после backend-релиза соответствующего модуля. См. OPEN_QUESTIONS."
+      "title": "Жақында қолжетімді болады",
+      "subtitle": "Бұл бөлім тиісті модульдің backend-релизінен кейін пайда болады. OPEN_QUESTIONS қараңыз."
     },
     "not_found": {
-      "title": "[KK-TBD] Садик не найден",
-      "subtitle": "[KK-TBD] Возможно, ссылка устарела или садик удалён.",
-      "cta": "[KK-TBD] К списку садиков"
+      "title": "Балабақша табылмады",
+      "subtitle": "Мүмкін сілтеме ескірген немесе балабақша жойылған.",
+      "cta": "Балабақшалар тізіміне"
     }
   },
   "actions": {
-    "archive": "[KK-TBD] Архивировать",
-    "restore": "[KK-TBD] Восстановить",
-    "resend_invite": "[KK-TBD] Отправить welcome-SMS повторно",
-    "back_to_list": "[KK-TBD] К списку садиков"
+    "archive": "Мұрағаттау",
+    "restore": "Қалпына келтіру",
+    "resend_invite": "Welcome-SMS қайта жіберу",
+    "back_to_list": "Балабақшалар тізіміне"
   },
   "confirms": {
-    "archive_title": "[KK-TBD] Архивировать садик «{{name}}»?",
-    "archive_description": "[KK-TBD] Это действие установит is_active=false, архивирует всех активных детей и отменит SaaS-подписку. Admin садика потеряет доступ к Admin Web.",
-    "archive_typing_label": "[KK-TBD] Для подтверждения введите slug садика:",
-    "archive_typing_placeholder": "[KK-TBD] {{slug}}",
-    "archive_confirm": "[KK-TBD] Архивировать",
-    "archive_cancel": "[KK-TBD] Отмена",
-    "archive_success": "[KK-TBD] Садик «{{name}}» архивирован.",
-    "archive_error": "[KK-TBD] Не удалось архивировать. Попробуйте ещё раз.",
-    "restore_title": "[KK-TBD] Восстановить садик «{{name}}»?",
-    "restore_description": "[KK-TBD] Учётные записи администраторов **не** будут реактивированы автоматически — сделайте это вручную в Admin Web.",
-    "restore_confirm": "[KK-TBD] Восстановить",
-    "restore_cancel": "[KK-TBD] Отмена",
-    "restore_success": "[KK-TBD] Садик «{{name}}» восстановлен.",
-    "restore_error": "[KK-TBD] Не удалось восстановить. Попробуйте ещё раз.",
-    "invite_title": "[KK-TBD] Отправить welcome-SMS повторно",
-    "invite_description": "[KK-TBD] Введите номер телефона администратора.",
-    "invite_phone_label": "[KK-TBD] Телефон",
-    "invite_send": "[KK-TBD] Отправить",
-    "invite_cancel": "[KK-TBD] Отмена",
-    "invite_success_sent": "[KK-TBD] Welcome-SMS отправлен на {{phone}}.",
-    "invite_success_not_sent": "[KK-TBD] Запрос принят, но SMS не доставлен (best-effort).",
-    "invite_error_archived": "[KK-TBD] Нельзя отправить SMS архивному садику.",
-    "invite_error_phone": "[KK-TBD] Невалидный формат телефона.",
-    "invite_error_generic": "[KK-TBD] Не удалось отправить. Попробуйте ещё раз."
+    "archive_title": "«{{name}}» балабақшасын мұрағаттау?",
+    "archive_description": "Бұл әрекет is_active=false орнатады, барлық белсенді балаларды мұрағаттайды және SaaS-жазылымды тоқтатады. Балабақша әкімшісі Admin Web-ке кіру мүмкіндігін жоғалтады.",
+    "archive_typing_label": "Растау үшін балабақшаның slug-ін енгізіңіз:",
+    "archive_typing_placeholder": "{{slug}}",
+    "archive_confirm": "Мұрағаттау",
+    "archive_cancel": "Бас тарту",
+    "archive_success": "«{{name}}» балабақшасы мұрағатталды.",
+    "archive_error": "Мұрағаттау мүмкін болмады. Қайталап көріңіз.",
+    "restore_title": "«{{name}}» балабақшасын қалпына келтіру?",
+    "restore_description": "Әкімшілердің тіркелгілері **автоматты түрде** қайта белсендірілмейді — мұны Admin Web-те қолмен жасаңыз.",
+    "restore_confirm": "Қалпына келтіру",
+    "restore_cancel": "Бас тарту",
+    "restore_success": "«{{name}}» балабақшасы қалпына келтірілді.",
+    "restore_error": "Қалпына келтіру мүмкін болмады. Қайталап көріңіз.",
+    "invite_title": "Welcome-SMS қайта жіберу",
+    "invite_description": "Әкімшінің телефон нөмірін енгізіңіз.",
+    "invite_phone_label": "Телефон",
+    "invite_send": "Жіберу",
+    "invite_cancel": "Бас тарту",
+    "invite_success_sent": "Welcome-SMS {{phone}} нөміріне жіберілді.",
+    "invite_success_not_sent": "Сұраныс қабылданды, бірақ SMS жеткізілмеді (best-effort).",
+    "invite_error_archived": "Мұрағатталған балабақшаға SMS жіберу мүмкін емес.",
+    "invite_error_phone": "Телефон форматы дұрыс емес.",
+    "invite_error_generic": "Жіберу мүмкін болмады. Қайталап көріңіз."
   }
 }

@@ -2,10 +2,41 @@
   "app": {
     "title": "Shyraq SuperAdmin"
   },
+  "actions": {
+    "collapse_sidebar": "Бүйірлік тақтаны жию",
+    "expand_sidebar": "Бүйірлік тақтаны жаю",
+    "toggle_sidebar": "Бүйірлік тақтаны ауыстыру"
+  },
   "cancel": "Болдырмау",
   "pagination": {
     "prev": "Артқа",
     "next": "Алға",
     "shown_count": "Көрсетілген: {{count}}"
+  },
+  "command_palette": {
+    "placeholder": "Балабақша, операцияларды іздеу...",
+    "section_kindergartens": "БАЛАБАҚШАЛАР",
+    "section_operations": "ОПЕРАЦИЯЛАР",
+    "empty": "Ештеңе табылмады",
+    "loading": "Жүктелуде...",
+    "ops": {
+      "open_dlq": "Lifecycle DLQ ашу",
+      "monthly_billing": "Айлық биллингті іске қосу",
+      "content": "Контент триггерлері",
+      "rollout": "Кесте (апта rollout)",
+      "system_status": "Жүйе күйі"
+    }
+  },
+  "shortcuts": {
+    "help": {
+      "title": "Жылдам пернелер",
+      "kbd_cmd_k": "Командалық мәзірді ашу",
+      "kbd_esc": "Модальді терезені жабу",
+      "kbd_question": "Осы тізімді ашу",
+      "kbd_g_h": "Басты бет",
+      "kbd_g_k": "Балабақшалар",
+      "kbd_g_u": "Пайдаланушылар",
+      "kbd_g_o": "Операциялар"
+    }
   }
 }

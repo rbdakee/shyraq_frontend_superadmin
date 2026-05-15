@@ -2,10 +2,41 @@
   "app": {
     "title": "Shyraq SuperAdmin"
   },
+  "actions": {
+    "collapse_sidebar": "Свернуть боковую панель",
+    "expand_sidebar": "Развернуть боковую панель",
+    "toggle_sidebar": "Переключить боковую панель"
+  },
   "cancel": "Отмена",
   "pagination": {
     "prev": "Назад",
     "next": "Вперёд",
     "shown_count": "Показано: {{count}}"
+  },
+  "command_palette": {
+    "placeholder": "Поиск садика, операции...",
+    "section_kindergartens": "САДИКИ",
+    "section_operations": "ОПЕРАЦИИ",
+    "empty": "Ничего не найдено",
+    "loading": "Загрузка...",
+    "ops": {
+      "open_dlq": "Открыть Lifecycle DLQ",
+      "monthly_billing": "Запустить Monthly billing",
+      "content": "Триггеры содержимого",
+      "rollout": "Расписание (week rollout)",
+      "system_status": "Статус системы"
+    }
+  },
+  "shortcuts": {
+    "help": {
+      "title": "Горячие клавиши",
+      "kbd_cmd_k": "Открыть командное меню",
+      "kbd_esc": "Закрыть модальное окно",
+      "kbd_question": "Открыть этот список",
+      "kbd_g_h": "Главная",
+      "kbd_g_k": "Садики",
+      "kbd_g_u": "Пользователи",
+      "kbd_g_o": "Операции"
+    }
   }
 }

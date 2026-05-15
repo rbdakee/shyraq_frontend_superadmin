@@ -9,6 +9,12 @@ interface UiState {
   toggleSidebar: () => void;
   setSidebarCollapsed: (v: boolean) => void;
   setLocale: (l: Locale) => void;
+  commandPaletteOpen: boolean;
+  openCommandPalette: () => void;
+  closeCommandPalette: () => void;
+  shortcutsHelpOpen: boolean;
+  openShortcutsHelp: () => void;
+  closeShortcutsHelp: () => void;
 }
 
 export const useUiStore = create<UiState>()(
@@ -19,6 +25,12 @@ export const useUiStore = create<UiState>()(
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       setLocale: (locale) => set({ locale }),
+      commandPaletteOpen: false,
+      openCommandPalette: () => set({ commandPaletteOpen: true }),
+      closeCommandPalette: () => set({ commandPaletteOpen: false }),
+      shortcutsHelpOpen: false,
+      openShortcutsHelp: () => set({ shortcutsHelpOpen: true }),
+      closeShortcutsHelp: () => set({ shortcutsHelpOpen: false }),
     }),
     { name: 'shyraq.sa.ui' },
   ),

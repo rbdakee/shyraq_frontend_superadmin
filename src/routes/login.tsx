@@ -25,7 +25,6 @@ import { useSessionStore } from '@/stores/session-store';
 import { tokenStorage } from '@/lib/token-storage';
 import { safeNext } from '@/lib/safe-next';
 import { toI18nKey } from '@/lib/error-map';
-import { env } from '@/env';
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -200,7 +199,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="font-mono text-[11.5px] text-text-quaternary">v{env.VITE_APP_VERSION}</div>
+        <p className="mt-6 text-center text-xs text-text-tertiary">v{__APP_VERSION__}</p>
       </div>
     </div>
   );

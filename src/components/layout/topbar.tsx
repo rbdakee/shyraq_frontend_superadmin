@@ -4,7 +4,6 @@ import { ChevronDown, KeyRound, LogOut, Menu, User } from 'lucide-react';
 import { useUiStore } from '@/stores/ui-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useCurrentUser, useLogout } from '@/hooks/use-auth';
-import { env } from '@/env';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/button';
 import {
@@ -185,14 +184,15 @@ function UserMenu() {
           </Tooltip>
         </TooltipProvider>
         <DropdownMenuSeparator />
+        <div className="px-2 py-1.5 text-xs text-muted-foreground" aria-label="App version">
+          v{__APP_VERSION__}
+        </div>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <a href="#" rel="noopener noreferrer">
             {t('shell:user_menu.docs')}
           </a>
         </DropdownMenuItem>
-        <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
-          v{env.VITE_APP_VERSION} &middot; production
-        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={() => logoutMutation.mutate()}>
           <LogOut className="size-4" />
@@ -205,10 +205,16 @@ function UserMenu() {
 
 export function Topbar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  const { t } = useTranslation(['common']);
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border-default bg-surface px-5">
-      <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        aria-label={t('common:actions.toggle_sidebar')}
+      >
         <Menu className="size-4" />
       </Button>
 

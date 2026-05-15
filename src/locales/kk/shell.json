@@ -1,18 +1,18 @@
 {
   "nav": {
-    "dashboard": "Басты",
+    "dashboard": "Басты бет",
     "kindergartens": "Балабақшалар",
     "subscriptions": "Жазылымдар",
     "feature_flags": "Feature Flags",
-    "users": "Қолданушылар",
-    "users_new": "Новый пользователь",
-    "users_edit": "Редактировать пользователя",
+    "users": "Пайдаланушылар",
+    "users_new": "Жаңа пайдаланушы",
+    "users_edit": "Пайдаланушыны өңдеу",
     "operations": "Операциялар",
     "billing": "Биллинг",
     "content": "Контент",
-    "schedule_rollout": "Апта rollout",
+    "schedule_rollout": "Апта роллауты",
     "lifecycle_dlq": "Failed jobs",
-    "system_status": "Жүйе статусы"
+    "system_status": "Жүйе күйі"
   },
   "user_menu": {
     "profile": "Менің профилім",

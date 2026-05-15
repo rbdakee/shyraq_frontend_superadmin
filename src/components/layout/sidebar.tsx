@@ -138,7 +138,7 @@ function SidebarNavLink({
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
-  const { t } = useTranslation(['shell']);
+  const { t } = useTranslation(['shell', 'common']);
   const navigate = useNavigate();
 
   return (
@@ -225,7 +225,14 @@ export function Sidebar() {
 
       {/* Collapse toggle */}
       <div className="flex shrink-0 items-center justify-center border-t border-border-default p-2">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          aria-label={
+            collapsed ? t('common:actions.expand_sidebar') : t('common:actions.collapse_sidebar')
+          }
+        >
           {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
         </Button>
       </div>

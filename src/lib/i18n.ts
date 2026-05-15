@@ -66,4 +66,9 @@ useUiStore.subscribe((s, prev) => {
   if (s.locale !== prev.locale) void i18n.changeLanguage(s.locale);
 });
 
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng;
+});
+document.documentElement.lang = i18n.resolvedLanguage ?? 'ru';
+
 export default i18n;

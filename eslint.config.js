@@ -8,7 +8,7 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist', 'src/api/types/openapi.d.ts'] },
+  { ignores: ['dist', 'src/api/types/openapi.d.ts', 'tests/**'] },
 
   {
     files: ['**/*.{ts,tsx}'],
