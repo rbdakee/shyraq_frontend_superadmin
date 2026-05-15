@@ -1358,16 +1358,30 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 ---
 
-## Post-B8 — Deployment
+## Post-B8 — Deployment (Vercel)
 
-После B8 — отдельная сессия (не в этом плане):
+Сессия 2026-05-15. Платформа — **Vercel** (Git-интеграция) + **GitHub Actions** quality-gate. Решения зафиксированы в [`architecture.md §11`](architecture.md#11-деплой).
 
-- Hosting setup (S3 + CloudFront / Nginx / Caddy)
-- Reverse proxy конфиг с IP-allowlist (`/saas/*` route + статика)
-- HTTPS + HSTS preload
-- CSP header (`default-src 'self'; img-src 'self' data:; connect-src 'self'`)
-- CI/CD (GitHub Actions): lint → typecheck → test → build → deploy
-- Versioned releases (`superadmin-vX.Y.Z` git tags + `<meta name="build">` SHA в HTML)
+**Tasks:**
+
+1. `vercel.json` — framework `vite`, `pnpm install --frozen-lockfile` / `pnpm build` / `outputDirectory: dist`; rewrites: `/api/:path*` → `http://13.60.189.214:3000/api/:path*`, затем SPA fallback `/(.*)` → `/index.html`; security headers (CSP/HSTS/nosniff/X-Frame-Options/Referrer-Policy/X-Robots-Tag) + cache (`/assets/*` immutable, `index.html` no-store).
+2. `.github/workflows/ci.yml` — push/PR в `main`; Node 20 + pnpm (frozen lockfile, cache); `pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
+3. `package.json#packageManager` — пин `pnpm@10.19.0` для воспроизводимости (Vercel + Actions + corepack).
+4. `.vercelignore`, `.env.example` (комментарий про prod-проксирование), README Deploy-секция.
+5. Vercel Project Setup (вручную пользователем): импорт repo, env `VITE_API_BASE_URL=/api/v1`, production branch = `main`.
+
+**Acceptance:**
+
+- [ ] `pnpm build` зелёный, `dist/` отдаётся, deep-links не 404 (SPA fallback)
+- [ ] `/api/*` проксируется на backend без CORS-ошибок (same-origin)
+- [ ] GitHub Actions gate падает на lint/type/test ошибке
+- [ ] Security/cache заголовки присутствуют в проде
+
+**Открытые / отложенные:**
+
+- Network-периметр (IP-allowlist / Vercel Deployment Protection) — [`OPEN_QUESTIONS.md#a3`](OPEN_QUESTIONS.md#a3-vercel-access-control--network-perimeter--open) (`open`)
+- True env-config backend-origin (edge-proxy) — отложено, см. `architecture.md §11`
+- Versioned releases (`superadmin-vX.Y.Z` git tags) — опционально, не блокер
 
 ---
 

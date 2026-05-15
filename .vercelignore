@@ -1,0 +1,9 @@
+# Not needed for the Vercel build (build = pnpm build → dist/)
+docs/
+tests/
+.github/
+.husky/
+.claude/
+coverage/
+*.log
+*.tsbuildinfo

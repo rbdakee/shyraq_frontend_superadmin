@@ -31,7 +31,14 @@ SPA on Vite 8 + React 19 + TypeScript (strict). TanStack Query for server state,
 
 ## Deploy
 
-Static build (`pnpm build` → `dist/`) on S3 + CloudFront (or Nginx/Caddy) behind a reverse proxy with IP-allowlist. CSP `default-src 'self'; img-src 'self' data:; connect-src 'self'`. HTTPS + HSTS preload. Deployment is intentionally out of scope for the development batches — see "Post-B8 Deployment" in `docs/IMPLEMENTATION_PLAN.md`.
+**Vercel** (Git integration) + **GitHub Actions** quality gate.
+
+- **CI gate** (`.github/workflows/ci.yml`): on push/PR to `main` runs `typecheck → lint → test → build` (Node 20, pnpm frozen lockfile).
+- **Vercel** (`vercel.json`): framework `vite`, builds `dist/`; `/api/*` is reverse-proxied to the backend (same-origin, no CORS, no mixed-content); SPA fallback for deep links; security headers (CSP/HSTS/nosniff/X-Frame-Options) + cache-control (`/assets/*` immutable, `index.html` no-store).
+- **One-time Vercel setup** (manual): import the GitHub repo, set `VITE_API_BASE_URL=/api/v1` in Project → Environment Variables, production branch = `main`. Backend origin lives in `vercel.json` rewrites (Vercel can't interpolate env vars there) — change = 1 line + push.
+- ⚠️ Network perimeter (IP-allowlist / Vercel Deployment Protection) is **deferred** — see [`docs/OPEN_QUESTIONS.md#a3`](docs/OPEN_QUESTIONS.md). Until then the only gate is app-login.
+
+Full rationale: [`docs/architecture.md §11`](docs/architecture.md) and "Post-B8 — Deployment" in [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
 
 ## License
 

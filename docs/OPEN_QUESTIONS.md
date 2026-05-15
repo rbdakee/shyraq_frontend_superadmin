@@ -56,6 +56,28 @@
 
 ---
 
+### A.3 Vercel access control / network perimeter — `open`
+
+**Контекст:** инструмент specced как internal за VPN/IP-allowlist ([`architecture.md §1`](architecture.md#1-контекст-и-ограничения)) — права super-admin над **всей** платформой (все садики, billing-триггеры, DLQ). После переезда на Vercel (решение Post-B8, 2026-05-15) на плане **Hobby** деплой — публичный URL без сетевого периметра. Сейчас единственная защита — app-login (super-admin auth + backend rate-limit `10/час` per email). Сетевой периметр (Vercel Deployment Protection / Trusted IPs) требует план **Pro**.
+
+**Вопросы:**
+
+- Берём Vercel Pro ради Deployment Protection (Vercel Authentication / Trusted IPs)?
+- Или ставим перед Vercel свой reverse-proxy с IP-allowlist (тогда зачем Vercel)?
+- Достаточно ли app-login + rate-limit как компенсирующего контроля до решения?
+
+**Варианты:**
+
+1. Vercel Pro + Deployment Protection (Trusted IPs / Vercel Auth) — лучший периметр, $/мес.
+2. Публичный URL, полагаемся только на app-login (текущее состояние) — security-риск зафиксирован.
+3. Свой reverse-proxy (Nginx/Caddy) с IP-allowlist перед Vercel-деплоем.
+
+**Зависимости:** бюджет (Vercel план), devops (статические IP офиса/VPN).
+
+**Триггер для решения:** перед тем как раздать URL команде / до первого реального super-admin доступа в проде. Решено пользователем: **отложить** (2026-05-15) — деплой делается рабочим, хардненинг доступа отдельной задачей.
+
+---
+
 ## B. Endpoints / Backend API contracts
 
 ### B.1 Унификация list response shape — `resolved` (2026-05-14)

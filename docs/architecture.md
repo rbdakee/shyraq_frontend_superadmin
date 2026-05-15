@@ -8,59 +8,59 @@
 
 ## 1. Контекст и ограничения
 
-| Аспект | Значение |
-|---|---|
-| **Аудитория** | Внутренняя команда Shyraq (5–20 человек): super_admin, support, devops |
-| **Деплой** | За VPN / IP-allowlist на reverse proxy. Не публичный сайт. |
-| **SEO** | Не нужен |
-| **SSR** | Не нужен (нет публичных страниц) |
-| **Mobile** | Не основной use-case. Desktop-first, минимально адаптивно для tablet |
-| **Backend** | NestJS REST API на том же домене, эндпойнты `/saas/*` + некоторые `/admin/*` для cross-kg операций. См. [`endpoints.md`](endpoints.md) |
-| **Auth** | Email + password → JWT (HS256, access TTL 15m) + opaque refresh (TTL 30d) |
-| **i18n** | RU + KK (i18next). Backend отдаёт jsonb-поля `{ru, kz}` для контента — фронт показывает оба значения в read-only превью |
+| Аспект        | Значение                                                                                                                                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Аудитория** | Внутренняя команда Shyraq (5–20 человек): super_admin, support, devops                                                                                                                                                                        |
+| **Деплой**    | За VPN / IP-allowlist на reverse proxy. Не публичный сайт.                                                                                                                                                                                    |
+| **SEO**       | Не нужен                                                                                                                                                                                                                                      |
+| **SSR**       | Не нужен (нет публичных страниц)                                                                                                                                                                                                              |
+| **Mobile**    | Не основной use-case. Desktop-first, минимально адаптивно для tablet                                                                                                                                                                          |
+| **Backend**   | NestJS REST API на том же домене, эндпойнты `/saas/*` + некоторые `/admin/*` для cross-kg операций. См. [`endpoints.md`](endpoints.md)                                                                                                        |
+| **Auth**      | Email + password → JWT (HS256, access TTL 15m) + opaque refresh (TTL 30d)                                                                                                                                                                     |
+| **i18n**      | RU + KK (i18next). Backend отдаёт jsonb-поля `{ru, kz}` для контента — фронт показывает оба значения в read-only превью                                                                                                                       |
 | **Real-time** | Не используется. Backend WS gateway существует, но не транслирует cross-kg system events для super_admin (auto-subscribe только в `user:{id}` room). См. [`OPEN_QUESTIONS.md#a2`](OPEN_QUESTIONS.md#a2-websocket-integration-timing--parked). |
 
 ---
 
 ## 2. Стек
 
-| Слой | Технология | Причина выбора |
-|---|---|---|
-| **Build** | Vite 5 | Быстрый dev-server, esbuild dev-bundle, минимальная конфигурация. SPA сборка → один статик-бандл за reverse proxy. |
-| **Framework** | React 18 + TypeScript (strict) | Стандарт. Strict TS — обязательно (бэкенд тоже strict). |
-| **Routing** | React Router 6 (data-router API: `createBrowserRouter`) | File-based routing не нужен (приложение маленькое, 15–25 экранов). Loader/Action API даёт интеграцию с TanStack Query. |
-| **Server state** | TanStack Query 5 | Дедупликация, кэш, invalidation tree, optimistic updates, background refetch. Идеальный матч для REST API. |
-| **HTTP client** | `ky` (или нативный `fetch` с обёрткой) | Лёгкий, типизируемый, поддерживает retry/timeout без axios-веса. Кастомный interceptor для JWT refresh-on-401. |
-| **API types** | `openapi-typescript` (generate from `/docs-json`) + `openapi-fetch` | Backend выдаёт OpenAPI через NestJS Swagger. Генерим `.d.ts` в build-time → нет ручной синхронизации DTO. |
-| **Forms** | React Hook Form + Zod | RHF — uncontrolled forms, минимум re-renders. Zod — runtime validation, типы выводятся автоматически. |
-| **UI components** | shadcn/ui (Radix UI primitives + Tailwind CSS v4) | Не библиотека, copy-paste коллекция в `src/components/ui/`. Полный контроль над стилями. Доступность из Radix. |
-| **Styling** | Tailwind CSS v4 + CSS Variables (для тем) | Utility-first, design tokens через CSS vars. Темизация (light/dark) через `prefers-color-scheme` + toggle. |
-| **Icons** | Lucide React | Tree-shakable, дружит с shadcn/ui. |
-| **Tables** | TanStack Table v8 | Headless, идеально для сложных списков (садики, подписки, инвойсы) с сортировкой, фильтрами, пагинацией. |
-| **Charts** | Recharts (или ECharts если понадобятся сложные) | Дашборд статуса, метрики платформы. На MVP — Recharts (простые bar/line). |
-| **State (UI)** | Zustand (минимально) | Только для не-серверного UI-state (sidebar collapse, theme, modals). Большинство state'а — server-state в TanStack Query. |
-| **i18n** | i18next + react-i18next + i18next-browser-languagedetector | RU + KK. Файлы `src/locales/{ru,kk}/{common,kindergartens,billing,...}.json`. |
-| **Date/time** | `date-fns` + `date-fns-tz` | Backend timezone — `Asia/Almaty` для cron. Все cron-триггеры показываем в Almaty TZ. |
-| **Notifications/toasts** | `sonner` | Лёгкий, дружит с shadcn/ui. |
-| **Env config** | Vite `import.meta.env` + Zod-валидация на старте | Падаем с понятной ошибкой если `VITE_API_BASE_URL` не задан. |
-| **Tests (unit)** | Vitest + Testing Library | Vitest сидит на esbuild как Vite — быстрый. |
-| **Tests (e2e)** | Playwright | Только для критичных флоу: логин, создание садика, активация фичефлага. |
-| **Lint/format** | ESLint (flat config) + Prettier + TypeScript ESLint | Стандарт. |
-| **Pre-commit** | Husky + lint-staged | `eslint --fix` + `prettier --write` + `tsc --noEmit` перед commit. |
-| **Package manager** | pnpm | Быстрее npm, дисковая экономия. |
-| **Node version** | 20 LTS | Закреплено в `.nvmrc` и `package.json#engines`. |
+| Слой                     | Технология                                                          | Причина выбора                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Build**                | Vite 5                                                              | Быстрый dev-server, esbuild dev-bundle, минимальная конфигурация. SPA сборка → один статик-бандл за reverse proxy.        |
+| **Framework**            | React 18 + TypeScript (strict)                                      | Стандарт. Strict TS — обязательно (бэкенд тоже strict).                                                                   |
+| **Routing**              | React Router 6 (data-router API: `createBrowserRouter`)             | File-based routing не нужен (приложение маленькое, 15–25 экранов). Loader/Action API даёт интеграцию с TanStack Query.    |
+| **Server state**         | TanStack Query 5                                                    | Дедупликация, кэш, invalidation tree, optimistic updates, background refetch. Идеальный матч для REST API.                |
+| **HTTP client**          | `ky` (или нативный `fetch` с обёрткой)                              | Лёгкий, типизируемый, поддерживает retry/timeout без axios-веса. Кастомный interceptor для JWT refresh-on-401.            |
+| **API types**            | `openapi-typescript` (generate from `/docs-json`) + `openapi-fetch` | Backend выдаёт OpenAPI через NestJS Swagger. Генерим `.d.ts` в build-time → нет ручной синхронизации DTO.                 |
+| **Forms**                | React Hook Form + Zod                                               | RHF — uncontrolled forms, минимум re-renders. Zod — runtime validation, типы выводятся автоматически.                     |
+| **UI components**        | shadcn/ui (Radix UI primitives + Tailwind CSS v4)                   | Не библиотека, copy-paste коллекция в `src/components/ui/`. Полный контроль над стилями. Доступность из Radix.            |
+| **Styling**              | Tailwind CSS v4 + CSS Variables (для тем)                           | Utility-first, design tokens через CSS vars. Темизация (light/dark) через `prefers-color-scheme` + toggle.                |
+| **Icons**                | Lucide React                                                        | Tree-shakable, дружит с shadcn/ui.                                                                                        |
+| **Tables**               | TanStack Table v8                                                   | Headless, идеально для сложных списков (садики, подписки, инвойсы) с сортировкой, фильтрами, пагинацией.                  |
+| **Charts**               | Recharts (или ECharts если понадобятся сложные)                     | Дашборд статуса, метрики платформы. На MVP — Recharts (простые bar/line).                                                 |
+| **State (UI)**           | Zustand (минимально)                                                | Только для не-серверного UI-state (sidebar collapse, theme, modals). Большинство state'а — server-state в TanStack Query. |
+| **i18n**                 | i18next + react-i18next + i18next-browser-languagedetector          | RU + KK. Файлы `src/locales/{ru,kk}/{common,kindergartens,billing,...}.json`.                                             |
+| **Date/time**            | `date-fns` + `date-fns-tz`                                          | Backend timezone — `Asia/Almaty` для cron. Все cron-триггеры показываем в Almaty TZ.                                      |
+| **Notifications/toasts** | `sonner`                                                            | Лёгкий, дружит с shadcn/ui.                                                                                               |
+| **Env config**           | Vite `import.meta.env` + Zod-валидация на старте                    | Падаем с понятной ошибкой если `VITE_API_BASE_URL` не задан.                                                              |
+| **Tests (unit)**         | Vitest + Testing Library                                            | Vitest сидит на esbuild как Vite — быстрый.                                                                               |
+| **Tests (e2e)**          | Playwright                                                          | Только для критичных флоу: логин, создание садика, активация фичефлага.                                                   |
+| **Lint/format**          | ESLint (flat config) + Prettier + TypeScript ESLint                 | Стандарт.                                                                                                                 |
+| **Pre-commit**           | Husky + lint-staged                                                 | `eslint --fix` + `prettier --write` + `tsc --noEmit` перед commit.                                                        |
+| **Package manager**      | pnpm                                                                | Быстрее npm, дисковая экономия.                                                                                           |
+| **Node version**         | 20 LTS                                                              | Закреплено в `.nvmrc` и `package.json#engines`.                                                                           |
 
 ### 2.1 Что НЕ берём и почему
 
-| Технология | Почему отказ |
-|---|---|
-| **Next.js** | SSR/RSC/edge-runtime не дают пользы для internal SPA. Overhead в build-time, конфигурация, deploy. |
-| **AntD Pro / Refine** | Дают быстрый CRUD из коробки, но lock-in в их theming → когда придёт дизайн-фаза, переделка дороже экономии на старте. |
-| **Redux / Redux Toolkit** | Сервер-state покрывает TanStack Query; UI-state маленький → Zustand хватает. RTK Query — хороший вариант, но TanStack Query шире распространён и интегрируется с openapi-fetch проще. |
-| **MUI / Mantine** | Готовые компоненты, но кастомизация под брендинг — через theme overrides (хрупкие). shadcn/ui честнее: код твой. |
-| **Storybook** | Не нужен на MVP (нет дизайн-системы для документирования). Добавим, если внутренняя UI-kit вырастет. |
-| **socket.io-client** | См. §1 — backend не шлёт cross-kg WS events для super_admin. Не тащим зависимость. |
-| **GraphQL клиенты (Apollo, urql)** | Backend — REST. |
+| Технология                         | Почему отказ                                                                                                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Next.js**                        | SSR/RSC/edge-runtime не дают пользы для internal SPA. Overhead в build-time, конфигурация, deploy.                                                                                    |
+| **AntD Pro / Refine**              | Дают быстрый CRUD из коробки, но lock-in в их theming → когда придёт дизайн-фаза, переделка дороже экономии на старте.                                                                |
+| **Redux / Redux Toolkit**          | Сервер-state покрывает TanStack Query; UI-state маленький → Zustand хватает. RTK Query — хороший вариант, но TanStack Query шире распространён и интегрируется с openapi-fetch проще. |
+| **MUI / Mantine**                  | Готовые компоненты, но кастомизация под брендинг — через theme overrides (хрупкие). shadcn/ui честнее: код твой.                                                                      |
+| **Storybook**                      | Не нужен на MVP (нет дизайн-системы для документирования). Добавим, если внутренняя UI-kit вырастет.                                                                                  |
+| **socket.io-client**               | См. §1 — backend не шлёт cross-kg WS events для super_admin. Не тащим зависимость.                                                                                                    |
+| **GraphQL клиенты (Apollo, urql)** | Backend — REST.                                                                                                                                                                       |
 
 ---
 
@@ -168,14 +168,14 @@ frontend_superadmin/
 
 ### 3.1 Слоистые правила
 
-| Слой | Что разрешено | Что запрещено |
-|---|---|---|
-| `api/` | `ky`, openapi-types, чистые async-функции `(input) → Promise<Response>` | TanStack Query hooks, React, i18n |
-| `hooks/` | TanStack Query (`useQuery`, `useMutation`), вызовы `api/*`, query-key constants | UI / JSX, прямой `fetch` |
-| `routes/` | React, JSX, `hooks/*`, `components/*`, `react-router-dom` | прямой `fetch`, прямой `api/*` (только через hooks) |
-| `components/ui/` | shadcn-сгенерённые примитивы | бизнес-логика, прямой backend-доступ |
-| `components/{layout,data-table,forms,feedback}/` | UI + переиспользуемые wrappers | бизнес-логика домена (это в routes) |
-| `lib/` | чистые функции, без React | TanStack Query, JSX |
+| Слой                                             | Что разрешено                                                                   | Что запрещено                                       |
+| ------------------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `api/`                                           | `ky`, openapi-types, чистые async-функции `(input) → Promise<Response>`         | TanStack Query hooks, React, i18n                   |
+| `hooks/`                                         | TanStack Query (`useQuery`, `useMutation`), вызовы `api/*`, query-key constants | UI / JSX, прямой `fetch`                            |
+| `routes/`                                        | React, JSX, `hooks/*`, `components/*`, `react-router-dom`                       | прямой `fetch`, прямой `api/*` (только через hooks) |
+| `components/ui/`                                 | shadcn-сгенерённые примитивы                                                    | бизнес-логика, прямой backend-доступ                |
+| `components/{layout,data-table,forms,feedback}/` | UI + переиспользуемые wrappers                                                  | бизнес-логика домена (это в routes)                 |
+| `lib/`                                           | чистые функции, без React                                                       | TanStack Query, JSX                                 |
 
 Нарушения отлавливаются ESLint правилом `no-restricted-imports` + code-review.
 
@@ -216,6 +216,7 @@ const router = createBrowserRouter([
 ### 5.2 UI state — Zustand
 
 Только для:
+
 - `useUiStore` — sidebar collapsed, current theme (light/dark), current locale
 - `useModalStore` — глобальные диалоги (если будут)
 
@@ -249,10 +250,10 @@ POST /saas/auth/logout (Bearer)
 
 ### 6.2 Хранение токенов
 
-| Токен | Где хранится | Почему |
-|---|---|---|
-| **access_token** | In-memory (`lib/token-storage.ts`, переменная модуля) | Short-lived (15m). Не в localStorage — XSS-эксфильтрация. |
-| **refresh_token** | `localStorage` под ключом `shyraq.sa.refresh` | Internal tool за VPN/IP-allowlist, XSS-поверхность ограничена. |
+| Токен             | Где хранится                                          | Почему                                                         |
+| ----------------- | ----------------------------------------------------- | -------------------------------------------------------------- |
+| **access_token**  | In-memory (`lib/token-storage.ts`, переменная модуля) | Short-lived (15m). Не в localStorage — XSS-эксфильтрация.      |
+| **refresh_token** | `localStorage` под ключом `shyraq.sa.refresh`         | Internal tool за VPN/IP-allowlist, XSS-поверхность ограничена. |
 
 Миграция на httpOnly cookie — отложена; триггер и варианты см. [`OPEN_QUESTIONS.md#a1`](OPEN_QUESTIONS.md#a1-token-storage-strategy--parked).
 
@@ -272,7 +273,7 @@ const client = ky.create({
     afterResponse: [
       async (req, _opts, res) => {
         if (res.status !== 401) return res;
-        const refreshed = await tryRefreshOnce();  // single-flight через mutex
+        const refreshed = await tryRefreshOnce(); // single-flight через mutex
         if (!refreshed) {
           tokenStorage.clear();
           window.location.href = '/login?reason=session_expired';
@@ -333,6 +334,7 @@ pnpm gen:api
 ```
 
 Запускается:
+
 - В CI после backend-deploy на staging
 - Локально руками когда фронт-разработчик знает что backend поменялся
 
@@ -369,43 +371,48 @@ Backend возвращает ошибки в едином формате (см. 
 
 Полный список — см. [`endpoints.md`](endpoints.md). Краткое резюме:
 
-| Категория | Backend route | Frontend page |
-|---|---|---|
-| Auth | `/saas/auth/{login,refresh,logout}` | `/login` |
-| Kindergartens (tenants) | `/saas/kindergartens` CRUD | `/kindergartens` + `/kindergartens/:id` + `/kindergartens/new` |
-| SaaS Subscriptions | `/saas/saas-subscriptions` | `/subscriptions`, в `/kindergartens/:id/subscription` |
-| Feature Flags | `/saas/feature-flags` | `/feature-flags`, в `/kindergartens/:id/flags` |
-| SaaS Users | `/saas/users` | `/users` |
-| Billing ops (manual triggers) | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}` | `/operations/billing` |
-| Content ops (manual triggers) | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}` | `/operations/content` |
-| Schedule weekly rollout | `/admin/schedule/week-rollout/run` | `/operations/schedule-rollout` |
-| Lifecycle DLQ (cross-kg) | `/admin/lifecycle/failed-jobs` (+ `/:id/retry`) | `/operations/lifecycle-dlq` |
-| Health | `/health`, `/health/ready` | `/system-status` (+ виджет на dashboard) |
-| View-as kindergarten | (placeholder — backend не поддерживает read-only impersonation) | `/kindergartens/:id/view-as` |
+| Категория                     | Backend route                                                            | Frontend page                                                  |
+| ----------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Auth                          | `/saas/auth/{login,refresh,logout}`                                      | `/login`                                                       |
+| Kindergartens (tenants)       | `/saas/kindergartens` CRUD                                               | `/kindergartens` + `/kindergartens/:id` + `/kindergartens/new` |
+| SaaS Subscriptions            | `/saas/saas-subscriptions`                                               | `/subscriptions`, в `/kindergartens/:id/subscription`          |
+| Feature Flags                 | `/saas/feature-flags`                                                    | `/feature-flags`, в `/kindergartens/:id/flags`                 |
+| SaaS Users                    | `/saas/users`                                                            | `/users`                                                       |
+| Billing ops (manual triggers) | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}`          | `/operations/billing`                                          |
+| Content ops (manual triggers) | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}` | `/operations/content`                                          |
+| Schedule weekly rollout       | `/admin/schedule/week-rollout/run`                                       | `/operations/schedule-rollout`                                 |
+| Lifecycle DLQ (cross-kg)      | `/admin/lifecycle/failed-jobs` (+ `/:id/retry`)                          | `/operations/lifecycle-dlq`                                    |
+| Health                        | `/health`, `/health/ready`                                               | `/system-status` (+ виджет на dashboard)                       |
+| View-as kindergarten          | (placeholder — backend не поддерживает read-only impersonation)          | `/kindergartens/:id/view-as`                                   |
 
 ---
 
 ## 11. Деплой
 
-| Аспект | Решение |
-|---|---|
-| **Build** | `pnpm build` → `dist/` (статика) |
-| **Hosting** | S3 + CloudFront / Nginx / Caddy за reverse proxy с IP-allowlist |
-| **API origin** | Same-origin (`/saas/*` проксируется через тот же reverse proxy на NestJS backend). Это убирает необходимость CORS. |
-| **Env vars** | `VITE_API_BASE_URL` (например, `/api/v1` для same-origin) — задаётся build-time, **запекается в bundle** |
-| **CI/CD** | GitHub Actions (или GitLab): lint → typecheck → test → build → deploy. На production — manual approval. |
-| **Versioning** | Git tag `superadmin-vX.Y.Z` + commit SHA в `<meta name="build">` для отладки |
-| **Cache headers** | `index.html` — `Cache-Control: no-store`. JS/CSS чанки — content-hashed → `immutable, max-age=31536000`. |
+**Платформа — Vercel** (решение Post-B8, 2026-05-15). Vercel Git-интеграция собирает и деплоит SPA-статику; `vercel.json` reverse-proxy сохраняет same-origin модель (без CORS, без mixed-content). Прежний вариант (S3 + CloudFront / Nginx за reverse-proxy) — отклонён.
+
+| Аспект                    | Решение                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Build**                 | `pnpm build` → `dist/` (статика). Vercel framework preset = `vite`.                                                                                                                                                                                                                                                                                                             |
+| **Hosting**               | Vercel CDN (статика `dist/`).                                                                                                                                                                                                                                                                                                                                                   |
+| **API origin**            | Same-origin: `vercel.json` rewrites проксируют `/api/*` → backend (`http://13.60.189.214:3000`). Браузер ↔ Vercel — HTTPS; Vercel ↔ backend — server-side (нет mixed-content при HTTP-бэкенде). CORS не нужен.                                                                                                                                                                  |
+| **Backend origin config** | `vercel.json` rewrites **не интерполируют env-переменные** в `destination` (ограничение платформы). Origin живёт одной строкой в `vercel.json` (config-as-code: смена backend = правка строки + push → авто-redeploy). True env-control потребовал бы edge-proxy `api/[...].ts` с `process.env.BACKEND_ORIGIN` — отложено (over-engineering для internal-tool на 5–20 человек). |
+| **Build-time env**        | `VITE_API_BASE_URL=/api/v1` (относительный, same-origin) — **запекается в bundle**. Задаётся в Project Settings → Environment Variables на Vercel + в `.env.example`.                                                                                                                                                                                                           |
+| **SPA fallback**          | `vercel.json` rewrite `/(.*) → /index.html` (после `/api/*`-правила). Deep-links React Router не отдают 404. Статика (`/assets/*`) резолвится файловой системой до rewrites.                                                                                                                                                                                                    |
+| **CI/CD**                 | **GitHub Actions** — gate `typecheck → lint → test → build` на push/PR в `main` (соответствует [CLAUDE.md §7](../CLAUDE.md)). **Vercel Git-интеграция** — build + production deploy на push в `main`, preview-deploy на PR.                                                                                                                                                     |
+| **Versioning**            | `__APP_VERSION__` из `package.json` (через `vite.config.ts define`). Git tag `superadmin-vX.Y.Z` — опционально.                                                                                                                                                                                                                                                                 |
+| **Cache headers**         | Через `vercel.json headers`: `index.html` — `Cache-Control: no-store`; content-hashed `/assets/*` — `public, max-age=31536000, immutable`.                                                                                                                                                                                                                                      |
 
 ### 11.1 Network security
 
-| Слой | Защита |
-|---|---|
-| **Транспорт** | HTTPS only, HSTS preload |
-| **Доступ** | IP-allowlist на reverse proxy (офис VPN + статические IP devops) |
-| **CSP** | `default-src 'self'; img-src 'self' data:; connect-src 'self' wss://api.shyraq.kz` |
-| **CORS** | Не нужен (same-origin) |
-| **CSRF** | Не уязвимо если auth через `Authorization: Bearer` (не cookie). Если перейдём на httpOnly cookie — добавим CSRF-token (`X-Csrf-Token`) |
+| Слой               | Защита                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Транспорт**      | HTTPS only (Vercel managed TLS), HSTS.                                                                                                                                                                                                                                                                                                                               |
+| **Доступ**         | ⚠️ **Отложено.** Vercel Hobby = публичный URL без IP-allowlist. Network-периметр (Vercel Deployment Protection / Trusted IPs — план Pro) пока не настроен. На текущем этапе защита — только app-login (super-admin auth + backend rate-limit `10/час` per email). См. [`OPEN_QUESTIONS.md#a3`](OPEN_QUESTIONS.md#a3-vercel-access-control--network-perimeter--open). |
+| **CSP**            | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'`. `connect-src 'self'` достаточно — API same-origin через rewrite. Google Fonts (`index.html`) допущены явно.                    |
+| **Доп. заголовки** | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex` (internal tool, не индексируется).                                                                                                                                                                                                               |
+| **CORS**           | Не нужен (same-origin через rewrite).                                                                                                                                                                                                                                                                                                                                |
+| **CSRF**           | Не уязвимо: auth через `Authorization: Bearer` (не cookie). При миграции на httpOnly cookie ([OPEN_QUESTIONS#a1](OPEN_QUESTIONS.md#a1-token-storage-strategy--parked)) — добавить CSRF-token.                                                                                                                                                                        |
 
 ---
 
