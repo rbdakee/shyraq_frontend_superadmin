@@ -5,6 +5,8 @@
     "subscriptions": "Подписки",
     "feature_flags": "Feature Flags",
     "users": "Пользователи",
+    "users_new": "Новый пользователь",
+    "users_edit": "Редактировать пользователя",
     "operations": "Операции",
     "billing": "Биллинг",
     "content": "Контент",

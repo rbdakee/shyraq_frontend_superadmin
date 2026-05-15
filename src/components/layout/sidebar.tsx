@@ -27,11 +27,13 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 interface NavItemDef {
   labelKey: string;
   to: string;
   icon: ReactNode;
+  soon?: boolean;
 }
 
 const NAV_ITEMS: NavItemDef[] = [
@@ -45,13 +47,15 @@ const NAV_ITEMS: NavItemDef[] = [
     labelKey: 'subscriptions',
     to: '/subscriptions',
     icon: <CreditCard className="size-4" />,
+    soon: true,
   },
   {
     labelKey: 'feature_flags',
     to: '/feature-flags',
     icon: <Flag className="size-4" />,
+    soon: true,
   },
-  { labelKey: 'users', to: '/users', icon: <Users className="size-4" /> },
+  { labelKey: 'users', to: '/users', icon: <Users className="size-4" />, soon: true },
 ];
 
 const OPS_ITEMS: NavItemDef[] = [
@@ -101,13 +105,21 @@ function SidebarNavLink({
         cn(
           navLinkBase,
           isActive && navLinkActive,
-          collapsed && 'justify-center px-0 py-2',
+          collapsed && 'relative justify-center px-0 py-2',
           !collapsed && indent && 'pl-5',
         )
       }
     >
       {item.icon}
       {!collapsed && <span className="flex-1 truncate">{label}</span>}
+      {!collapsed && item.soon && (
+        <Badge variant="secondary" className="ml-auto px-1.5 py-0 text-[10px]">
+          soon
+        </Badge>
+      )}
+      {collapsed && item.soon && (
+        <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-warning" aria-hidden />
+      )}
     </NavLink>
   );
 

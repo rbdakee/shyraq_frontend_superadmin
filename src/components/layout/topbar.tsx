@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, LogOut, Menu } from 'lucide-react';
+import { ChevronDown, KeyRound, LogOut, Menu, User } from 'lucide-react';
 import { useUiStore } from '@/stores/ui-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useCurrentUser, useLogout } from '@/hooks/use-auth';
@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 function getInitials(name: string | undefined | null): string {
   if (!name) return '?';
@@ -117,7 +118,7 @@ function LanguageSwitcher() {
 }
 
 function UserMenu() {
-  const { t } = useTranslation(['shell']);
+  const { t } = useTranslation(['shell', 'errors']);
   const { data: currentUser } = useCurrentUser();
   const email = useSessionStore((s) => s.email);
   const role = useSessionStore((s) => s.role);
@@ -159,8 +160,30 @@ function UserMenu() {
           </DropdownMenuLabel>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>{t('shell:user_menu.profile')}</DropdownMenuItem>
-        <DropdownMenuItem disabled>{t('shell:user_menu.change_password')}</DropdownMenuItem>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  {t('shell:user_menu.profile')}
+                </DropdownMenuItem>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('errors:blocked.b11_short')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                <DropdownMenuItem disabled>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  {t('shell:user_menu.change_password')}
+                </DropdownMenuItem>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('errors:blocked.b11_short')}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <a href="#" rel="noopener noreferrer">

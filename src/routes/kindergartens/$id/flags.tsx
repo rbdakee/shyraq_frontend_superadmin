@@ -1,8 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { KindergartenDetailShell } from '@/components/layout/kindergarten-detail-shell';
+import { BlockedFeature } from '@/components/feedback/blocked-feature';
 import { useKindergartenFromCache } from '@/hooks/use-kindergartens';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 export default function KindergartenFlagsPage() {
@@ -26,10 +26,7 @@ export default function KindergartenFlagsPage() {
 
   return (
     <KindergartenDetailShell kg={kg} activeTab="flags">
-      <Alert>
-        <AlertTitle>{t('kindergartens:detail.tab_placeholder.title')}</AlertTitle>
-        <AlertDescription>{t('kindergartens:detail.tab_placeholder.subtitle')}</AlertDescription>
-      </Alert>
+      <BlockedFeature blockerCode="b10" featureName={t('kindergartens:detail.tabs.flags')} />
     </KindergartenDetailShell>
   );
 }

@@ -12,6 +12,11 @@ import KindergartenSettingsPage from '@/routes/kindergartens/$id/settings';
 import KindergartenSubscriptionPage from '@/routes/kindergartens/$id/subscription';
 import KindergartenFlagsPage from '@/routes/kindergartens/$id/flags';
 import KindergartenViewAsPage from '@/routes/kindergartens/$id/view-as';
+import SubscriptionsPage from '@/routes/subscriptions';
+import FeatureFlagsPage from '@/routes/feature-flags';
+import UsersPage from '@/routes/users/index';
+import UsersNewPage from '@/routes/users/new';
+import UsersEditPage from '@/routes/users/$id';
 import OperationsBillingPage from '@/routes/operations/billing';
 import OperationsContentPage from '@/routes/operations/content';
 import OperationsScheduleRolloutPage from '@/routes/operations/schedule-rollout';
@@ -52,11 +57,11 @@ export const router = createBrowserRouter([
                   { path: 'view-as', element: <KindergartenViewAsPage /> },
                 ],
               },
-              { path: '/subscriptions', element: <div>subscriptions</div> },
-              { path: '/feature-flags', element: <div>feature-flags</div> },
-              { path: '/users', element: <div>users</div> },
-              { path: '/users/new', element: <div>users/new</div> },
-              { path: '/users/:id', element: <div>users/:id</div> },
+              { path: '/subscriptions', element: <SubscriptionsPage /> },
+              { path: '/feature-flags', element: <FeatureFlagsPage /> },
+              { path: '/users', element: <UsersPage /> },
+              { path: '/users/new', element: <UsersNewPage /> },
+              { path: '/users/:id', element: <UsersEditPage /> },
               { path: '/operations/billing', element: <OperationsBillingPage /> },
               { path: '/operations/content', element: <OperationsContentPage /> },
               {
