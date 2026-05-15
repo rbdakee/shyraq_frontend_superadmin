@@ -1262,6 +1262,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B7
 
 - [`docs/DESIGN.md §6-8`](DESIGN.md#6-cross-cutting-ux) — cross-cutting + responsive + a11y
 - Visual reference: `screens-misc.jsx` → `ScreenGlobalSearch`, `ScreenStates`, `ScreenMobileAlert`, `ScreenFlagCreate` (для overlays-паттернов, даже если flags заблокированы)
+- [`docs/OPEN_QUESTIONS.md#c6`](OPEN_QUESTIONS.md#c6-i18n-kk-translation-ownership--open) — closes via this batch's Slice S1 (native sub-agent pass).
 
 ### Tasks
 
@@ -1316,6 +1317,17 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B7
 
 12. **TODO backlog cleanup:** просмотреть TODO backlog ниже, убедиться что все `// TODO(BN)` в коде имеют запись.
 
+13. **Playwright e2e (4 critical paths)** — see CLAUDE.md §7:
+    - `pnpm add -D @playwright/test` + `pnpm exec playwright install chromium`.
+    - `playwright.config.ts`: baseURL http://localhost:5173, chromium only, screenshots/video on failure.
+    - Tests in `tests/e2e/`:
+      - `login.spec.ts` — admin@shyraq.local login → land on /, see "Главная".
+      - `kg-create.spec.ts` — 2-step wizard → expect redirect to /kindergartens/:id.
+      - `kg-archive.spec.ts` — open kg → archive via DestructiveConfirm (slug typing) → toast + status.
+      - `monthly-billing-run.spec.ts` — /operations/billing → click Запустить → 202 toast.
+    - `package.json` script: `"test:e2e": "playwright test"`.
+    - Tests run against live dev backend (no mocks). NOT part of `pnpm test`.
+
 ### Acceptance criteria
 
 - [ ] `Cmd+K` открывает command palette, search по садикам работает (debounced)
@@ -1329,6 +1341,8 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B7
 - [ ] `pnpm preview` поднимает production build, login → kg list → ops trigger → logout — всё работает
 - [ ] Total bundle gzipped < 500KB ИЛИ обоснование почему больше + lazy-loading применён
 - [ ] README содержит setup instructions + ссылки на docs
+- [ ] `pnpm test:e2e` exit 0, 4 specs pass against live dev backend
+- [ ] Playwright artifacts (screenshots/videos) saved under `playwright-report/` on failure
 
 ### Commit
 

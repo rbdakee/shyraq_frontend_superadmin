@@ -377,7 +377,7 @@
 
 ---
 
-### C.6 i18n KK translation ownership — `open`
+### C.6 i18n KK translation ownership — `resolved (MVP)`
 
 **Контекст:** [`architecture.md §1`](architecture.md#1-контекст-и-ограничения) — i18n RU+KK через i18next. Translation strings — кто их пишет?
 
@@ -390,6 +390,8 @@
 **Рекомендация:** не катать машинный перевод для admin tool без человеческого review — выглядит непрофессионально для русскоязычных KZ-сотрудников.
 
 **Зависимости:** HR/команда (найти native KK speaker), product.
+
+**Resolved for MVP (2026-05-15):** B8-S1 sub-agent (Claude Sonnet 4.6) writes native KK translations for all 7 i18n namespaces directly, no DeepL/Google MT. Switcher remains active. Human review by native KK speaker optional post-launch.
 
 ---
 
