@@ -40,5 +40,118 @@
     "prev": "Назад",
     "next": "Далее"
   },
-  "error": { "title": "Не удалось загрузить список", "retry": "Повторить" }
+  "error": { "title": "Не удалось загрузить список", "retry": "Повторить" },
+  "wizard": {
+    "title": "Создать садик",
+    "steps": { "kg": "Садик", "admin": "Первый администратор" },
+    "kg": {
+      "section_title": "Информация о садике",
+      "name_label": "Название садика",
+      "name_placeholder": "Солнышко",
+      "slug_label": "Slug",
+      "slug_placeholder": "solnyshko",
+      "slug_hint": "Латиница, цифры, дефис. Используется в URL и интеграциях.",
+      "address_label": "Адрес",
+      "address_placeholder": "Алматы, ул. Абая, 1",
+      "phone_label": "Телефон садика",
+      "phone_placeholder": "+7 (727) 222-11-00",
+      "plan_label": "План",
+      "plan_options": { "standard": "Standard", "pro": "Pro", "enterprise": "Enterprise" },
+      "settings_title": "Настройки (advanced)",
+      "settings": {
+        "timezone_label": "Часовой пояс",
+        "currency_label": "Валюта",
+        "late_pickup_fee_label": "Штраф за поздний забор (KZT)",
+        "otp_expiry_label": "TTL OTP (секунд)",
+        "grace_label": "Дней до overdue"
+      }
+    },
+    "admin": {
+      "section_title": "Первый администратор",
+      "full_name_label": "ФИО администратора",
+      "full_name_placeholder": "Айгерим Касымова",
+      "phone_label": "Телефон администратора",
+      "phone_placeholder": "+7 (700) 123-45-67",
+      "phone_hint": "На этот номер уйдёт welcome-SMS. Если телефон уже зарегистрирован — будет переиспользован существующий пользователь.",
+      "locale_label": "Язык интерфейса",
+      "locale_options": { "ru": "Русский", "kk": "Қазақша" }
+    },
+    "buttons": {
+      "next": "Далее",
+      "back": "Назад",
+      "submit": "Создать садик",
+      "cancel": "Отмена",
+      "submitting": "Создание…"
+    },
+    "toast_success": "Садик создан. Welcome-SMS отправлен на {{phone}}.",
+    "toast_error_slug_taken": "Slug уже занят. Выберите другой.",
+    "toast_error_invariant": "Проверьте slug и телефоны — невалидный формат.",
+    "toast_error_generic": "Не удалось создать садик. Попробуйте ещё раз."
+  },
+  "detail": {
+    "back_link": "Садики",
+    "tabs": {
+      "overview": "Обзор",
+      "settings": "Настройки",
+      "subscription": "Подписка",
+      "flags": "Feature Flags",
+      "view_as": "View as"
+    },
+    "overview": {
+      "system_card_title": "Системная информация",
+      "system_id": "ID",
+      "system_slug": "Slug",
+      "system_plan": "План",
+      "system_created_at": "Создан",
+      "system_updated_at": "Обновлён",
+      "system_archived_at": "Архивирован",
+      "contacts_card_title": "Контакты",
+      "contacts_address": "Адрес",
+      "contacts_phone": "Телефон",
+      "contacts_empty": "—",
+      "settings_card_title": "Настройки (read-only)",
+      "settings_locked_alert": "Редактирование настроек будет доступно после backend-релиза (см. OPEN_QUESTIONS#b8)."
+    },
+    "tab_placeholder": {
+      "title": "Скоро будет доступно",
+      "subtitle": "Этот раздел появится после backend-релиза соответствующего модуля. См. OPEN_QUESTIONS."
+    },
+    "not_found": {
+      "title": "Садик не найден",
+      "subtitle": "Возможно, ссылка устарела или садик удалён.",
+      "cta": "К списку садиков"
+    }
+  },
+  "actions": {
+    "archive": "Архивировать",
+    "restore": "Восстановить",
+    "resend_invite": "Отправить welcome-SMS повторно",
+    "back_to_list": "К списку садиков"
+  },
+  "confirms": {
+    "archive_title": "Архивировать садик «{{name}}»?",
+    "archive_description": "Это действие установит is_active=false, архивирует всех активных детей и отменит SaaS-подписку. Admin садика потеряет доступ к Admin Web.",
+    "archive_typing_label": "Для подтверждения введите slug садика:",
+    "archive_typing_placeholder": "{{slug}}",
+    "archive_confirm": "Архивировать",
+    "archive_cancel": "Отмена",
+    "archive_success": "Садик «{{name}}» архивирован.",
+    "archive_error": "Не удалось архивировать. Попробуйте ещё раз.",
+    "restore_title": "Восстановить садик «{{name}}»?",
+    "restore_description": "Учётные записи администраторов **не** будут реактивированы автоматически — сделайте это вручную в Admin Web.",
+    "restore_confirm": "Восстановить",
+    "restore_cancel": "Отмена",
+    "restore_success": "Садик «{{name}}» восстановлен.",
+    "restore_error": "Не удалось восстановить. Попробуйте ещё раз.",
+    "invite_title": "Отправить welcome-SMS повторно",
+    "invite_description": "Введите номер телефона администратора.",
+    "invite_phone_label": "Телефон",
+    "invite_send": "Отправить",
+    "invite_cancel": "Отмена",
+    "invite_success_sent": "Welcome-SMS отправлен на {{phone}}.",
+    "invite_success_not_sent": "Запрос принят, но SMS не доставлен (best-effort).",
+    "invite_error_archived": "Нельзя отправить SMS архивному садику.",
+    "invite_error_phone": "Невалидный формат телефона.",
+    "invite_error_generic": "Не удалось отправить. Попробуйте ещё раз."
+  }
 }

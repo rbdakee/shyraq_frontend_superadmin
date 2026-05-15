@@ -430,6 +430,27 @@
 
 ---
 
+### B.16 Realtime slug uniqueness check (frontend feature gap) — `open`
+
+**Контекст:** B5 finalization browser walk — user expects slug field to flag duplicates before submit.
+
+Currently the wizard collects (name, slug, ...) and submits all at once; the 409 `kindergarten_slug_taken` error returns user to Step 1 with field highlighted. UX feedback is delayed by full round-trip + reset.
+
+Frontend can't do this client-side cheaply because backend `GET /saas/kindergartens` list endpoint accepts `name_search` but no `slug=` query — we can't probe a specific slug without listing all kgs and matching client-side (cost grows with kg count, fragile).
+
+**Requested backend work:** either
+
+1. New query param: `GET /saas/kindergartens?slug=<exact>` returning `{ items: [...], total: 0|1 }`. Frontend debounces 300ms, hits endpoint on slug field blur or pause, surfaces inline error.
+2. Dedicated endpoint: `GET /saas/kindergartens/check-slug?slug=<value>` returning `{ available: bool }`. Cheaper.
+
+Until then, MVP behavior (deferred 409 on submit) stays. See `TODO(B?)#03`.
+
+**Зависимости:** backend roadmap.
+
+**Триггер:** when support/product requests inline slug validation UX.
+
+---
+
 ## D. Process / Operational
 
 ### D.1 Когда обновить этот документ — `meta`

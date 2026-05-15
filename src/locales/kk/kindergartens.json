@@ -49,5 +49,122 @@
     "prev": "[KK-TBD] Назад",
     "next": "[KK-TBD] Далее"
   },
-  "error": { "title": "[KK-TBD] Не удалось загрузить список", "retry": "[KK-TBD] Повторить" }
+  "error": { "title": "[KK-TBD] Не удалось загрузить список", "retry": "[KK-TBD] Повторить" },
+  "wizard": {
+    "title": "[KK-TBD] Создать садик",
+    "steps": { "kg": "[KK-TBD] Садик", "admin": "[KK-TBD] Первый администратор" },
+    "kg": {
+      "section_title": "[KK-TBD] Информация о садике",
+      "name_label": "[KK-TBD] Название садика",
+      "name_placeholder": "[KK-TBD] Солнышко",
+      "slug_label": "[KK-TBD] Slug",
+      "slug_placeholder": "[KK-TBD] solnyshko",
+      "slug_hint": "[KK-TBD] Латиница, цифры, дефис. Используется в URL и интеграциях.",
+      "address_label": "[KK-TBD] Адрес",
+      "address_placeholder": "[KK-TBD] Алматы, ул. Абая, 1",
+      "phone_label": "[KK-TBD] Телефон садика",
+      "phone_placeholder": "[KK-TBD] +7 (727) 222-11-00",
+      "plan_label": "[KK-TBD] План",
+      "plan_options": {
+        "standard": "[KK-TBD] Standard",
+        "pro": "[KK-TBD] Pro",
+        "enterprise": "[KK-TBD] Enterprise"
+      },
+      "settings_title": "[KK-TBD] Настройки (advanced)",
+      "settings": {
+        "timezone_label": "[KK-TBD] Часовой пояс",
+        "currency_label": "[KK-TBD] Валюта",
+        "late_pickup_fee_label": "[KK-TBD] Штраф за поздний забор (KZT)",
+        "otp_expiry_label": "[KK-TBD] TTL OTP (секунд)",
+        "grace_label": "[KK-TBD] Дней до overdue"
+      }
+    },
+    "admin": {
+      "section_title": "[KK-TBD] Первый администратор",
+      "full_name_label": "[KK-TBD] ФИО администратора",
+      "full_name_placeholder": "[KK-TBD] Айгерим Касымова",
+      "phone_label": "[KK-TBD] Телефон администратора",
+      "phone_placeholder": "[KK-TBD] +7 (700) 123-45-67",
+      "phone_hint": "[KK-TBD] На этот номер уйдёт welcome-SMS. Если телефон уже зарегистрирован — будет переиспользован существующий пользователь.",
+      "locale_label": "[KK-TBD] Язык интерфейса",
+      "locale_options": { "ru": "[KK-TBD] Русский", "kk": "[KK-TBD] Қазақша" }
+    },
+    "buttons": {
+      "next": "[KK-TBD] Далее",
+      "back": "[KK-TBD] Назад",
+      "submit": "[KK-TBD] Создать садик",
+      "cancel": "[KK-TBD] Отмена",
+      "submitting": "[KK-TBD] Создание…"
+    },
+    "toast_success": "[KK-TBD] Садик создан. Welcome-SMS отправлен на {{phone}}.",
+    "toast_error_slug_taken": "[KK-TBD] Slug уже занят. Выберите другой.",
+    "toast_error_invariant": "[KK-TBD] Проверьте slug и телефоны — невалидный формат.",
+    "toast_error_generic": "[KK-TBD] Не удалось создать садик. Попробуйте ещё раз."
+  },
+  "detail": {
+    "back_link": "[KK-TBD] Садики",
+    "tabs": {
+      "overview": "[KK-TBD] Обзор",
+      "settings": "[KK-TBD] Настройки",
+      "subscription": "[KK-TBD] Подписка",
+      "flags": "[KK-TBD] Feature Flags",
+      "view_as": "[KK-TBD] View as"
+    },
+    "overview": {
+      "system_card_title": "[KK-TBD] Системная информация",
+      "system_id": "[KK-TBD] ID",
+      "system_slug": "[KK-TBD] Slug",
+      "system_plan": "[KK-TBD] План",
+      "system_created_at": "[KK-TBD] Создан",
+      "system_updated_at": "[KK-TBD] Обновлён",
+      "system_archived_at": "[KK-TBD] Архивирован",
+      "contacts_card_title": "[KK-TBD] Контакты",
+      "contacts_address": "[KK-TBD] Адрес",
+      "contacts_phone": "[KK-TBD] Телефон",
+      "contacts_empty": "—",
+      "settings_card_title": "[KK-TBD] Настройки (read-only)",
+      "settings_locked_alert": "[KK-TBD] Редактирование настроек будет доступно после backend-релиза (см. OPEN_QUESTIONS#b8)."
+    },
+    "tab_placeholder": {
+      "title": "[KK-TBD] Скоро будет доступно",
+      "subtitle": "[KK-TBD] Этот раздел появится после backend-релиза соответствующего модуля. См. OPEN_QUESTIONS."
+    },
+    "not_found": {
+      "title": "[KK-TBD] Садик не найден",
+      "subtitle": "[KK-TBD] Возможно, ссылка устарела или садик удалён.",
+      "cta": "[KK-TBD] К списку садиков"
+    }
+  },
+  "actions": {
+    "archive": "[KK-TBD] Архивировать",
+    "restore": "[KK-TBD] Восстановить",
+    "resend_invite": "[KK-TBD] Отправить welcome-SMS повторно",
+    "back_to_list": "[KK-TBD] К списку садиков"
+  },
+  "confirms": {
+    "archive_title": "[KK-TBD] Архивировать садик «{{name}}»?",
+    "archive_description": "[KK-TBD] Это действие установит is_active=false, архивирует всех активных детей и отменит SaaS-подписку. Admin садика потеряет доступ к Admin Web.",
+    "archive_typing_label": "[KK-TBD] Для подтверждения введите slug садика:",
+    "archive_typing_placeholder": "[KK-TBD] {{slug}}",
+    "archive_confirm": "[KK-TBD] Архивировать",
+    "archive_cancel": "[KK-TBD] Отмена",
+    "archive_success": "[KK-TBD] Садик «{{name}}» архивирован.",
+    "archive_error": "[KK-TBD] Не удалось архивировать. Попробуйте ещё раз.",
+    "restore_title": "[KK-TBD] Восстановить садик «{{name}}»?",
+    "restore_description": "[KK-TBD] Учётные записи администраторов **не** будут реактивированы автоматически — сделайте это вручную в Admin Web.",
+    "restore_confirm": "[KK-TBD] Восстановить",
+    "restore_cancel": "[KK-TBD] Отмена",
+    "restore_success": "[KK-TBD] Садик «{{name}}» восстановлен.",
+    "restore_error": "[KK-TBD] Не удалось восстановить. Попробуйте ещё раз.",
+    "invite_title": "[KK-TBD] Отправить welcome-SMS повторно",
+    "invite_description": "[KK-TBD] Введите номер телефона администратора.",
+    "invite_phone_label": "[KK-TBD] Телефон",
+    "invite_send": "[KK-TBD] Отправить",
+    "invite_cancel": "[KK-TBD] Отмена",
+    "invite_success_sent": "[KK-TBD] Welcome-SMS отправлен на {{phone}}.",
+    "invite_success_not_sent": "[KK-TBD] Запрос принят, но SMS не доставлен (best-effort).",
+    "invite_error_archived": "[KK-TBD] Нельзя отправить SMS архивному садику.",
+    "invite_error_phone": "[KK-TBD] Невалидный формат телефона.",
+    "invite_error_generic": "[KK-TBD] Не удалось отправить. Попробуйте ещё раз."
+  }
 }

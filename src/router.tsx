@@ -6,6 +6,12 @@ import LoginPage from '@/routes/login';
 import DashboardPage from '@/routes/dashboard';
 import SystemStatusPage from '@/routes/system-status';
 import KindergartensListPage from '@/routes/kindergartens';
+import KindergartenCreatePage from '@/routes/kindergartens/new';
+import KindergartenDetailPage from '@/routes/kindergartens/$id';
+import KindergartenSettingsPage from '@/routes/kindergartens/$id/settings';
+import KindergartenSubscriptionPage from '@/routes/kindergartens/$id/subscription';
+import KindergartenFlagsPage from '@/routes/kindergartens/$id/flags';
+import KindergartenViewAsPage from '@/routes/kindergartens/$id/view-as';
 import NotFoundPage from '@/routes/_404';
 import ServerErrorPage from '@/routes/_500';
 
@@ -31,15 +37,15 @@ export const router = createBrowserRouter([
             children: [
               { path: '/', element: <DashboardPage /> },
               { path: '/kindergartens', element: <KindergartensListPage /> },
-              { path: '/kindergartens/new', element: <div>kindergartens/new</div> },
+              { path: '/kindergartens/new', element: <KindergartenCreatePage /> },
               {
                 path: '/kindergartens/:id',
                 children: [
-                  { index: true, element: <div>kindergartens/:id (overview)</div> },
-                  { path: 'settings', element: <div>kindergartens/:id/settings</div> },
-                  { path: 'subscription', element: <div>kindergartens/:id/subscription</div> },
-                  { path: 'flags', element: <div>kindergartens/:id/flags</div> },
-                  { path: 'view-as', element: <div>kindergartens/:id/view-as</div> },
+                  { index: true, element: <KindergartenDetailPage /> },
+                  { path: 'settings', element: <KindergartenSettingsPage /> },
+                  { path: 'subscription', element: <KindergartenSubscriptionPage /> },
+                  { path: 'flags', element: <KindergartenFlagsPage /> },
+                  { path: 'view-as', element: <KindergartenViewAsPage /> },
                 ],
               },
               { path: '/subscriptions', element: <div>subscriptions</div> },
