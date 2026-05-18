@@ -11,6 +11,7 @@ import type { components } from '@/api/types/openapi';
 import { useCreateKindergarten } from '@/hooks/use-kindergartens';
 import { slugify } from '@/lib/slug';
 import { toI18nKey } from '@/lib/error-map';
+import { isAppError } from '@/lib/error-guards';
 import { PhoneInput } from '@/components/forms/phone-input';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -27,17 +28,6 @@ import {
 } from '@/components/ui/accordion';
 
 type CreateKindergartenDto = components['schemas']['CreateKindergartenDto'];
-
-function isAppError(e: unknown): e is { status: number; code: string } {
-  return (
-    !!e &&
-    typeof e === 'object' &&
-    'status' in e &&
-    typeof (e as Record<string, unknown>).status === 'number' &&
-    'code' in e &&
-    typeof (e as Record<string, unknown>).code === 'string'
-  );
-}
 
 const KgStep1Schema = z.object({
   name: z.string().trim().min(1).max(255),

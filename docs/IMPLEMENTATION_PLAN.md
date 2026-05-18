@@ -73,31 +73,33 @@ VITE_APP_VERSION=0.1.0
 
 ### Available endpoints (in-scope, MVP)
 
-| Method | Path                                             | Auth   | Async?                    |
-| ------ | ------------------------------------------------ | ------ | ------------------------- |
-| POST   | `/api/v1/saas/auth/login`                        | public | sync                      |
-| POST   | `/api/v1/saas/auth/refresh`                      | public | sync                      |
-| POST   | `/api/v1/saas/auth/logout`                       | Bearer | sync                      |
-| GET    | `/api/v1/saas/kindergartens`                     | Bearer | sync                      |
-| POST   | `/api/v1/saas/kindergartens`                     | Bearer | sync (atomic TX)          |
-| POST   | `/api/v1/saas/kindergartens/{id}/archive`        | Bearer | sync (cascade)            |
-| POST   | `/api/v1/saas/kindergartens/{id}/restore`        | Bearer | sync                      |
-| POST   | `/api/v1/saas/kindergartens/{id}/admin/invite`   | Bearer | sync (best-effort SMS)    |
-| POST   | `/api/v1/saas/billing/monthly-run`               | Bearer | **202 async** (BullMQ)    |
-| POST   | `/api/v1/saas/billing/discount-expire-run`       | Bearer | **202 async**             |
-| POST   | `/api/v1/saas/billing/overdue-run`               | Bearer | **202 async**             |
-| POST   | `/api/v1/saas/content/birthday-run`              | Bearer | **200 sync** (с counters) |
-| POST   | `/api/v1/saas/content/story-cleanup-run`         | Bearer | **200 sync**              |
-| POST   | `/api/v1/saas/content/publish-scheduled-run`     | Bearer | **200 sync**              |
-| GET    | `/api/v1/admin/lifecycle/failed-jobs`            | Bearer | sync                      |
-| POST   | `/api/v1/admin/lifecycle/failed-jobs/{id}/retry` | Bearer | 202 async                 |
-| POST   | `/api/v1/admin/schedule/week-rollout/run`        | Bearer | sync (минуты)             |
-| GET    | `/api/v1/health`                                 | public | sync                      |
-| GET    | `/api/v1/health/ready`                           | public | sync                      |
+| Method | Path                                             | Auth   | Async?                                  |
+| ------ | ------------------------------------------------ | ------ | --------------------------------------- |
+| POST   | `/api/v1/saas/auth/login`                        | public | sync                                    |
+| POST   | `/api/v1/saas/auth/refresh`                      | public | sync                                    |
+| POST   | `/api/v1/saas/auth/logout`                       | Bearer | sync                                    |
+| GET    | `/api/v1/saas/kindergartens`                     | Bearer | sync                                    |
+| POST   | `/api/v1/saas/kindergartens`                     | Bearer | sync (atomic TX)                        |
+| POST   | `/api/v1/saas/kindergartens/{id}/archive`        | Bearer | sync (cascade)                          |
+| POST   | `/api/v1/saas/kindergartens/{id}/restore`        | Bearer | sync                                    |
+| POST   | `/api/v1/saas/kindergartens/{id}/admin/invite`   | Bearer | sync (best-effort SMS)                  |
+| GET    | `/api/v1/saas/kindergartens/{id}/admins`         | Bearer | sync (plain array, no pg)               |
+| POST   | `/api/v1/saas/kindergartens/{id}/admins`         | Bearer | sync (find-or-create + best-effort SMS) |
+| POST   | `/api/v1/saas/billing/monthly-run`               | Bearer | **202 async** (BullMQ)                  |
+| POST   | `/api/v1/saas/billing/discount-expire-run`       | Bearer | **202 async**                           |
+| POST   | `/api/v1/saas/billing/overdue-run`               | Bearer | **202 async**                           |
+| POST   | `/api/v1/saas/content/birthday-run`              | Bearer | **200 sync** (с counters)               |
+| POST   | `/api/v1/saas/content/story-cleanup-run`         | Bearer | **200 sync**                            |
+| POST   | `/api/v1/saas/content/publish-scheduled-run`     | Bearer | **200 sync**                            |
+| GET    | `/api/v1/admin/lifecycle/failed-jobs`            | Bearer | sync                                    |
+| POST   | `/api/v1/admin/lifecycle/failed-jobs/{id}/retry` | Bearer | 202 async                               |
+| POST   | `/api/v1/admin/schedule/week-rollout/run`        | Bearer | sync (минуты)                           |
+| GET    | `/api/v1/health`                                 | public | sync                                    |
+| GET    | `/api/v1/health/ready`                           | public | sync                                    |
 
 ### NOT available (blocker'ы, см. OPEN_QUESTIONS)
 
-- `GET /api/v1/saas/kindergartens/{id}` — детальная страница садика → [B.8](OPEN_QUESTIONS.md#b8)
+- `GET /api/v1/saas/kindergartens/{id}` — детальная страница садика (overview tab) → [B.8](OPEN_QUESTIONS.md#b8) _(частично: вкладка «Администраторы» разблокирована через `/admins` — см. B9)_
 - `PATCH /api/v1/saas/kindergartens/{id}` — редактирование настроек → [B.8](OPEN_QUESTIONS.md#b8)
 - `/api/v1/saas/saas-subscriptions/*` — модуль не существует → [B.9](OPEN_QUESTIONS.md#b9)
 - `/api/v1/saas/feature-flags/*` — модуль не существует → [B.10](OPEN_QUESTIONS.md#b10)
@@ -121,6 +123,13 @@ VITE_APP_VERSION=0.1.0
 - `InviteAdminDto`: `{ phone (req) }`.
 - `InviteAdminResponseDto`: `{ phone, kindergarten_id, sent: boolean }`.
 - Archive/restore возвращают `KindergartenDto` целиком.
+
+**Kindergarten admins (B9 — `§1.7`):**
+
+- `KindergartenAdminDto` (GET `/admins` → plain array, **БЕЗ пагинации**): `{ staff_member_id, user_id, full_name (nullable), phone (nullable), locale ('ru'|'kk', nullable), is_active, hired_at ('YYYY-MM-DD'|null), fired_at ('YYYY-MM-DD'|null), created_at (ISO) }`. Все поля `required`, часть `nullable`. Query `?is_active=boolean` (omit → все).
+- `AddKindergartenAdminDto` (POST body): `{ full_name (req), phone (req, E.164), locale?: 'ru'|'kk' (default 'ru') }`.
+- `AddKindergartenAdminResponseDto` (201): `{ kindergarten_id, user: { id, phone, full_name, locale }, staff_member: { id, role, is_active, hired_at, created_at }, invite_sms_sent: boolean }`. `invite_sms_sent:false` ⇒ warning, не error.
+- **Два error-envelope:** 422 `{ status, errors: { <field>: <constraint> } }` (class-validator phone/locale) vs доменный `{ statusCode, error, message }` (409 `admin_already_exists` / `staff_already_exists` / `kindergarten_archived`; 404 `kindergarten_not_found`; 400 `invariant_violation`).
 
 **Billing triggers (все возвращают 202):**
 
@@ -1385,6 +1394,58 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 ---
 
+## B9 — Kindergarten Admins tab
+
+**Goal:** вкладка «Администраторы» на detail-странице садика (`/kindergartens/:id/admins`): список admin-аккаунтов садика + модалка добавления + row-action переотправки приглашения. Разблокирована backend'ом 2026-05-18 (`GET/POST /saas/kindergartens/:id/admins`), **независима от всё ещё заблокированного B.8** (overview/settings табы).
+
+**Time:** 2–3 часа
+
+### Inputs
+
+- [`docs/endpoints.md §1.7`](endpoints.md#17-get--post-saaskindergartensidadmins--список--добавление-админов-садика) — контракт обоих эндпоинтов, два error-envelope
+- [`docs/DESIGN.md §5.5.6`](DESIGN.md#556-tab-администраторы) — UI-спека вкладки
+- [`docs/HANDOFF_TO_FRONTEND_kg-admins.md`](HANDOFF_TO_FRONTEND_kg-admins.md) — backend-handoff (первоисточник)
+- [`docs/OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-) — частичная доставка + follow-up gaps
+- Existing infra (reuse): `DataTable` (B4), `PhoneInput` / forms (B5/B6), `useInviteAdmin` (B5, для row-action), `KindergartenDetailShell`, `error-map` / `api/client.ts`, `lib/routes.ts`
+
+### Tasks (субагентные слайсы)
+
+1. **`pnpm gen:api` + типы (Sonnet, первый, блокирующий остальные):** прогнать `pnpm gen:api` (эндпоинты live), убедиться что `KindergartenAdminDto` / `AddKindergartenAdminDto` / `AddKindergartenAdminResponseDto` появились в `src/api/types/openapi.d.ts` без `any`. `pnpm typecheck` exit 0.
+2. **API + hooks (Sonnet, после 1):** `src/api/kg-admins.ts` — `listKgAdmins(id, { is_active? })`, `createKgAdmin(id, body)` (типы из openapi). `src/hooks/use-kg-admins.ts` — `useKgAdmins(id, { isActive })` (query), `useCreateKgAdmin(id)` (mutation, invalidate list). Query-keys в `query-keys.ts`. `routes.kindergartens.admins(id)` в `lib/routes.ts`.
+3. **Error-envelope verification (Sonnet/reviewer, параллельно 2):** подтвердить, что `api/client.ts` + `lib/error-map.ts` парсят **оба** envelope (422 `{status,errors}` и доменный `{statusCode,error,message}`). 422 уже использовался в wizard B6 — verify, не переписывать без нужды. Если 422-field-shape не покрыт — минимальная доработка.
+4. **i18n (Sonnet, параллельно 2):** `errors.json` RU+KK — `admin_already_exists`, `staff_already_exists` (`kindergarten_archived`/`kindergarten_not_found` уже есть — reuse), 422 constraint `invalid_phone_format` (если ещё нет). Namespace `kindergartens.json` RU+KK — строки вкладки/таблицы/модалки/тостов (заголовок, фильтр, колонки, CTA, success/warning).
+5. **Tab UI + route (Opus, после 2+3+4):** `src/routes/kindergartens/$id/admins.tsx` — `KindergartenDetailShell activeTab="admins"`, DataTable **без пагинации** (plain array), тоггл-фильтр `is_active` (default «только активные», синк в URL search-param), счётчик в заголовке, состояния loading/empty/error/404, row-action «Переотправить приглашение» (reuse `useInviteAdmin`, `sent:false`→warning). Модалка «Добавить администратора» (RHF+Zod, паттерн зеркалит invite-dialog из `$id/index.tsx`): поля `full_name`/`phone`/`locale`; archived-kg → кнопка disabled+tooltip; 201+`invite_sms_sent` handling; оба error-envelope → 422 `setError(field)` / 409 inline / 404 redirect. Зарегистрировать таб в `KindergartenDetailShell` + роут в router.
+
+### Acceptance criteria
+
+- [ ] `pnpm gen:api` → admin DTO в `openapi.d.ts` без `any`; `pnpm typecheck` exit 0
+- [ ] `/kindergartens/:id/admins` — вкладка видна в таб-баре detail-страницы, активна
+- [ ] Список грузится через `GET /saas/kindergartens/:id/admins?is_active=true` (DevTools Network) — таблица, **БЕЗ пагинации**
+- [ ] Тоггл «Все» → запрос без `is_active`, видны деактивированные строки (+ `fired_at`); состояние синкается в URL
+- [ ] Пустой садик → empty-state с CTA; несуществующий `:id` → `kindergarten_not_found` сообщение
+- [ ] «Добавить администратора» → POST `/admins` → 201 → success-тост (или warning если `invite_sms_sent:false`) → список рефетчится, модалка закрыта
+- [ ] 409 `admin_already_exists` → inline-ошибка формы (НЕ retry); 422 invalid phone → подсветка поля `phone`
+- [ ] Архивный садик → кнопка «Добавить администратора» disabled + tooltip
+- [ ] Row-action «Переотправить приглашение» → POST `/admin/invite` → тост по `sent`
+- [ ] Нет hardcoded путей/строк (routes-helper + i18n RU/KK); `pnpm lint` + `pnpm test` exit 0
+
+### Commit
+
+```
+B9: Kindergarten Admins tab — list + add + resend invite
+
+Вкладка «Администраторы» на /kindergartens/:id/admins: list (plain array,
+фильтр is_active, default active), add-модалка (201/invite_sms_sent, оба
+error-envelope), row-action переотправки. Независима от блокера B.8.
+
+Acceptance:
+- [x] ...
+
+Refs: docs/IMPLEMENTATION_PLAN.md §B9
+```
+
+---
+
 ## Tracker
 
 Отмечай батчи по мере завершения:
@@ -1398,8 +1459,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 - [x] **B6** Operations (billing 202, content 200, rollout, DLQ retry)
 - [x] **B7** Blocked module placeholders (subs/flags/users + KG tabs)
 - [x] **B8** Polish (command palette, i18n, a11y, build) — _Playwright e2e (task 13) deferred: §B8 acceptance `pnpm test:e2e` + artifacts bullets remain open_
+- [x] **B9** Kindergarten Admins tab (list + add + resend invite) — частично снимает [B.8](OPEN_QUESTIONS.md#b8); overview/settings табы остаются заблокированы
 
-Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8).
+Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8). B9 — post-deploy фича-батч (backend разблокировал 2026-05-18).
 
 ---
 

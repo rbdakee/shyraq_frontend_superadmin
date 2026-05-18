@@ -203,6 +203,13 @@
 
 **Триггер для решения:** до старта batch 5 фронта.
 
+**🟡 Частично доставлено (2026-05-18) — НЕ закрывает B.8.** Backend выкатил `GET / POST /saas/kindergartens/:id/admins` (список + добавление админов садика; ветка `superadmin/kg-admins`, смержена + задеплоена, live Swagger подтверждён). Это **разблокировало отдельную вкладку «Администраторы»** (`/kindergartens/:id/admins`) — у неё свой list/add-эндпоинт, она НЕ зависит от детального DTO. Реализуется фронт-батчем **B9** ([`IMPLEMENTATION_PLAN.md §B9`](IMPLEMENTATION_PLAN.md#b9--kindergarten-admins-tab), [`DESIGN.md §5.5.6`](DESIGN.md#556-tab-администраторы), [`endpoints.md §1.7`](endpoints.md#17-get--post-saaskindergartensidadmins--список--добавление-админов-садика)). **Остаётся blocker:** `GET /saas/kindergartens/:id` (overview-tab) и `PATCH` (settings-tab) — по-прежнему отсутствуют.
+
+**Follow-up gaps (новые backend-asks, открыть при появлении продуктовой нужды):**
+
+- **Нет remove / demote админа** садика суперадмином (удалить/понизить роль). Если в UI понадобится «Убрать админа» — отдельный backend-ask.
+- **Нет реактивации деактивированного админа** через `POST .../admins` (409 by design на пару (kg,user) при любом `is_active`; оператор реактивирует руками). UI на 409 показывает осмысленное сообщение, не «retry».
+
 ---
 
 ### B.9 SaaS Subscriptions module — `blocker` 🚫

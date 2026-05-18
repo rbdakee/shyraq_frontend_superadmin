@@ -4,7 +4,7 @@
 
 > **🚫 Backend gaps notice (2026-05-13).** Аудит live Swagger показал, что несколько модулей backend'а ещё не реализованы. Соответствующие страницы этого ТЗ — **placeholder'ы на MVP**, без полноценного функционала, до выкатки backend'а:
 >
-> - **`/kindergartens/:id` tabs "Обзор" / "Настройки"** — нет `GET/PATCH /saas/kindergartens/{id}`. См. [`OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-).
+> - **`/kindergartens/:id` tabs "Обзор" / "Настройки"** — нет `GET/PATCH /saas/kindergartens/{id}`. См. [`OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-). **Разблокировано отдельно (2026-05-18): вкладка «Администраторы»** (`/kindergartens/:id/admins`) — свой list/add-эндпоинт `/saas/kindergartens/:id/admins`, от B.8 не зависит. Спека — §5.5.6.
 > - **`/kindergartens/:id/subscription`, `/subscriptions`** — нет модуля `/saas/saas-subscriptions`. См. [`#b9`](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-).
 > - **`/kindergartens/:id/flags`, `/feature-flags`** — нет модуля `/saas/feature-flags`. См. [`#b10`](OPEN_QUESTIONS.md#b10-feature-flags-module--blocker-).
 > - **`/users`, `/users/new`, `/users/:id`** — нет модуля `/saas/users` (CRUD). Логин работает (`saas_users` в БД), создание/редактирование — нет. См. [`#b11`](OPEN_QUESTIONS.md#b11-saas-users-module--blocker-).
@@ -48,6 +48,7 @@
 /kindergartens                         [list]
 /kindergartens/new                     [create form]
 /kindergartens/:id                     [overview tab]
+/kindergartens/:id/admins              [admins tab — list + add]
 /kindergartens/:id/settings            [settings tab]
 /kindergartens/:id/subscription        [subscription tab]
 /kindergartens/:id/flags               [flags tab]
@@ -539,7 +540,7 @@ Backend на MVP не выдаёт unified search → клиент дёргае�
 │  sunshine  ●Активен  Standard  Подписка: ●active          │
 │  Алматы, ул. Абая 10  ·  +7 727 222 33 44                 │
 ├──────────────────────────────────────────────────────────┤
-│  [Обзор] [Настройки] [Подписка] [Feature Flags] [View as]│
+│  [Обзор] [Администраторы] [Настройки] [Подписка] [Flags] [View as]│
 ├──────────────────────────────────────────────────────────┤
 │                                                           │
 │  Tab content                                              │
@@ -630,6 +631,62 @@ CTA в шапке tab'а: `[+ Добавить флаг для этого сад
 │                                                           │
 └──────────────────────────────────────────────────────────┘
 ```
+
+#### 5.5.6 Tab: Администраторы
+
+**Backend:** `GET / POST /saas/kindergartens/:id/admins`. См. [`endpoints.md §1.7`](endpoints.md#17-get--post-saaskindergartensidadmins--список--добавление-админов-садика). **Независима от блокера B.8** — у вкладки свой list/add-эндпоинт, шипится отдельно от Обзор/Настройки.
+
+**Назначение:** управление admin-аккаунтами конкретного садика (только `role='admin'`; reception/mentor/specialist сюда НЕ попадают).
+
+**Layout:** заголовок таба + primary-кнопка `[+ Добавить администратора]` (справа) + тоггл-фильтр + таблица.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  Администраторы (3)              [+ Добавить администратора]│
+│  ( ) Только активные  (•) Все                              │
+├──────────────────────────────────────────────────────────┤
+│  Имя         Телефон        Локаль  Статус   Принят  Создан│
+│  Айгерим Н.  +7 701 111 22  RU      ●Активен 28.04   …     │
+│  Жанна С.    +7 701 111 55  KK      ○Деакт.  —       …  [⋮]│
+└──────────────────────────────────────────────────────────┘
+```
+
+**Таблица** (DataTable из B4, но **БЕЗ пагинации** — plain array by contract, bounded sub-resource):
+
+| Колонка | Содержимое                                                                       |
+| ------- | -------------------------------------------------------------------------------- |
+| Имя     | `full_name`; nullable → «—»                                                      |
+| Телефон | `formatPhoneE164(phone)`; nullable → «—»                                         |
+| Локаль  | badge `RU`/`KK`; nullable → «—»                                                  |
+| Статус  | badge: `is_active=true` → «Активен» (success), `false` → «Деактивирован» (muted) |
+| Принят  | `hired_at` (дата); nullable → «—». Для деактивированных дополнительно `fired_at` |
+| Создан  | `formatRelativeTime(created_at)`                                                 |
+| ⋮       | row-action: **«Переотправить приглашение»**                                      |
+
+- **Фильтр** «Только активные / Все» → `?is_active=true` / без параметра. **Default: «Только активные».** Переключатель синкается в URL search-param.
+- **Счётчик** в заголовке таба — длина массива текущего ответа.
+- **Состояния:** loading (skeleton-таблица) · empty («У этого садика пока нет администраторов» + CTA «Добавить») · error (retry) · 404 `kindergarten_not_found` (осмысленное сообщение).
+- **«Все» — это диагностика 409:** реактивации деактивированного админа эндпоинта нет; чтобы оператор понял, почему `add` вернул 409, он переключает фильтр на «Все» и видит деактивированную строку (+ `fired_at`).
+
+**Row-action «Переотправить приглашение»:** дергает **старый singular** `POST /saas/kindergartens/:id/admin/invite` с `phone` строки (для «SMS не дошла / потерял телефон»). `sent:false` → warning-тост, не error. Переиспользует существующий `useInviteAdmin` (B5).
+
+**Модалка «Добавить администратора»** (RHF + Zod, паттерн зеркалит invite-dialog из §5.5 Обзор):
+
+- Поля: `full_name` (text, required), `phone` (`PhoneInput`, E.164, required), `locale` (select `RU`/`KK`, default `RU`).
+- **Если садик архивный** (`archived_at` из list-cache) — кнопка `[+ Добавить администратора]` disabled + tooltip «Нельзя добавить администратора в архивный садик» (не даём ловить 409).
+- Submit → `POST .../admins`:
+  - **201 + `invite_sms_sent: true`** → success-тост «Администратор добавлен. Приглашение отправлено на {phone}» + рефетч списка + закрыть модалку.
+  - **201 + `invite_sms_sent: false`** → **warning**-тост «Администратор добавлен, но SMS-приглашение не доставлено. Переотправьте позже» + рефетч + закрыть.
+- **Обработка ошибок — два envelope:**
+  - **422** `{ status, errors: { phone|locale: <constraint> } }` → `setError(field, …)` inline на поле (constraint `invalid_phone_format` → текст поля).
+  - Доменный `{ statusCode, error, message }`:
+    - `409 admin_already_exists` → inline-ошибка формы «Этот пользователь уже администратор данного садика» (НЕ retry).
+    - `409 staff_already_exists` → «Этот пользователь уже сотрудник садика (другая роль)».
+    - `409 kindergarten_archived` → «Нельзя добавить администратора в архивный садик».
+    - `404 kindergarten_not_found` → тост + редирект на `/kindergartens`.
+    - `400 invariant_violation` → подсветка поля `phone` (fallback).
+
+**Не в scope (follow-up backend-asks, [`OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-)):** удалить/понизить (demote) админа; реактивация деактивированного (409 by design — UI показывает сообщение, не «retry»); пагинация/поиск (bounded).
 
 ---
 

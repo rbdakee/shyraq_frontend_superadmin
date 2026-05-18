@@ -5,6 +5,7 @@
 **База:** все пути относительно `VITE_API_BASE_URL` (например, `https://api.shyraq.kz/api/v1` или `/api/v1` при same-origin через Vite-proxy).
 
 **Каноничные соглашения backend'а:**
+
 - Все ответы — JSON.
 - Ошибки — `{ "error": "<code>", "message": "<human readable>", "details"?: {...} }`.
 - Timestamps — ISO 8601 (`2026-05-13T08:30:00.000Z`).
@@ -28,6 +29,7 @@ Authorization: Bearer <access_token>
 ```
 
 Где `access_token` — JWT HS256, TTL 15 минут (`expires_in: 900`), payload:
+
 ```json
 {
   "sub": "<saas_user_uuid>",
@@ -47,15 +49,18 @@ Authorization: Bearer <access_token>
 **Public** (security: default — без Bearer). Rate-limit: 10/час per email (на стороне backend).
 
 **Request:**
+
 ```json
 { "email": "admin@shyraq.local", "password": "********" }
 ```
 
 **Validation:**
+
 - `email` — формат `email` (Swagger `format: email`).
 - `password` — string, minLength 8.
 
 **Response 200** (`SuperAdminAuthResponseDto`):
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -63,9 +68,7 @@ Authorization: Bearer <access_token>
   "token_type": "Bearer",
   "expires_in": 900,
   "pending_role_select": false,
-  "roles": [
-    { "role": "super_admin", "kindergarten_id": null, "group_id": null }
-  ]
+  "roles": [{ "role": "super_admin", "kindergarten_id": null, "group_id": null }]
 }
 ```
 
@@ -78,6 +81,7 @@ Authorization: Bearer <access_token>
 | 401 | `invalid_credentials` | User не найден / wrong password / `is_active=false` (одинаковый код для всех — anti-enumeration) |
 
 **Notes:**
+
 - Lookup в `saas_users WHERE email=? AND is_active=true`, проверка `bcrypt.compare(password, password_hash)`.
 - Refresh-токен пишется в `saas_refresh_tokens` (отдельная таблица от обычных users), TTL `REFRESH_TOKEN_TTL_DAYS` (default 30).
 
@@ -86,6 +90,7 @@ Authorization: Bearer <access_token>
 **Public** (security: default).
 
 **Request:**
+
 ```http
 POST /saas/auth/refresh
 Content-Type: application/json
@@ -103,6 +108,7 @@ Content-Type: application/json
 | 401 | `invalid_refresh` | Refresh неизвестен, истёк или отозван |
 
 **Алгоритм backend'а (single transaction):**
+
 1. Lookup `saas_refresh_tokens WHERE token_hash = SHA256(input)`.
 2. Проверка `revoked_at IS NULL AND expires_at > NOW()`.
 3. `UPDATE … SET revoked_at = NOW()`.
@@ -115,6 +121,7 @@ Content-Type: application/json
 **Bearer-protected.**
 
 **Request:**
+
 ```json
 { "refreshToken": "a1b2c3d4...e8f90" }
 ```
@@ -128,6 +135,7 @@ Backend ревокирует именно эту запись `saas_refresh_toke
 **Errors:** 401 (Bearer missing/invalid/revoked).
 
 **Frontend flow:**
+
 1. `POST /saas/auth/logout` (body: текущий refresh из in-memory storage).
 2. Wipe `lib/token-storage`.
 3. `queryClient.clear()`.
@@ -156,6 +164,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > **Внимание:** в Swagger пагинация **offset-based** (`limit` + `offset` + `total`), а не cursor-based. Параметр `cursor` и `next_cursor` из старого нашего доко отсутствуют.
 
 **Response 200** (`KindergartenListResponseDto`):
+
 ```json
 {
   "items": [
@@ -166,7 +175,9 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
       "address": "Алматы, ул. Абая, 1",
       "phone": "+77272221100",
       "plan": "standard",
-      "settings": { /* jsonb — см. §1.4 */ },
+      "settings": {
+        /* jsonb — см. §1.4 */
+      },
       "is_active": true,
       "archived_at": null,
       "created_at": "2026-04-24T10:00:00.000Z",
@@ -188,6 +199,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Critical operation.** Один request-scoped transaction: создаётся `kindergartens` + находится-или-создаётся `users` (по `admin.phone`) + создаётся `staff_members(role=admin, is_active=true)`. После commit — best-effort welcome-SMS через `SmsPort`.
 
 **Request** (`CreateKindergartenDto`):
+
 ```json
 {
   "name": "Солнышко",
@@ -207,6 +219,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Required fields (Swagger required[]):** `name`, `slug`, `admin`. Поля `address`, `phone`, `plan`, `settings` — опциональны (backend применяет defaults / NULL).
 
 **Validation:**
+
 - `name` — non-empty string.
 - `slug` — `/^[a-z0-9-]+$/`, unique. На нарушение формата backend возвращает `invariant_violation` (а не `invalid_slug_format`, см. ниже).
 - `phone` — E.164 strict (`/^\+[1-9]\d{1,14}$/`), необязательное.
@@ -216,6 +229,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 - `admin.locale` — enum `["ru", "kk"]`, optional, defaults to `ru`.
 
 **Response 201** (`CreateKindergartenResponseDto`):
+
 ```json
 {
   "kindergarten": {
@@ -261,6 +275,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > Старые наши коды `invalid_slug_format` и `invalid_phone_format` Swagger **не подтверждает** — backend возвращает общий `invariant_violation`. Маппить оба сценария на одну i18n-строку с подсказкой "проверьте slug и телефон", либо парсить `details`/`message`.
 
 **Frontend UX:**
+
 - Двух-step форма: Kindergarten details → Admin contact.
 - После 201 — toast "Садик создан. Welcome-SMS отправлен на +7..." + redirect на список (`/kindergartens`), пока нет detail-эндпойнта.
 - Объяснить пользователю что admin активируется через OTP-flow.
@@ -272,6 +287,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 Используется когда первичный admin потерял устройство или welcome-SMS не дошёл. Best-effort.
 
 **Request** (`InviteAdminDto`):
+
 ```json
 { "phone": "+77011112233" }
 ```
@@ -279,6 +295,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Validation:** `phone` required, E.164.
 
 **Response 200** (`InviteAdminResponseDto`):
+
 ```json
 {
   "phone": "+77011112233",
@@ -305,6 +322,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Request:** body не требуется.
 
 **Response 200** (`KindergartenDto`):
+
 ```json
 {
   "id": "7c2c2b6a-...",
@@ -336,6 +354,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Errors:** 401 / 403 / 404 `kindergarten_not_found`.
 
 **Frontend UX:**
+
 - Доступен только для садиков в фильтре `archived=true`.
 - Confirmation: "Восстановить садик X? Учётные записи администраторов **не** будут реактивированы автоматически — выполните это в Admin Web вручную."
 
@@ -343,19 +362,92 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 
 Свободный JSONB-bag, backend применяет defaults на отсутствующие ключи. Swagger описывает поле как `type: object` без явных properties — структуру держим в общем reference (backend `schema.dbml`):
 
-| Ключ | Тип | Default | Описание |
-|---|---|---|---|
-| `timezone` | string | `Asia/Almaty` | IANA TZ |
-| `currency` | string | `KZT` | ISO 4217 |
-| `late_pickup_fee_amount` | decimal | `5000` | Сумма штрафа за поздний забор |
-| `otp_expiry_seconds` | int | `300` | TTL OTP |
-| `prepay_3m_discount` | decimal % | 0 | Скидка за 3-месячную предоплату |
-| `prepay_6m_discount` | decimal % | 0 | На 6 месяцев |
-| `prepay_12m_discount` | decimal % | 0 | На 12 месяцев |
-| `payment_grace_days` | int | `5` | Дней после due_date до перехода в `overdue` |
-| `fiscal` | object | `{}` | Конфиг ОФД (только super_admin) |
+| Ключ                     | Тип       | Default       | Описание                                    |
+| ------------------------ | --------- | ------------- | ------------------------------------------- |
+| `timezone`               | string    | `Asia/Almaty` | IANA TZ                                     |
+| `currency`               | string    | `KZT`         | ISO 4217                                    |
+| `late_pickup_fee_amount` | decimal   | `5000`        | Сумма штрафа за поздний забор               |
+| `otp_expiry_seconds`     | int       | `300`         | TTL OTP                                     |
+| `prepay_3m_discount`     | decimal % | 0             | Скидка за 3-месячную предоплату             |
+| `prepay_6m_discount`     | decimal % | 0             | На 6 месяцев                                |
+| `prepay_12m_discount`    | decimal % | 0             | На 12 месяцев                               |
+| `payment_grace_days`     | int       | `5`           | Дней после due_date до перехода в `overdue` |
+| `fiscal`                 | object    | `{}`          | Конфиг ОФД (только super_admin)             |
 
 > Поскольку `PATCH /saas/kindergartens/:id` сегодня не существует, **редактирование settings из SuperAdmin frontend'а не поддерживается**. На MVP — read-only отображение в списке (если потребуется), редактирование — через Admin Web садика или backend-side утилиту. Поднять в OPEN_QUESTIONS.
+
+### 1.7 `GET / POST /saas/kindergartens/:id/admins` — список / добавление админов садика
+
+Доставлено backend'ом 2026-05-18 (ветка `superadmin/kg-admins`, смержена + задеплоена; live Swagger подтверждён). Источник: [`HANDOFF_TO_FRONTEND_kg-admins.md`](HANDOFF_TO_FRONTEND_kg-admins.md). **Auth (оба):** `Bearer` JWT, `role ∈ {super_admin, support}` (как create/invite/archive). 401 без/невалидный токен; 403 если роль не та.
+
+> **Это НЕ blocker B.8.** Вкладка «Администраторы» имеет свой list-эндпоинт и шипится независимо от всё ещё отсутствующих `GET/PATCH /saas/kindergartens/:id` (overview/settings табы остаются заблокированы — см. [`OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-)).
+
+#### `GET /saas/kindergartens/:id/admins` — список
+
+- Возвращает staff-членов садика `:id` строго с `role='admin'` (НЕ reception/mentor/specialist).
+- Query (опц.): `is_active: boolean`. **Отсутствует → возвращаются ВСЕ** (активные + деактивированные). Фронт по умолчанию шлёт `?is_active=true`.
+- **Response 200 — plain array, БЕЗ offset-пагинации** (намеренное исключение из B.1 offset-convention: bounded sub-resource, админов мало). **Не строить пагинацию.**
+
+`KindergartenAdminDto[]` (все поля `required`, часть `nullable`):
+
+```json
+[
+  {
+    "staff_member_id": "e2e2b6a7-…",
+    "user_id": "d3e2b6a7-…",
+    "full_name": "Айгерим Нурланкызы", // nullable
+    "phone": "+77011112233", // nullable
+    "locale": "ru", // 'ru'|'kk', nullable
+    "is_active": true,
+    "hired_at": "2026-04-28", // YYYY-MM-DD | null
+    "fired_at": null, // YYYY-MM-DD | null
+    "created_at": "2026-04-28T10:00:00.000Z" // ISO-8601
+  }
+]
+```
+
+- **Errors:** 404 `kindergarten_not_found`; 401; 403.
+
+#### `POST /saas/kindergartens/:id/admins` — добавить админа
+
+Реально **создаёт** админа: kg exists/не архивный → find-or-create `users` по phone (имя/locale существующего юзера **не перезаписываются**) → строгий 409-конфликт → `staff_members(role=admin, is_active=true)` → best-effort invite-SMS. **НЕ путать с `§1.3 POST .../admin/invite`** (singular, только шлёт SMS, staff НЕ создаёт).
+
+- **Request** `AddKindergartenAdminDto` (snake_case): `{ "full_name": string (req), "phone": string (req, E.164 ^\+[1-9]\d{1,14}$), "locale"?: "ru"|"kk" (default "ru") }`
+- **Response 201** `AddKindergartenAdminResponseDto`:
+
+```json
+{
+  "kindergarten_id": "7c2c2b6a-…",
+  "user": {
+    "id": "d3e2b6a7-…",
+    "phone": "+77011115566",
+    "full_name": "Жанна Серикова",
+    "locale": "kk"
+  },
+  "staff_member": {
+    "id": "e2e2b6a7-…",
+    "role": "admin",
+    "is_active": true,
+    "hired_at": "2026-04-28",
+    "created_at": "2026-04-28T10:00:00.000Z"
+  },
+  "invite_sms_sent": true
+}
+```
+
+> `invite_sms_sent: false` ⇒ админ создан, но SMS не доставлена. UI показывает **warning**, не error (зеркало паттерна `§1.3 invite`).
+
+- **Errors (ДВА разных envelope — фронт-handler обязан уметь оба):**
+  - **422** — class-validator (phone/locale) ДО сервиса. Envelope: `{ "status": 422, "errors": { "phone": "invalid_phone_format" } }` → подсветка поля по `errors.<field>`.
+  - **400** `invariant_violation` — сервисный `Phone.parse`/`Locale.parse` (практически недостижим если DTO прошёл).
+  - **404** `kindergarten_not_found`; **409** `kindergarten_archived`; **409** `admin_already_exists`; **409** `staff_already_exists`; 401; 403. Доменный envelope: `{ statusCode, error: <code>, message }`.
+
+**Контрактные тонкости:**
+
+- Конфликт по паре (kg, user) при **любом** `is_active` → 409. Реактивации деактивированного админа эндпоинта **НЕТ** (оператор делает руками). UI на 409 показывает осмысленное сообщение, **не «retry»**; деактивированную строку видно через фильтр «Все».
+- snake_case везде; `locale` enum — `ru|kk` (НЕ `kz`).
+- `super_admin` И `support` оба могут вызывать оба эндпоинта (consistency с create/invite/archive).
+- Не в scope (новые backend-asks при необходимости): remove/demote админа, реактивация деактивированного.
 
 ---
 
@@ -392,6 +484,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected** (super_admin / support).
 
 **Request:**
+
 ```json
 {
   "kindergarten_id": "00000000-0000-0000-0000-000000000001",
@@ -400,10 +493,12 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 ```
 
 > Оба поля **опциональны и nullable** в Swagger. Однако:
+>
 > - Если `kindergarten_id` передан — backend сегодня возвращает **400** (single-kg trigger отложен на B22 backend). Поэтому фронт **должен опускать** это поле и запускать только cross-tenant прогон.
 > - `period_start` — ISO date `YYYY-MM-DD`, **должно быть** первым числом месяца. Если опущено — backend подставляет первое число текущего месяца.
 
 **Response 202:**
+
 ```json
 {
   "job_id": "billing:monthly-run:2026-06-01",
@@ -421,6 +516,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 | 403 | — | Не super_admin/support |
 
 **Frontend UX:**
+
 - Date picker (только первое число месяца).
 - Confirmation: "Запустить генерацию инвойсов за {месяц} {год} для всех активных садиков? Процесс асинхронный — следите за результатом в worker-логах."
 - После 202 — toast "Задача поставлена в очередь, job_id: {…}". **Не** показывать ложный прогресс — фронт не знает когда worker закончит.
@@ -431,6 +527,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected.**
 
 **Request:**
+
 ```json
 { "now": "2026-06-01T03:00:00.000Z" }
 ```
@@ -438,6 +535,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > `now` — optional ISO-8601 anchor (по умолчанию server now). **Поле `kindergarten_id` Swagger не описывает** — прогон всегда cross-tenant. Backend behavior: `UPDATE custom_discounts SET status='expired' WHERE valid_until < $now`.
 
 **Response 202:**
+
 ```json
 {
   "job_id": "billing:discount-expire-manual:1717200000",
@@ -454,6 +552,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected.**
 
 **Request:**
+
 ```json
 { "now": "2026-05-13T03:00:00.000Z" }
 ```
@@ -461,6 +560,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > `now` — optional ISO-8601 anchor (по умолчанию server now). Cross-tenant — нет фильтра по kg.
 
 **Response 202:**
+
 ```json
 {
   "job_id": "billing:overdue-manual:1717200000",
@@ -471,6 +571,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Errors:** 400 validation / 401 / 403.
 
 **Frontend UX (общее для §5):**
+
 - Все три — кнопка "Запустить" + опциональный date/datetime input для anchor.
 - После 202 — toast "Задача поставлена в очередь" с показом `job_id`. Без ожидания результата.
 
@@ -485,6 +586,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected** (super_admin / support).
 
 **Request:**
+
 ```json
 { "now": "2026-05-07T07:00:00.000Z" }
 ```
@@ -492,10 +594,12 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > Только optional `now` (ISO-8601 anchor). **Поля `kindergarten_id` и `date` Swagger не описывает** — это расхождение с прежним нашим доко. Прогон всегда cross-tenant.
 
 **Backend behavior:**
+
 - Идемпотентен — пропускает если `content_posts` с `metadata.child_id = X` за эту дату уже есть.
 - Создаёт `content_posts` (type=`birthday`) для каждого ребёнка с совпадением day-of-month у `date_of_birth`.
 
 **Response 200:**
+
 ```json
 {
   "triggered_at": "2026-05-07T07:00:00.000Z",
@@ -514,6 +618,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected.**
 
 **Request:**
+
 ```json
 { "now": "2026-05-07T07:00:00.000Z" }
 ```
@@ -523,6 +628,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Backend behavior:** DELETE `group_stories WHERE expires_at <= $now` + best-effort `FileStoragePort.delete(media_url)` для каждого.
 
 **Response 200:**
+
 ```json
 {
   "triggered_at": "2026-05-07T07:00:00.000Z",
@@ -541,6 +647,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Bearer-protected.**
 
 **Request:**
+
 ```json
 { "now": "2026-05-07T07:00:00.000Z" }
 ```
@@ -550,6 +657,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 **Backend behavior:** UPDATE `content_posts SET status='published' WHERE status='scheduled' AND scheduled_for <= $now`.
 
 **Response 200:**
+
 ```json
 {
   "triggered_at": "2026-05-07T07:00:00.000Z",
@@ -572,6 +680,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 ### 7.1 `POST /admin/schedule/week-rollout/run`
 
 **Request** (`RunWeeklyRolloutDto`):
+
 ```json
 { "fromMonday": "2026-04-27" }
 ```
@@ -579,6 +688,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 > **camelCase `fromMonday`** (а не `from_monday` как в прежнем нашем доко). Optional ISO date понедельника. Если опущен — backend берёт **предыдущий** понедельник в Asia/Almaty (а не текущий — расхождение с прежним нашим доко).
 
 **Response 200** (`RolloutSummaryResponseDto`):
+
 ```json
 {
   "fromMonday": "2026-04-27",
@@ -618,6 +728,7 @@ CRUD над садиками. Из live Swagger (`Kindergartens (SuperAdmin)` ta
 | 429 | `too_many_requests` | Превышен rate-limit на manual rollout |
 
 **Frontend UX:**
+
 - Date picker (только понедельники).
 - Default: предыдущий понедельник (соответствует backend default).
 - Loading state с прогрессом — запрос синхронный, может занять минуты при 100+ садиках.
@@ -643,6 +754,7 @@ Auth: super_admin видит **все** kg; per-kg admin — только сво
 > Тип `cursor` — **string** (opaque base64), а не `int` offset как в прежнем нашем доко.
 
 **Response 200** (`ListLifecycleFailedJobsResponseDto`):
+
 ```json
 {
   "items": [
@@ -665,6 +777,7 @@ Auth: super_admin видит **все** kg; per-kg admin — только сво
 ```
 
 > Ключевые отличия от прежнего нашего доко:
+>
 > - `name` имеет префикс `lifecycle:` (например, `lifecycle:pro-rata-refund`, не просто `pro-rata-refund`).
 > - `failed_reason` — **string или null** (Swagger маркирует nullable).
 > - `finished_on` — **number или null**.
@@ -678,6 +791,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 **Request:** body не требуется (Swagger описывает пустой `application/json`).
 
 **Response 202** (`RetryLifecycleFailedJobResponseDto`):
+
 ```json
 { "enqueued": true, "job_id": "12345" }
 ```
@@ -692,6 +806,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 | 429 | — | Rate-limit auth gateway |
 
 **Frontend UX:**
+
 - DataTable с фильтрами по `name` (processor type). Per-kg фильтр **не поддерживается query-param'ом** на backend сегодня — фильтровать клиентски через `payload.kindergartenId` после fetch.
 - Колонки: name, kg name (JOIN на kindergartens по `payload.kindergartenId` через client-side lookup), failed_reason (truncated, click → modal), attempts_made, finished_on.
 - Кнопка `Retry` в каждой строке + confirmation.
@@ -705,6 +820,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 ### 9.1 `GET /health` — liveness/version
 
 **Response 200** (`HealthStatusDto`):
+
 ```json
 {
   "status": "ok",
@@ -721,6 +837,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 ### 9.2 `GET /health/ready` — readiness
 
 **Response 200** (`HealthReadyDto`):
+
 ```json
 {
   "status": "ok",
@@ -733,6 +850,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 > Swagger декларирует только `200` для этого пути; backend код может возвращать `503` при degraded — фронт должен принимать оба и читать `status`. Поднять уточнение в OPEN_QUESTIONS если важно.
 
 **Frontend UX:**
+
 - Дашборд: pulse-indicator (green/red) для DB и Redis. Polling каждые 30 секунд через TanStack Query `refetchInterval: 30_000`.
 - Отдельная страница `/system-status` с историей последних 10 проверок (in-memory state, не персистится).
 - Показывать `version` и `uptime_seconds` в footer / системной плашке.
@@ -744,6 +862,7 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 **Цель:** super_admin может открыть kg и увидеть данные (дети, группы, инвойсы) в read-only режиме — для support-задач.
 
 **Backend сегодня покрывает:**
+
 - `GET /admin/lifecycle/failed-jobs` — cross-kg для super_admin'а (см. §8).
 
 **Read-only доступ к остальным `/admin/*` resources** (дети, группы, инвойсы, …) на стороне backend не реализован, **и `GET /saas/kindergartens/:id` тоже отсутствует** — даже базовая overview-страница садика недоступна. Frontend держит `/kindergartens/:id/view-as` как placeholder с информационным сообщением. Подход к реализации, scope данных, PII-ограничения — см. [`OPEN_QUESTIONS.md#b3`](OPEN_QUESTIONS.md#b3-read-only-super-admin-доступ-к-admin-resources--parked) и [`#c4`](OPEN_QUESTIONS.md#c4-view-as-kindergarten--scope-данных--open).
@@ -754,27 +873,30 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 
 Общие коды backend'а, которые фронт ловит и маппит в i18n. Сверены с live Swagger.
 
-| HTTP | `error` | Контекст |
-|---|---|---|
-| 400 | `invariant_violation` | DTO: невалидный slug, phone, или общий доменный invariant в kindergartens / invite |
-| 400 | validation | Любая class-validator ошибка (поля в `details`) |
-| 401 | `invalid_credentials` | `/saas/auth/login` |
-| 401 | `invalid_refresh` | `/saas/auth/refresh` |
-| 401 | `invalid_token` | JWT битый/expired |
-| 401 | `token_revoked` | JWT `jti` в blocklist |
-| 403 | `forbidden` | Per-kg admin к чужому kg (`/admin/lifecycle/...`) |
-| 403 | — | Caller не super_admin/support (без явного error-code, generic 403) |
-| 404 | `kindergarten_not_found` | |
-| 404 | `lifecycle_job_not_found` | |
-| 409 | `kindergarten_slug_taken` | |
-| 409 | `kindergarten_archived` | invite в архивный kg |
-| 409 | `lifecycle_job_not_in_failed_state` | |
-| 422 | `invalid_date_range` | `/admin/schedule/week-rollout/run`: невалидный `fromMonday` |
-| 429 | `too_many_requests` | rate-limit на manual rollout |
-| 429 | `rate_limit` | Generic rate-limit на auth gateway |
-| 503 | `service_unavailable` | `/health/ready` если DB/Redis down (не подтверждено Swagger'ом, проверить в коде backend'а) |
+| HTTP | `error`                             | Контекст                                                                                                                                  |
+| ---- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 400  | `invariant_violation`               | DTO: невалидный slug, phone, или общий доменный invariant в kindergartens / invite                                                        |
+| 400  | validation                          | Любая class-validator ошибка (поля в `details`)                                                                                           |
+| 401  | `invalid_credentials`               | `/saas/auth/login`                                                                                                                        |
+| 401  | `invalid_refresh`                   | `/saas/auth/refresh`                                                                                                                      |
+| 401  | `invalid_token`                     | JWT битый/expired                                                                                                                         |
+| 401  | `token_revoked`                     | JWT `jti` в blocklist                                                                                                                     |
+| 403  | `forbidden`                         | Per-kg admin к чужому kg (`/admin/lifecycle/...`)                                                                                         |
+| 403  | —                                   | Caller не super_admin/support (без явного error-code, generic 403)                                                                        |
+| 404  | `kindergarten_not_found`            |                                                                                                                                           |
+| 404  | `lifecycle_job_not_found`           |                                                                                                                                           |
+| 409  | `kindergarten_slug_taken`           |                                                                                                                                           |
+| 409  | `kindergarten_archived`             | invite / add-admin в архивный kg                                                                                                          |
+| 409  | `admin_already_exists`              | `POST /saas/kindergartens/:id/admins`: у юзера уже admin-строка в этом kg                                                                 |
+| 409  | `staff_already_exists`              | `POST /saas/kindergartens/:id/admins`: у юзера уже non-admin staff-строка в этом kg                                                       |
+| 409  | `lifecycle_job_not_in_failed_state` |                                                                                                                                           |
+| 422  | `invalid_date_range`                | `/admin/schedule/week-rollout/run`: невалидный `fromMonday`                                                                               |
+| 422  | `invalid_phone_format`              | `POST /saas/kindergartens/:id/admins`: class-validator phone/locale — envelope `{ status, errors: { <field>: <constraint> } }` (см. §1.7) |
+| 429  | `too_many_requests`                 | rate-limit на manual rollout                                                                                                              |
+| 429  | `rate_limit`                        | Generic rate-limit на auth gateway                                                                                                        |
+| 503  | `service_unavailable`               | `/health/ready` если DB/Redis down (не подтверждено Swagger'ом, проверить в коде backend'а)                                               |
 
-> Прежние коды `invalid_slug_format`, `invalid_phone_format`, `invalid_period_start`, `email_already_taken`, `pending_role_select`, `otp_rate_limit` — **в Swagger live не подтверждены**. Часть из них (например, `email_already_taken`) относилась к несуществующим эндпойнтам (`/saas/users`).
+> Прежние коды `invalid_slug_format`, `invalid_period_start`, `email_already_taken`, `pending_role_select`, `otp_rate_limit` — **в Swagger live не подтверждены**. Часть из них (например, `email_already_taken`) относилась к несуществующим эндпойнтам (`/saas/users`). **Исключение:** `invalid_phone_format` теперь подтверждён как 422-field-constraint для `POST /saas/kindergartens/:id/admins` (§1.7) — приходит в envelope `{ status, errors: { phone } }`, маппится в текст поля, не в общий toast.
 
 Маппинг → `src/locales/<lang>/errors.json` ключ `<error_code>`. Fallback — `unknown_error` с показом raw `message` из ответа.
 
@@ -784,30 +906,31 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 
 Сводная таблица: какие routes покрывает SuperAdmin frontend. Жирным помечены routes, у которых backend-эндпойнты **отсутствуют сегодня** — реализация откладывается.
 
-| Frontend route | HTTP methods | Backend endpoints | Примечание |
-|---|---|---|---|
-| `/login` | POST | `/saas/auth/login` | |
-| `/` (dashboard) | GET | `/health`, `/health/ready` + агрегированный счётчик из `/saas/kindergartens?limit=1` (читаем `total`) | |
-| `/kindergartens` | GET | `/saas/kindergartens` | offset-pagination |
-| `/kindergartens/new` | POST | `/saas/kindergartens` | |
-| **`/kindergartens/:id`** | — | — нет endpoint'а | **Заблокировано:** нет `GET /saas/kindergartens/:id` |
-| **`/kindergartens/:id/settings`** | — | — нет endpoint'а | **Заблокировано:** нет `PATCH /saas/kindergartens/:id` |
-| `/kindergartens/:id/archive` | POST | `/saas/kindergartens/:id/archive` | dialog из списка |
-| `/kindergartens/:id/restore` | POST | `/saas/kindergartens/:id/restore` | dialog из списка с фильтром archived |
-| `/kindergartens/:id/admin/invite` | POST | `/saas/kindergartens/:id/admin/invite` | dialog из списка / future detail page |
-| **`/kindergartens/:id/subscription`** | — | — нет модуля `/saas/saas-subscriptions` | **Заблокировано** |
-| **`/kindergartens/:id/flags`** | — | — нет модуля `/saas/feature-flags` | **Заблокировано** |
-| **`/kindergartens/:id/view-as`** | (placeholder) | — | informational stub |
-| **`/subscriptions`** | — | — нет модуля | **Заблокировано** |
-| **`/feature-flags`** | — | — нет модуля | **Заблокировано** |
-| **`/users`** | — | — нет модуля `/saas/users` | **Заблокировано** |
-| **`/users/new`** | — | — | **Заблокировано** |
-| **`/users/:id`** | — | — | **Заблокировано** |
-| `/operations/billing` | POST | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}` | все async (202) |
-| `/operations/content` | POST | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}` | sync (200) |
-| `/operations/schedule-rollout` | POST | `/admin/schedule/week-rollout/run` | sync (200), camelCase body/response |
-| `/operations/lifecycle-dlq` | GET, POST | `/admin/lifecycle/failed-jobs`, `/admin/lifecycle/failed-jobs/:id/retry` | opaque base64 cursor |
-| `/system-status` | GET | `/health`, `/health/ready` (polling) | |
+| Frontend route                        | HTTP methods  | Backend endpoints                                                                                     | Примечание                                                                                                       |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `/login`                              | POST          | `/saas/auth/login`                                                                                    |                                                                                                                  |
+| `/` (dashboard)                       | GET           | `/health`, `/health/ready` + агрегированный счётчик из `/saas/kindergartens?limit=1` (читаем `total`) |                                                                                                                  |
+| `/kindergartens`                      | GET           | `/saas/kindergartens`                                                                                 | offset-pagination                                                                                                |
+| `/kindergartens/new`                  | POST          | `/saas/kindergartens`                                                                                 |                                                                                                                  |
+| **`/kindergartens/:id`**              | —             | — нет endpoint'а                                                                                      | **Заблокировано:** нет `GET /saas/kindergartens/:id` (overview tab)                                              |
+| **`/kindergartens/:id/settings`**     | —             | — нет endpoint'а                                                                                      | **Заблокировано:** нет `PATCH /saas/kindergartens/:id`                                                           |
+| `/kindergartens/:id/admins`           | GET, POST     | `/saas/kindergartens/:id/admins`                                                                      | **вкладка «Администраторы»** — list (plain array, фильтр `is_active`) + add-модалка. См. §1.7. Независима от B.8 |
+| `/kindergartens/:id/archive`          | POST          | `/saas/kindergartens/:id/archive`                                                                     | dialog из списка                                                                                                 |
+| `/kindergartens/:id/restore`          | POST          | `/saas/kindergartens/:id/restore`                                                                     | dialog из списка с фильтром archived                                                                             |
+| `/kindergartens/:id/admin/invite`     | POST          | `/saas/kindergartens/:id/admin/invite`                                                                | dialog из списка + row-action «переотправить приглашение» во вкладке «Администраторы»                            |
+| **`/kindergartens/:id/subscription`** | —             | — нет модуля `/saas/saas-subscriptions`                                                               | **Заблокировано**                                                                                                |
+| **`/kindergartens/:id/flags`**        | —             | — нет модуля `/saas/feature-flags`                                                                    | **Заблокировано**                                                                                                |
+| **`/kindergartens/:id/view-as`**      | (placeholder) | —                                                                                                     | informational stub                                                                                               |
+| **`/subscriptions`**                  | —             | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
+| **`/feature-flags`**                  | —             | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
+| **`/users`**                          | —             | — нет модуля `/saas/users`                                                                            | **Заблокировано**                                                                                                |
+| **`/users/new`**                      | —             | —                                                                                                     | **Заблокировано**                                                                                                |
+| **`/users/:id`**                      | —             | —                                                                                                     | **Заблокировано**                                                                                                |
+| `/operations/billing`                 | POST          | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}`                                       | все async (202)                                                                                                  |
+| `/operations/content`                 | POST          | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}`                              | sync (200)                                                                                                       |
+| `/operations/schedule-rollout`        | POST          | `/admin/schedule/week-rollout/run`                                                                    | sync (200), camelCase body/response                                                                              |
+| `/operations/lifecycle-dlq`           | GET, POST     | `/admin/lifecycle/failed-jobs`, `/admin/lifecycle/failed-jobs/:id/retry`                              | opaque base64 cursor                                                                                             |
+| `/system-status`                      | GET           | `/health`, `/health/ready` (polling)                                                                  |                                                                                                                  |
 
 ---
 

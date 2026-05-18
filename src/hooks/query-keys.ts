@@ -6,6 +6,11 @@ export const queryKeys = {
       ['kindergartens', 'list', params] as const,
     detail: (id: string) => ['kindergartens', 'detail', id] as const,
   },
+  kgAdmins: {
+    all: (id: string) => ['kg-admins', id] as const,
+    list: (id: string, params: import('@/api/kg-admins').ListKgAdminsParams) =>
+      ['kg-admins', id, 'list', params] as const,
+  },
   lifecycle: {
     all: () => ['lifecycle'] as const,
     failedJobs: (params: import('@/api/lifecycle-jobs').ListFailedJobsParams) =>

@@ -404,6 +404,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/saas/kindergartens/{id}/admins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List admins of a kindergarten.
+     * @description Returns a plain array (NOT offset-paginated) of staff_members with role=admin for the kindergarten. Optional `is_active` filter; omit it to return ALL admins (active + deactivated). full_name/phone/locale are resolved from the linked users row.
+     */
+    get: operations['SuperAdminKindergartenController_listAdmins_v1'];
+    put?: never;
+    /**
+     * Add another admin to an existing kindergarten.
+     * @description Find-or-create user by phone (existing identity untouched), then a staff_members row with role=admin. Strict 409 if ANY staff row already exists for the (kg, user) pair regardless of is_active. Best-effort invite SMS afterwards.
+     */
+    post: operations['SuperAdminKindergartenController_addAdmin_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/saas/kindergartens/{id}/archive': {
     parameters: {
       query?: never;
@@ -4012,6 +4036,92 @@ export interface components {
        * @example true
        */
       sent: boolean;
+    };
+    KindergartenAdminDto: {
+      /** @example e2e2b6a7-1a2b-4c3d-9e8f-0a1b2c3d4e5f */
+      staff_member_id: string;
+      /** @example d3e2b6a7-1a2b-4c3d-9e8f-0a1b2c3d4e5f */
+      user_id: string;
+      /** @example Айгерим Нурланкызы */
+      full_name: string | null;
+      /** @example +77011112233 */
+      phone: string | null;
+      /**
+       * @example ru
+       * @enum {string|null}
+       */
+      locale: 'ru' | 'kk' | null;
+      /** @example true */
+      is_active: boolean;
+      /**
+       * @description YYYY-MM-DD hire date; null when unset.
+       * @example 2026-04-28
+       */
+      hired_at: string | null;
+      /**
+       * @description YYYY-MM-DD fired date; null when still active.
+       * @example null
+       */
+      fired_at: string | null;
+      /** @example 2026-04-28T10:00:00.000Z */
+      created_at: string;
+    };
+    AddKindergartenAdminDto: {
+      /**
+       * @description Admin full name.
+       * @example Жанна Серикова
+       */
+      full_name: string;
+      /**
+       * @description Admin phone — E.164 format. Used to find-or-create the user.
+       * @example +77011115566
+       */
+      phone: string;
+      /**
+       * @description Preferred locale for invite SMS and UI. Defaults to ru.
+       * @example kk
+       * @enum {string}
+       */
+      locale?: 'ru' | 'kk';
+    };
+    AddedAdminUserDto: {
+      /** @example d3e2b6a7-1a2b-4c3d-9e8f-0a1b2c3d4e5f */
+      id: string;
+      /** @example +77011115566 */
+      phone: string;
+      /** @example Жанна Серикова */
+      full_name: string;
+      /**
+       * @example kk
+       * @enum {string}
+       */
+      locale: 'ru' | 'kk';
+    };
+    AddedAdminStaffDto: {
+      /** @example e2e2b6a7-1a2b-4c3d-9e8f-0a1b2c3d4e5f */
+      id: string;
+      /**
+       * @example admin
+       * @enum {string}
+       */
+      role: 'admin';
+      /** @example true */
+      is_active: boolean;
+      /** @example 2026-04-28 */
+      hired_at: string | null;
+      /** @example 2026-04-28T10:00:00.000Z */
+      created_at: string;
+    };
+    AddKindergartenAdminResponseDto: {
+      /** @example 7c2c2b6a-1a2b-4c3d-9e8f-0a1b2c3d4e5f */
+      kindergarten_id: string;
+      user: components['schemas']['AddedAdminUserDto'];
+      staff_member: components['schemas']['AddedAdminStaffDto'];
+      /**
+       * @description true if the invite SMS adapter accepted the message. false means the adapter rejected it but the request still succeeded (best-effort).
+       * @example true
+       */
+      invite_sms_sent: boolean;
     };
     GroupDto: {
       /** @example b2c3d4e5-1234-5678-abcd-1234567890ab */
@@ -9022,6 +9132,129 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  SuperAdminKindergartenController_listAdmins_v1: {
+    parameters: {
+      query?: {
+        /** @description Filter admins by active flag. Omit to return ALL admins (active + deactivated). */
+        is_active?: boolean;
+      };
+      header?: {
+        'x-custom-lang'?: unknown;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['KindergartenAdminDto'][];
+        };
+      };
+      /** @description Bearer missing/invalid/revoked. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+      /** @description Caller is not super_admin/support. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+      /** @description Kindergarten not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+    };
+  };
+  SuperAdminKindergartenController_addAdmin_v1: {
+    parameters: {
+      query?: never;
+      header?: {
+        'x-custom-lang'?: unknown;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AddKindergartenAdminDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AddKindergartenAdminResponseDto'];
+        };
+      };
+      /** @description Invalid phone/locale format (`invariant_violation`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bearer missing/invalid/revoked. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+      /** @description Caller is not super_admin/support. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+      /** @description Kindergarten not found (`kindergarten_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+      /** @description Kindergarten archived (`kindergarten_archived`), or an admin (`admin_already_exists`) / non-admin staff (`staff_already_exists`) row already exists for the (kg, user) pair. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
       };
     };
   };

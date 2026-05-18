@@ -30,17 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { formatPhoneE164, formatRelativeTime } from '@/lib/format';
-
-function isAppError(e: unknown): e is { status: number; code: string } {
-  return (
-    !!e &&
-    typeof e === 'object' &&
-    'status' in e &&
-    typeof (e as Record<string, unknown>).status === 'number' &&
-    'code' in e &&
-    typeof (e as Record<string, unknown>).code === 'string'
-  );
-}
+import { isAppError } from '@/lib/error-guards';
 
 const InviteSchema = z.object({
   phone: z.string().regex(/^\+[1-9]\d{1,14}$/),

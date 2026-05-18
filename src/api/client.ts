@@ -44,16 +44,25 @@ async function tryRefreshOnce(): Promise<void> {
   return refreshPromise;
 }
 
+// Backend emits two distinct error envelopes:
+// 1. Domain 4xx: { statusCode, error: "<code>", message }
+// 2. 422 class-validator: { status: 422, errors: { "<field>": "<constraint>" } }
+// We normalise both into AppError so UI-slices get a uniform shape.
 function parseErrorData(data: unknown): { error: string; details?: unknown } | null {
-  if (
-    typeof data === 'object' &&
-    data !== null &&
-    'error' in data &&
-    typeof (data as Record<string, unknown>).error === 'string'
-  ) {
-    const d = data as Record<string, unknown>;
-    return { error: d.error as string, details: d.details };
+  if (typeof data !== 'object' || data === null) return null;
+  const d = data as Record<string, unknown>;
+
+  // Domain envelope: { error: string } (statusCode / message are ignored — i18n handles text)
+  if (typeof d.error === 'string') {
+    return { error: d.error, details: d.details };
   }
+
+  // 422 field-errors envelope: { status: 422, errors: { field: constraint } }
+  // We surface the whole errors map as `details` so the form layer can call setError per-field.
+  if (d.status === 422 && typeof d.errors === 'object' && d.errors !== null) {
+    return { error: 'validation_error', details: d.errors };
+  }
+
   return null;
 }
 

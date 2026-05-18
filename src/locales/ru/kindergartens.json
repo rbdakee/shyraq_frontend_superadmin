@@ -92,6 +92,7 @@
     "back_link": "Садики",
     "tabs": {
       "overview": "Обзор",
+      "admins": "Администраторы",
       "settings": "Настройки",
       "subscription": "Подписка",
       "flags": "Feature Flags",
@@ -111,6 +112,49 @@
       "contacts_empty": "—",
       "settings_card_title": "Настройки (read-only)",
       "settings_locked_alert": "Редактирование настроек будет доступно после backend-релиза (см. OPEN_QUESTIONS#b8)."
+    },
+    "admins": {
+      "title": "Администраторы ({{count}})",
+      "cta_add": "Добавить администратора",
+      "cta_add_tooltip_archived": "Нельзя добавить администратора в архивный садик",
+      "filter": {
+        "only_active": "Только активные",
+        "all": "Все"
+      },
+      "columns": {
+        "name": "Имя",
+        "phone": "Телефон",
+        "locale": "Локаль",
+        "status": "Статус",
+        "hired_at": "Принят",
+        "created_at": "Создан",
+        "actions": "Действия"
+      },
+      "status": {
+        "active": "Активен",
+        "deactivated": "Деактивирован"
+      },
+      "row_action_resend": "Переотправить приглашение",
+      "empty_title": "У этого садика пока нет администраторов",
+      "empty_cta": "Добавить",
+      "error_title": "Не удалось загрузить список администраторов",
+      "error_retry": "Повторить",
+      "not_found_message": "Садик не найден. Возможно, ссылка устарела.",
+      "modal": {
+        "title": "Добавить администратора",
+        "field_name": "Имя",
+        "field_phone": "Телефон",
+        "field_locale": "Локаль",
+        "locale_ru": "Русский",
+        "locale_kk": "Қазақша",
+        "btn_cancel": "Отмена",
+        "btn_submit": "Добавить",
+        "btn_submitting": "Добавление…"
+      },
+      "toast_added_sms_sent": "Администратор добавлен. Приглашение отправлено на {{phone}}",
+      "toast_added_sms_not_sent": "Администратор добавлен, но SMS-приглашение не доставлено. Переотправьте позже",
+      "toast_resend_sent": "Welcome-SMS отправлен на {{phone}}",
+      "toast_resend_not_sent": "Запрос принят, но SMS не доставлен. Попробуйте позже"
     },
     "tab_placeholder": {
       "title": "Скоро будет доступно",

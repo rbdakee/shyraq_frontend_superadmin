@@ -97,6 +97,7 @@
     "back_link": "Балабақшалар",
     "tabs": {
       "overview": "Шолу",
+      "admins": "Әкімшілер",
       "settings": "Параметрлер",
       "subscription": "Жазылым",
       "flags": "Feature Flags",
@@ -116,6 +117,49 @@
       "contacts_empty": "—",
       "settings_card_title": "Параметрлер (тек оқу)",
       "settings_locked_alert": "Параметрлерді өңдеу backend-релизден кейін қолжетімді болады (OPEN_QUESTIONS#b8 қараңыз)."
+    },
+    "admins": {
+      "title": "Әкімшілер ({{count}})",
+      "cta_add": "Әкімші қосу",
+      "cta_add_tooltip_archived": "Мұрағатталған балабақшаға әкімші қосу мүмкін емес",
+      "filter": {
+        "only_active": "Тек белсендіler",
+        "all": "Барлығы"
+      },
+      "columns": {
+        "name": "Аты-жөні",
+        "phone": "Телефон",
+        "locale": "Тіл",
+        "status": "Мәртебе",
+        "hired_at": "Қабылданды",
+        "created_at": "Жасалған",
+        "actions": "Әрекеттер"
+      },
+      "status": {
+        "active": "Белсенді",
+        "deactivated": "Деактивацияланған"
+      },
+      "row_action_resend": "Шақырымды қайта жіберу",
+      "empty_title": "Бұл балабақшаның әкімшілері әлі жоқ",
+      "empty_cta": "Қосу",
+      "error_title": "Әкімшілер тізімін жүктеу мүмкін болмады",
+      "error_retry": "Қайталау",
+      "not_found_message": "Балабақша табылмады. Мүмкін сілтеме ескірген.",
+      "modal": {
+        "title": "Әкімші қосу",
+        "field_name": "Аты-жөні",
+        "field_phone": "Телефон",
+        "field_locale": "Тіл",
+        "locale_ru": "Русский",
+        "locale_kk": "Қазақша",
+        "btn_cancel": "Бас тарту",
+        "btn_submit": "Қосу",
+        "btn_submitting": "Қосылуда…"
+      },
+      "toast_added_sms_sent": "Әкімші қосылды. Шақырым {{phone}} нөміріне жіберілді",
+      "toast_added_sms_not_sent": "Әкімші қосылды, бірақ SMS-шақырым жеткізілмеді. Кейінірек қайта жіберіңіз",
+      "toast_resend_sent": "Welcome-SMS {{phone}} нөміріне жіберілді",
+      "toast_resend_not_sent": "Сұраныс қабылданды, бірақ SMS жеткізілмеді. Кейінірек қайталаңыз"
     },
     "tab_placeholder": {
       "title": "Жақында қолжетімді болады",
