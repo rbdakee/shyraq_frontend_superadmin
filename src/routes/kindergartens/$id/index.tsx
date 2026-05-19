@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,9 +11,10 @@ import {
   useArchiveKindergarten,
   useRestoreKindergarten,
   useInviteAdmin,
-  useKindergartenFromCache,
+  useKindergarten,
 } from '@/hooks/use-kindergartens';
 import { KindergartenDetailShell } from '@/components/layout/kindergarten-detail-shell';
+import { KindergartenDetailFallback } from '@/components/layout/kindergarten-detail-fallback';
 import { DestructiveConfirm } from '@/components/feedback/destructive-confirm';
 import { PhoneInput } from '@/components/forms/phone-input';
 import { Button } from '@/components/ui/button';
@@ -41,7 +42,7 @@ export default function KindergartenDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation(['kindergartens', 'errors']);
-  const kg = useKindergartenFromCache(id);
+  const { kg, isPending } = useKindergarten(id);
 
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
@@ -57,19 +58,7 @@ export default function KindergartenDetailPage() {
     mode: 'onSubmit',
   });
 
-  if (!kg) {
-    return (
-      <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-12 text-center">
-        <h2 className="text-xl font-semibold">{t('kindergartens:detail.not_found.title')}</h2>
-        <p className="text-sm text-text-secondary">
-          {t('kindergartens:detail.not_found.subtitle')}
-        </p>
-        <Button asChild>
-          <Link to="/kindergartens">{t('kindergartens:detail.not_found.cta')}</Link>
-        </Button>
-      </div>
-    );
-  }
+  if (!kg) return <KindergartenDetailFallback isPending={isPending} />;
 
   const isArchived = !!kg.archived_at;
 

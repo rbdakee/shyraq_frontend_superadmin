@@ -1,9 +1,10 @@
+import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, KeyRound, LogOut, Menu, User } from 'lucide-react';
 import { useUiStore } from '@/stores/ui-store';
 import { useSessionStore } from '@/stores/session-store';
-import { useCurrentUser, useLogout } from '@/hooks/use-auth';
+import { useLogout } from '@/hooks/use-auth';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,12 +25,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-function getInitials(name: string | undefined | null): string {
-  if (!name) return '?';
-  const parts = name.trim().split(/\s+/);
+// Super-admin has no full_name source (no /users/me — see OPEN_QUESTIONS#b18);
+// initials are derived from the email local-part instead.
+function getEmailInitials(email: string | undefined | null): string {
+  if (!email) return '?';
+  const local = email.split('@')[0] ?? '';
+  const parts = local.split(/[.\-_+]/).filter(Boolean);
   if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? '?';
-  return `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`.toUpperCase();
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
 }
 
 function normalizeSegment(seg: string): string {
@@ -68,16 +72,18 @@ function TopbarBreadcrumbs() {
           const isLast = i === segments.length - 1;
 
           return (
-            <BreadcrumbItem key={path}>
+            <Fragment key={path}>
               <BreadcrumbSeparator />
-              {isLast ? (
-                <BreadcrumbPage>{label}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <Link to={path}>{label}</Link>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Link to={path}>{label}</Link>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </Fragment>
           );
         })}
       </BreadcrumbList>
@@ -118,13 +124,11 @@ function LanguageSwitcher() {
 
 function UserMenu() {
   const { t } = useTranslation(['shell', 'errors']);
-  const { data: currentUser } = useCurrentUser();
   const email = useSessionStore((s) => s.email);
   const role = useSessionStore((s) => s.role);
   const logoutMutation = useLogout();
 
-  const fullName = currentUser?.full_name;
-  const initials = getInitials(fullName);
+  const initials = getEmailInitials(email);
 
   const roleBadgeClasses =
     role === 'super_admin'
@@ -138,7 +142,7 @@ function UserMenu() {
           <div className="grid size-7 place-items-center rounded-full bg-brand-soft text-[11px] font-semibold text-brand-text-on-soft">
             {initials}
           </div>
-          <span className="max-w-32 truncate text-[13px] font-medium">{fullName ?? ' '}</span>
+          <span className="max-w-32 truncate text-[13px] font-medium">{email ?? ' '}</span>
           <ChevronDown className="size-3 text-text-tertiary" />
         </Button>
       </DropdownMenuTrigger>

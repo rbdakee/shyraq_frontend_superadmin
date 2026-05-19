@@ -1446,6 +1446,51 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B9
 
 ---
 
+## BF1 — Post-B9 bugfixes (refresh resilience + phone mask + super-admin identity)
+
+**Goal:** три бага из browser walk 2026-05-19: (1) Ctrl+R на `/kindergartens/:id` → ложный «Садик не найден»; (2) `GET /users/me` → 403 под супер-админским токеном (имя в топбаре пустое, шумные 401→refresh→403); (3) маска телефона пропускала в backend одну лишнюю цифру сверх 11.
+
+**Time:** 1.5–2 часа
+
+### Inputs
+
+- [`docs/OPEN_QUESTIONS.md#b8`](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-) — MVP workaround для refresh (персист кэша + `useKindergarten(id)` chokepoint)
+- [`docs/OPEN_QUESTIONS.md#b18`](OPEN_QUESTIONS.md#b18-super-admin-identity-endpoint--usersme-403-backend-dto-gap--open) — `/users/me` 403, вариант A (frontend, сделано) + вариант B (backend-ask)
+- [`docs/endpoints.md §0.5`](endpoints.md#05-identity--текущий-пользователь--нет-super-admin-эндпоинта) — super-admin identity без сетевого запроса
+- CLAUDE.md §9 (in-memory access token by design → волна 401 на boot ожидаема)
+
+### Tasks
+
+1. **Bug 4 — phone mask cap (сделано):** `normalizeToE164` (единственный chokepoint записи значения `PhoneInput`) cap'ает digits до KZ-длины (11 для `+7`) / E.164-max (15) — зеркалит `maskKZPhone.slice(1,11)`. + Vitest на 12-значный overflow.
+2. **Bug 2 — убрать `/users/me` (вариант A):** удалить `getCurrentUser` / `useCurrentUser` / `queryKeys.auth.me` / invalidate; `UserMenu` рендерит email+role из persisted `sessionStore`, инициалы из email. `/users/me` больше не вызывается. Backend-ask (вариант B) — в [`OPEN_QUESTIONS#b18`](OPEN_QUESTIONS.md#b18-super-admin-identity-endpoint--usersme-403-backend-dto-gap--open).
+3. **Bug 1 — refresh-resilient detail:** TanStack Query cache персистится в `sessionStorage` (`@tanstack/react-query-persist-client` + `query-sync-storage-persister`, buster=`__APP_VERSION__`). Введён единый хук `useKindergarten(id)` (chokepoint) — `$id/index.tsx` и `$id/admins.tsx` переключены с прямого `useKindergartenFromCache` на него. Свап на `GET /saas/kindergartens/:id` при появлении эндпоинта = правка тела одного хука (см. TODO backlog).
+
+### Acceptance criteria
+
+- [ ] Ctrl+R на `/kindergartens/:id` (после визита списка в той же сессии) — страница рендерится, НЕ «Садик не найден»
+- [ ] DevTools Network: `/users/me` не вызывается нигде; нет 403 от него; топбар показывает email + role
+- [ ] Маска: ввод `777777777777` (12 цифр) → в POST `/admins` уходит `phone:"+77777777777"` (11), не 12
+- [ ] `pnpm typecheck && pnpm lint && pnpm test` — exit 0
+
+### Commit
+
+```
+BF1: post-B9 bugfixes — refresh resilience, drop /users/me, phone mask cap
+
+(1) TanStack Query cache → sessionStorage persist + useKindergarten(id)
+chokepoint → Ctrl+R на detail больше не «не найден» (MVP workaround B.8).
+(2) /users/me удалён (403 для super-admin); топбар из persisted sessionStore
+(вариант A, OPEN_QUESTIONS#b18; вариант B — backend-ask). (3) normalizeToE164
+cap до KZ/E.164 длины → лишняя 12-я цифра не уходит в backend.
+
+Acceptance:
+- [x] ...
+
+Refs: docs/IMPLEMENTATION_PLAN.md §BF1, OPEN_QUESTIONS#b8, #b18
+```
+
+---
+
 ## Tracker
 
 Отмечай батчи по мере завершения:
@@ -1460,8 +1505,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B9
 - [x] **B7** Blocked module placeholders (subs/flags/users + KG tabs)
 - [x] **B8** Polish (command palette, i18n, a11y, build) — _Playwright e2e (task 13) deferred: §B8 acceptance `pnpm test:e2e` + artifacts bullets remain open_
 - [x] **B9** Kindergarten Admins tab (list + add + resend invite) — частично снимает [B.8](OPEN_QUESTIONS.md#b8); overview/settings табы остаются заблокированы
+- [ ] **BF1** Post-B9 bugfixes — refresh resilience (персист кэша + `useKindergarten(id)`), drop `/users/me` (403 super-admin), phone mask cap
 
-Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8). B9 — post-deploy фича-батч (backend разблокировал 2026-05-18).
+Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8). B9 — post-deploy фича-батч (backend разблокировал 2026-05-18). BF1 — post-B9 bugfix-батч (browser walk 2026-05-19).
 
 ---
 
@@ -1469,12 +1515,14 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B9
 
 **Live registry** всех `// TODO(BN)` в коде. Каждый TODO — параллельная запись здесь. При завершении батча — пройтись по списку, удалить выполненные.
 
-| ID          | File / Owner                                                                                       | Description                                                                                                                                                                                                   | Linked OPEN_QUESTIONS                                                                   |
-| ----------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| TODO(B7)#01 | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).                                              | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)                         |
-| TODO(B?)#01 | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ kindergarten filter — реализовать когда backend выкатит `?kindergartenId=` query OR дешёвый kg name JOIN на список. Сегодня MVP омитит фильтр (D18) и показывает только truncated UUID + tooltip.         | —                                                                                       |
-| TODO(B?)#02 | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ "failed_in_last" filter — backend не поддерживает `?failed_in_last=` query. Если станет нужно — отдельный backend endpoint OR client-side фильтр (бесполезен на cursor-pagination — пропускает страницы). | —                                                                                       |
-| TODO(B?)#03 | src/routes/kindergartens/new.tsx                                                                   | Realtime slug uniqueness check — реализовать когда backend выкатит `?slug=` query OR `/check-slug` endpoint. Сегодня 409 возвращается только после submit.                                                    | [B.16](OPEN_QUESTIONS.md#b16-realtime-slug-uniqueness-check-frontend-feature-gap--open) |
+| ID           | File / Owner                                                                                       | Description                                                                                                                                                                                                   | Linked OPEN_QUESTIONS                                                                          |
+| ------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| TODO(B7)#01  | src/routes/dashboard.tsx (Platform card), src/routes/kindergartens/index.tsx (subscription column) | Wire active_subscriptions placeholder после того как backend выкатит /saas/saas-subscriptions ([B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)).                                              | [B.9](OPEN_QUESTIONS.md#b9-saas-subscriptions-module--blocker-)                                |
+| TODO(B?)#01  | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ kindergarten filter — реализовать когда backend выкатит `?kindergartenId=` query OR дешёвый kg name JOIN на список. Сегодня MVP омитит фильтр (D18) и показывает только truncated UUID + tooltip.         | —                                                                                              |
+| TODO(B?)#02  | src/routes/operations/lifecycle-dlq.tsx                                                            | DLQ "failed_in_last" filter — backend не поддерживает `?failed_in_last=` query. Если станет нужно — отдельный backend endpoint OR client-side фильтр (бесполезен на cursor-pagination — пропускает страницы). | —                                                                                              |
+| TODO(B?)#03  | src/routes/kindergartens/new.tsx                                                                   | Realtime slug uniqueness check — реализовать когда backend выкатит `?slug=` query OR `/check-slug` endpoint. Сегодня 409 возвращается только после submit.                                                    | [B.16](OPEN_QUESTIONS.md#b16-realtime-slug-uniqueness-check-frontend-feature-gap--open)        |
+| TODO(BF1)#01 | src/hooks/use-kindergartens.ts (`useKindergarten`)                                                 | Swap chokepoint на реальный `GET /saas/kindergartens/:id` когда backend выкатит detail-эндпоинт — правка тела одного хука, routes не трогать. Сегодня читает из персистентного кэша (row-данные списка).      | [B.8](OPEN_QUESTIONS.md#b8-kindergarten-detail--settings-endpoints--blocker-)                  |
+| TODO(BF1)#02 | src/hooks/use-auth.ts / src/stores/session-store.ts                                                | Когда `SuperAdminAuthResponseDto` получит `full_name` (+`email`) — перезаполнять `sessionStore` именем из login+refresh ответа, показывать ФИО вместо email в топбаре (вариант B).                            | [B.18](OPEN_QUESTIONS.md#b18-super-admin-identity-endpoint--usersme-403-backend-dto-gap--open) |
 
 Формат добавления:
 

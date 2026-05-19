@@ -20,6 +20,14 @@ describe('normalizeToE164', () => {
     expect(normalizeToE164('8 (700) 123-45-67')).toBe('+77001234567'));
   it('international stays', () => expect(normalizeToE164('+15551234567')).toBe('+15551234567'));
   it('digits-only -> +<digits>', () => expect(normalizeToE164('15551234567')).toBe('+15551234567'));
+  it('caps KZ at 11 digits (one extra typed digit dropped)', () =>
+    expect(normalizeToE164('+777777777777')).toBe('+77777777777'));
+  it('caps KZ at 11 digits regardless of overflow length', () =>
+    expect(normalizeToE164('+7000000000099')).toBe('+70000000000'));
+  it('local 8 overflow also capped at 11', () =>
+    expect(normalizeToE164('877777777777')).toBe('+77777777777'));
+  it('international capped at E.164 max 15 digits', () =>
+    expect(normalizeToE164('+1999999999999999999')).toBe('+199999999999999'));
 });
 
 describe('applyBackspaceCorrection', () => {
@@ -39,6 +47,13 @@ describe('applyBackspaceCorrection', () => {
   it('no-op paste with same value passes through', () => {
     expect(
       applyBackspaceCorrection('+77777777777', '+7 (777) 777-77-77', '+7 (777) 777-77-77'),
+    ).toBe('+77777777777');
+  });
+  // Reported bug: full 11-digit value, mask pinned, user types a 12th digit ->
+  // browser appends it to the displayed mask. Value must stay capped at 11.
+  it('typing past a full KZ number does not leak a 12th digit', () => {
+    expect(
+      applyBackspaceCorrection('+77777777777', '+7 (777) 777-77-777', '+7 (777) 777-77-77'),
     ).toBe('+77777777777');
   });
 });

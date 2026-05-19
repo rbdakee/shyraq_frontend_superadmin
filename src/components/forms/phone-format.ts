@@ -16,6 +16,12 @@ export function maskKZPhone(e164: string): string {
   return '+' + digits;
 }
 
+// KZ_MAX_DIGITS mirrors maskKZPhone's `digits.slice(1, 11)` (7 + 10 national).
+// Без этого cap stored value может перерасти отображаемую маску на 1 цифру —
+// маска обрезает только display, и лишняя цифра уходила в backend.
+const KZ_MAX_DIGITS = 11;
+const E164_MAX_DIGITS = 15;
+
 export function normalizeToE164(raw: string): string {
   const digits = raw.replace(/\D/g, '');
   if (!digits) return '';
@@ -23,7 +29,8 @@ export function normalizeToE164(raw: string): string {
   if (digits.startsWith('8') && raw.trimStart().startsWith('8')) {
     normalized = '7' + digits.slice(1);
   }
-  return '+' + normalized;
+  const cap = normalized.startsWith('7') ? KZ_MAX_DIGITS : E164_MAX_DIGITS;
+  return '+' + normalized.slice(0, cap);
 }
 
 export function applyBackspaceCorrection(

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import * as kindergartensApi from '@/api/kindergartens';
 import type { ListKindergartensParams } from '@/api/kindergartens';
 import { queryKeys } from './query-keys';
@@ -54,8 +54,10 @@ export function useInviteAdmin() {
   });
 }
 
-export function useKindergartenFromCache(id: string | undefined): Kindergarten | undefined {
-  const qc = useQueryClient();
+function readKindergartenFromCache(
+  qc: ReturnType<typeof useQueryClient>,
+  id: string | undefined,
+): Kindergarten | undefined {
   if (!id) return undefined;
 
   const single = qc.getQueryData<Kindergarten>(queryKeys.kindergartens.detail(id));
@@ -69,4 +71,26 @@ export function useKindergartenFromCache(id: string | undefined): Kindergarten |
     if (found) return found;
   }
   return undefined;
+}
+
+/**
+ * Single chokepoint for "get one kindergarten" on detail pages.
+ *
+ * There is no `GET /saas/kindergartens/:id` endpoint yet (OPEN_QUESTIONS#b8),
+ * so the source today is the (sessionStorage-persisted) query cache populated
+ * by the list. `isPending` is true while the persisted cache is still being
+ * restored after a hard refresh — callers must show a loading state then,
+ * NOT "not found", otherwise Ctrl+R flashes a false miss.
+ *
+ * TODO(BF1)#01: when the backend ships GET /saas/kindergartens/:id, swap the
+ * body of THIS hook to a useQuery — routes stay untouched.
+ */
+export function useKindergarten(id: string | undefined): {
+  kg: Kindergarten | undefined;
+  isPending: boolean;
+} {
+  const qc = useQueryClient();
+  const isRestoring = useIsRestoring();
+  const kg = readKindergartenFromCache(qc, id);
+  return { kg, isPending: !!id && !kg && isRestoring };
 }

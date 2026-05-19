@@ -1,5 +1,4 @@
 export const queryKeys = {
-  auth: { me: () => ['auth', 'me'] as const },
   kindergartens: {
     all: () => ['kindergartens'] as const,
     list: (params: import('@/api/kindergartens').ListKindergartensParams) =>

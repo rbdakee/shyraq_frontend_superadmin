@@ -141,6 +141,19 @@ Backend ревокирует именно эту запись `saas_refresh_toke
 3. `queryClient.clear()`.
 4. Redirect `/login`.
 
+### 0.5 Identity / «текущий пользователь» — **нет super-admin эндпоинта**
+
+> ⛔ **`GET /users/me` НЕ использовать под супер-админским токеном.** Это shared-identity эндпоинт обычного приложения (parent/staff/admin), резолвится из выбранной app-роли. Супер-админский JWT app-роли не имеет → эндпоинт всегда отдаёт `403 Forbidden` (openapi: `pending_role_select`). Рефреш токена не лечит.
+
+**Super-admin identity на фронте собирается БЕЗ сетевого запроса:**
+
+- `email` — из формы `/saas/auth/login` (что ввёл оператор).
+- `role` — из `SuperAdminAuthResponseDto.roles[0].role` (login response).
+- оба кладутся в persisted `sessionStore` (Zustand `persist` → localStorage) → переживают hard refresh.
+- `full_name` — **недоступно** (нет ни в JWT, ни в `SuperAdminAuthResponseDto`). UI показывает email + role; инициалы аватара — из email.
+
+Расширение `SuperAdminAuthResponseDto` полем `full_name` (+`email`) — открытый backend-ask [`OPEN_QUESTIONS.md#b18`](OPEN_QUESTIONS.md#b18-super-admin-identity-endpoint--usersme-403-backend-dto-gap--open). До его реализации отдельный `/saas/me` не вводим.
+
 ---
 
 ## 1. Kindergartens (Tenants) — `/saas/kindergartens`

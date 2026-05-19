@@ -205,6 +205,8 @@
 
 **🟡 Частично доставлено (2026-05-18) — НЕ закрывает B.8.** Backend выкатил `GET / POST /saas/kindergartens/:id/admins` (список + добавление админов садика; ветка `superadmin/kg-admins`, смержена + задеплоена, live Swagger подтверждён). Это **разблокировало отдельную вкладку «Администраторы»** (`/kindergartens/:id/admins`) — у неё свой list/add-эндпоинт, она НЕ зависит от детального DTO. Реализуется фронт-батчем **B9** ([`IMPLEMENTATION_PLAN.md §B9`](IMPLEMENTATION_PLAN.md#b9--kindergarten-admins-tab), [`DESIGN.md §5.5.6`](DESIGN.md#556-tab-администраторы), [`endpoints.md §1.7`](endpoints.md#17-get--post-saaskindergartensidadmins--список--добавление-админов-садика)). **Остаётся blocker:** `GET /saas/kindergartens/:id` (overview-tab) и `PATCH` (settings-tab) — по-прежнему отсутствуют.
 
+**🩹 Frontend hotfix (2026-05-19) — баг «Садик не найден» при Ctrl+R. MVP workaround, blocker НЕ закрывает.** Детальные страницы (`/kindergartens/:id`, `/admins`) брали садик только из in-memory TanStack Query cache → при hard refresh кэш пуст → ложный «не найден» (заход через кнопку из списка работал, т.к. list-запрос наполнял кэш). Фикс: (1) TanStack Query cache персистится в `sessionStorage` (`@tanstack/react-query-persist-client`, buster = `__APP_VERSION__`) → row-данные из `GET /saas/kindergartens` переживают Ctrl+R; (2) введён единый chokepoint-хук `useKindergarten(id)` — сегодня читает из (персистентного) кэша; при появлении `GET /saas/kindergartens/:id` достаточно поменять **только тело этого хука** (one-line swap), routes не трогаются. **Остаётся ограничение:** прямой заход на `/kindergartens/:id` в чистой сессии (пустой `sessionStorage`, без визита списка) по-прежнему даёт «не найден» — неизбежно до появления detail-эндпоинта (это и есть содержание blocker'а).
+
 **Follow-up gaps (новые backend-asks, открыть при появлении продуктовой нужды):**
 
 - **Нет remove / demote админа** садика суперадмином (удалить/понизить роль). Если в UI понадобится «Убрать админа» — отдельный backend-ask.
@@ -504,6 +506,24 @@ Frontend can't proceed beyond the empty/403 state without this. `POST /admin/lif
 **Зависимости:** backend RBAC fix.
 
 **Триггер:** before B6 can be marked fully accepted on DLQ tab.
+
+---
+
+### B.18 Super-admin identity endpoint — `/users/me` 403 (backend DTO gap) — `open`
+
+**Контекст:** B-bugfix browser walk (2026-05-19). `GET /api/v1/users/me` возвращает `403 Forbidden` (`{"message":"Forbidden resource","error":"Forbidden","statusCode":403}`) под супер-админским токеном (`admin@shyraq.local`). openapi прямо документирует этот 403: `pending_role_select — finish /auth/role/select before reading /users/me` ([`openapi.d.ts` UsersController_getMe_v1](../src/api/types/openapi.d.ts)).
+
+**Корневая причина:** `/users/me` — shared-identity эндпоинт **обычного приложения** (parent/staff/admin), резолвится из выбранной app-роли. У супер-админского JWT (из `/saas/auth/login`) app-роли нет → guard всегда 403, рефреш токена не помогает. Отдельного super-admin identity-эндпоинта (`/saas/me`) на backend нет; `SuperAdminAuthResponseDto` (login + refresh) не содержит ни `full_name`, ни `email` — только токены + `roles`.
+
+**Affects:** топбар (`UserMenu`) — имя/инициалы супер-админа не отображались; шумные `401 → refresh → 403` в каждом boot (см. также §A.1 — access-токен in-memonly by design, волна 401 на boot ожидаема).
+
+**Frontend fix (вариант A — сделано 2026-05-19):** `useCurrentUser` / `getCurrentUser` удалены, `/users/me` больше не дёргается. Топбар рендерится из persisted `sessionStore` (email + role кладутся при логине, переживают Ctrl+R), инициалы аватара — из email. Соответствует исходному дизайну [`IMPLEMENTATION_PLAN.md` §4.456](IMPLEMENTATION_PLAN.md) (placeholder без `/saas/me`).
+
+**Backend-ask (вариант B — желательно, `open`):** добавить `full_name` (+`email`) в существующий `SuperAdminAuthResponseDto` — его возвращают **и** `/saas/auth/login`, **и** `/saas/auth/refresh`. Фронт уже дёргает `/saas/auth/refresh` на каждом boot → перезаполнит `sessionStore` именем из refresh-ответа одной строкой. **Ноль новых эндпоинтов, ноль лишних запросов, имя переживает Ctrl+R.** Отдельный `GET /saas/me` — дороже (новый эндпоинт + лишний запрос на каждый boot) ради одного поля; **не рекомендуется**.
+
+**Зависимости:** backend (расширить `SuperAdminAuthResponseDto`).
+
+**Триггер:** когда продукт потребует отображать ФИО супер-админа (а не email) в UI. До тех пор вариант A полностью функционален.
 
 ---
 
