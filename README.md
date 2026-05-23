@@ -6,7 +6,7 @@
 
 1. `pnpm install`
 2. `cp .env.example .env.local` — fill in `VITE_API_BASE_URL` (default `/api/v1`, served via Vite dev proxy to the live dev backend).
-3. `pnpm dev` — Vite dev server on `http://localhost:5173`. Backend dev: `http://13.60.189.214:3000` (proxied).
+3. `pnpm dev` — Vite dev server on `http://localhost:5173`. Backend dev: `http://194.32.140.219:5678` (proxied).
 
 ## Scripts
 

@@ -2,7 +2,7 @@
 
 Безопасный, поэтапный план разработки SuperAdmin frontend. **8 батчей**, каждый ≈ одна Claude Code сессия. Каждый батч заканчивается рабочим коммитом с проходящими acceptance-критериями.
 
-**Контракты сверены с live Swagger** (`http://13.60.189.214:3000/docs-json`, последний аудит: 2026-05-14, OpenAPI ≈ 383KB, 202 paths из них 13 под `/saas/*` + 2 для super-admin под `/admin/*` + 2 health). Все URL/DTO/response shape'ы в этом плане — точные. Если backend меняется — `pnpm gen:api` + ре-аудит.
+**Контракты сверены с live Swagger** (`http://194.32.140.219:5678/docs-json`, последний аудит: 2026-05-14, OpenAPI ≈ 383KB, 202 paths из них 13 под `/saas/*` + 2 для super-admin под `/admin/*` + 2 health). Все URL/DTO/response shape'ы в этом плане — точные. Если backend меняется — `pnpm gen:api` + ре-аудит.
 
 **Total estimate:** 24–32 часа чистого кодинга (с учётом готового handoff-дизайна и blocker'ов B.8-B.13). Календарно: 8–14 рабочих дней при 1 сессии в день.
 
@@ -41,12 +41,12 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B<N>
 
 ### URLs
 
-| Что                               | URL                                   |
-| --------------------------------- | ------------------------------------- |
-| Backend base                      | `http://13.60.189.214:3000`           |
-| API prefix (для всех endpoints)   | `/api/v1/`                            |
-| Swagger UI                        | `http://13.60.189.214:3000/docs`      |
-| Swagger JSON (для `pnpm gen:api`) | `http://13.60.189.214:3000/docs-json` |
+| Что                               | URL                                    |
+| --------------------------------- | -------------------------------------- |
+| Backend base                      | `http://194.32.140.219:5678`           |
+| API prefix (для всех endpoints)   | `/api/v1/`                             |
+| Swagger UI                        | `http://194.32.140.219:5678/docs`      |
+| Swagger JSON (для `pnpm gen:api`) | `http://194.32.140.219:5678/docs-json` |
 
 > **Внимание:** Swagger UI/JSON живут на корне домена, **не** под `/api/v1/`. Все остальные endpoints — под `/api/v1/`.
 
@@ -57,7 +57,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B<N>
 ```ts
 server: {
   proxy: {
-    '/api': { target: 'http://13.60.189.214:3000', changeOrigin: true },
+    '/api': { target: 'http://194.32.140.219:5678', changeOrigin: true },
   },
 }
 ```
@@ -167,19 +167,19 @@ VITE_APP_VERSION=0.1.0
 
 ```bash
 # Backend health
-curl -sS http://13.60.189.214:3000/api/v1/health | head
+curl -sS http://194.32.140.219:5678/api/v1/health | head
 # → должно быть {"status":"ok","version":"...","uptime_seconds":...,"timestamp":"..."}
 
 # Swagger UI открывается
-curl -sS -o /dev/null -w "%{http_code}\n" http://13.60.189.214:3000/docs
+curl -sS -o /dev/null -w "%{http_code}\n" http://194.32.140.219:5678/docs
 # → 200
 
 # Swagger JSON не пустой
-curl -sS http://13.60.189.214:3000/docs-json | wc -c
+curl -sS http://194.32.140.219:5678/docs-json | wc -c
 # → должно быть > 100000 (~383KB)
 
 # SuperAdmin login работает
-curl -sS -X POST http://13.60.189.214:3000/api/v1/saas/auth/login \
+curl -sS -X POST http://194.32.140.219:5678/api/v1/saas/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@shyraq.local","password":"<actual_password>"}' | head
 # → должно быть {"access_token":"eyJ...","refresh_token":"...","token_type":"Bearer","expires_in":900,...}
@@ -286,7 +286,7 @@ pnpm --version    # >= 9
     server: {
       proxy: {
         '/api': {
-          target: 'http://13.60.189.214:3000',
+          target: 'http://194.32.140.219:5678',
           changeOrigin: true,
         },
       },
@@ -338,7 +338,7 @@ pnpm --version    # >= 9
     `package.json` script:
 
     ```json
-    "gen:api": "openapi-typescript http://13.60.189.214:3000/docs-json -o src/api/types/openapi.d.ts"
+    "gen:api": "openapi-typescript http://194.32.140.219:5678/docs-json -o src/api/types/openapi.d.ts"
     ```
 
     Запустить `pnpm gen:api`. Файл должен сгенериться (> 100KB, typical 500-600KB depending on backend schema). Закоммитить.
@@ -1373,7 +1373,7 @@ Refs: docs/IMPLEMENTATION_PLAN.md §B8
 
 **Tasks:**
 
-1. `vercel.json` — framework `vite`, `pnpm install --frozen-lockfile` / `pnpm build` / `outputDirectory: dist`; rewrites: `/api/:path*` → `http://13.60.189.214:3000/api/:path*`, затем SPA fallback `/(.*)` → `/index.html`; security headers (CSP/HSTS/nosniff/X-Frame-Options/Referrer-Policy/X-Robots-Tag) + cache (`/assets/*` immutable, `index.html` no-store).
+1. `vercel.json` — framework `vite`, `pnpm install --frozen-lockfile` / `pnpm build` / `outputDirectory: dist`; rewrites: `/api/:path*` → `http://194.32.140.219:5678/api/:path*`, затем SPA fallback `/(.*)` → `/index.html`; security headers (CSP/HSTS/nosniff/X-Frame-Options/Referrer-Policy/X-Robots-Tag) + cache (`/assets/*` immutable, `index.html` no-store).
 2. `.github/workflows/ci.yml` — push/PR в `main`; Node 20 + pnpm (frozen lockfile, cache); `pnpm typecheck && pnpm lint && pnpm test && pnpm build`.
 3. `package.json#packageManager` — пин `pnpm@10.19.0` для воспроизводимости (Vercel + Actions + corepack).
 4. `.vercelignore`, `.env.example` (комментарий про prod-проксирование), README Deploy-секция.

@@ -32,8 +32,8 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 | Implementation tracker (батчи, acceptance, открытые TODO)            | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)                                                           |
 | Дизайн-handoff (HTML/CSS/JS прототип всех экранов)                   | [`docs/design/handoff/shyraq-superadmin/`](docs/design/handoff/shyraq-superadmin/)                                     |
 | Design tokens (palette, typography, radii, shadows)                  | [`docs/design/handoff/shyraq-superadmin/project/tokens.css`](docs/design/handoff/shyraq-superadmin/project/tokens.css) |
-| Backend OpenAPI (live JSON)                                          | `http://13.60.189.214:3000/docs-json`                                                                                  |
-| Backend Swagger UI (live)                                            | `http://13.60.189.214:3000/docs`                                                                                       |
+| Backend OpenAPI (live JSON)                                          | `http://194.32.140.219:5678/docs-json`                                                                                 |
+| Backend Swagger UI (live)                                            | `http://194.32.140.219:5678/docs`                                                                                      |
 
 **Backend code reference** (читать ТОЛЬКО при критических неопределённостях):
 
@@ -59,19 +59,19 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 ## 3. Backend integration
 
-**Dev server:** `http://13.60.189.214:3000`
+**Dev server:** `http://194.32.140.219:5678`
 
-| Что                               | URL                                   |
-| --------------------------------- | ------------------------------------- |
-| API base (все endpoints)          | `http://13.60.189.214:3000/api/v1/`   |
-| Swagger UI                        | `http://13.60.189.214:3000/docs`      |
-| OpenAPI JSON (для `pnpm gen:api`) | `http://13.60.189.214:3000/docs-json` |
+| Что                               | URL                                    |
+| --------------------------------- | -------------------------------------- |
+| API base (все endpoints)          | `http://194.32.140.219:5678/api/v1/`   |
+| Swagger UI                        | `http://194.32.140.219:5678/docs`      |
+| OpenAPI JSON (для `pnpm gen:api`) | `http://194.32.140.219:5678/docs-json` |
 
-**Полный путь endpoint'а** — `/api/v1/<route>`. Например, super-admin login: `POST http://13.60.189.214:3000/api/v1/saas/auth/login`. Префикс `/api/v1/` глобальный для **всех** endpoints. Swagger UI/JSON — на корне домена, **не** под `/api/v1/`.
+**Полный путь endpoint'а** — `/api/v1/<route>`. Например, super-admin login: `POST http://194.32.140.219:5678/api/v1/saas/auth/login`. Префикс `/api/v1/` глобальный для **всех** endpoints. Swagger UI/JSON — на корне домена, **не** под `/api/v1/`.
 
 **SuperAdmin seed creds:** `admin@shyraq.local` / `CHANGE_ME_ADMIN_PASSWORD` (см. `SUPER_ADMIN_SEED_*` env на сервере — может быть переопределён).
 
-**CORS:** в dev используем **Vite dev proxy** (`vite.config.ts`) — `/api/*` тоннелится на `http://13.60.189.214:3000`. Это убирает CORS-проблемы и позволяет писать `fetch('/api/v1/...')` без конфигурации origin'а.
+**CORS:** в dev используем **Vite dev proxy** (`vite.config.ts`) — `/api/*` тоннелится на `http://194.32.140.219:5678`. Это убирает CORS-проблемы и позволяет писать `fetch('/api/v1/...')` без конфигурации origin'а.
 
 **OpenAPI types:** генерируются командой `pnpm gen:api` из live Swagger JSON. Артефакт `src/api/types/openapi.d.ts` коммитим (чтобы CI без backend connection мог собрать фронт).
 
@@ -110,7 +110,7 @@ Audience: 5–20 internal users. За VPN/IP-allowlist. Desktop-first (≥768px)
 
 | Хардкод запрещён                           | Где жить должно                                            |
 | ------------------------------------------ | ---------------------------------------------------------- |
-| `'http://13.60.189.214:3000'` в коде       | `import.meta.env.VITE_API_BASE_URL` через `env.ts`         |
+| `'http://194.32.140.219:5678'` в коде      | `import.meta.env.VITE_API_BASE_URL` через `env.ts`         |
 | Магические числа (TTL, лимиты, offsets)    | Константы в `lib/constants.ts` или TS-enum                 |
 | Цвета `#fafaf9`                            | CSS variables через Tailwind theme                         |
 | Пиксели `padding: 28` без причины          | Tailwind spacing utilities                                 |
