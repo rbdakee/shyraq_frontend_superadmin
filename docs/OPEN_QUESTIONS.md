@@ -527,6 +527,45 @@ Frontend can't proceed beyond the empty/403 state without this. `POST /admin/lif
 
 ---
 
+### B.19 Нет push-канала для super-admin алертов (Kaspi `down`) — `open`
+
+**Контекст:** Kaspi-апдейт backend'а 2026-06-05 (см. [`endpoints.md §13`](endpoints.md#13-kaspi-config--version-gate--saaskaspi)). Когда Kaspi блокирует текущий билд (`OldVersionToUpdate`), оплата ломается у **всех** садиков сразу. Backend выставляет `checks.kaspi='down'` в `/health/ready` и кэширует снапшот в `kaspi_detail`, но **полноценного push-алерта суперадмину нет** — канала нотификаций для saas-юзеров на backend не существует (см. также [§A.2](#a2-websocket-integration-timing--parked) — system-events для super_admin не транслируются).
+
+**Следствие для фронта:** инцидент «Kaspi блокирует билд» обнаруживается только если super-admin **сам** открыл UI. Митигация в B10 — пассивная: destructive-баннер на `/system/kaspi` + строка `Kaspi gate` на `/system-status`, оба читают `checks.kaspi` (polling 30s). Нет toast/email/Telegram-пуша, когда статус флипается в фоне.
+
+**Вопрос:** нужен ли активный канал (email / Telegram-бот / WS `saas:system` room) для немедленного оповещения о `kaspi=down`? Или пассивного мониторинга через дашборд достаточно (учитывая 5–20 internal users, которые и так в инструменте)?
+
+**Варианты:**
+
+1. Пассивный мониторинг (текущий B10) — баннер + индикатор, достаточно для MVP.
+2. Backend выпускает `NotificationPort.notifySystemEvent('kaspi_blocked')` → фронт слушает WS-room (зависит от [§A.2](#a2-websocket-integration-timing--parked)).
+3. Backend шлёт email/Telegram дежурному при флипе `up→down` (вне фронта).
+
+**Зависимости:** backend (новый канал нотификаций для saas-юзеров) + product (нужна ли real-time реакция на kaspi-инциденты).
+
+**Триггер:** первый реальный инцидент, где `kaspi=down` провисел незамеченным и сломал оплату у садиков. До тех пор — вариант 1.
+
+---
+
+### B.20 SSRF: backend-валидация Kaspi URL-полей — `open` (backend-ask)
+
+**Контекст:** B10 (`/system/kaspi`). Форма редактирует `entrance_url` / `mtoken_url` / `qrpay_url` → `PUT /saas/kaspi/config`. Backend **сам дёргает** эти URL server-side (в `version-probe` и в реальных платёжных flow). Это классический SSRF-sink: кто может задать URL — может заставить backend постучаться во внутренний сервис (loopback, RFC1918, `169.254.169.254` cloud-metadata).
+
+**Кто может:** только super_admin / support (самая привилегированная роль, за VPN). Порог доверия высокий, но «internal-only» **не** снимает SSRF — внутренние сервисы как раз и есть цель.
+
+**Где защита:**
+
+- **Frontend (сделано, defense-in-depth):** Zod-refinement `isPublicHostUrl` в [`routes/system/kaspi.tsx`](../src/routes/system/kaspi.tsx) отклоняет очевидно-внутренние хосты (localhost, 127/10/192.168/172.16-31/169.254, `::1`, `0.0.0.0`). **Это НЕ граница безопасности** — `PUT /saas/kaspi/config` можно дёрнуть в обход фронта.
+- **Backend (требуется, authoritative):** валидировать host **после DNS-резолва**, отклонять loopback / private / link-local / metadata-ranges; защита от DNS-rebinding (резолв → проверка → коннект к тому же IP, либо allowlist Kaspi-доменов). Опционально — жёсткий allowlist `*.kaspi.kz`.
+
+**Вопрос:** backend добавляет post-resolution валидацию (или allowlist Kaspi-хостов)? Без этого frontend-проверка — только UX.
+
+**Зависимости:** backend (`SaasKaspiConfigController` / Kaspi-клиент).
+
+**Триггер:** до реального использования probe/конфига с недоверенными значениями. Для MVP (super_admin за VPN) риск низкий, но фикс дешёвый — allowlist доменов Kaspi.
+
+---
+
 ## D. Process / Operational
 
 ### D.1 Когда обновить этот документ — `meta`

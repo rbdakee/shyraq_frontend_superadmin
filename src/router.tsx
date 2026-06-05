@@ -23,6 +23,7 @@ import UsersEditPage from '@/routes/users/$id';
 /* eslint-disable react-refresh/only-export-components -- lazy route chunks are not HMR components */
 const DashboardPage = lazy(() => import('./routes/dashboard'));
 const SystemStatusPage = lazy(() => import('./routes/system-status'));
+const SystemKaspiPage = lazy(() => import('./routes/system/kaspi'));
 const KindergartensListPage = lazy(() => import('./routes/kindergartens'));
 const KindergartenCreatePage = lazy(() => import('./routes/kindergartens/new'));
 const KindergartenDetailPage = lazy(() => import('./routes/kindergartens/$id'));
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
               },
               { path: '/operations/lifecycle-dlq', element: <OperationsLifecycleDlqPage /> },
               { path: '/system-status', element: <SystemStatusPage /> },
+              { path: '/system/kaspi', element: <SystemKaspiPage /> },
             ],
           },
         ],

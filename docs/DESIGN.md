@@ -63,6 +63,7 @@
 /operations/schedule-rollout           [weekly rollout trigger]
 /operations/lifecycle-dlq              [failed jobs table + retry]
 /system-status                         [health page]
+/system/kaspi                          [Kaspi config + version gate]
 
 # Error pages
 /404
@@ -86,6 +87,7 @@ Feature Flags       /feature-flags        icon: Flag
   └─ Failed jobs    /operations/lifecycle-dlq      icon: AlertTriangle
 ─────── (separator) ───────
 Статус системы      /system-status        icon: Activity
+Kaspi конфиг        /system/kaspi         icon: Wallet
 ```
 
 Группа "Операции" — collapsible accordion в sidebar (default expanded).
@@ -1090,6 +1092,7 @@ Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 - История in-memory, last 10 проверок. Сброс при reload.
 - Top status block — pulse-animated dot (green/red).
 - При degraded — статус-block становится red, alert "Some services are down" с деталями.
+- Третья строка компонентов — `Kaspi gate` (`checks.kaspi`): green `up` / red `down` / grey `unknown`. `down` **не** делает общий статус degraded (информационный сигнал). Ссылка «Открыть Kaspi конфиг» → `/system/kaspi`.
 
 ---
 
@@ -1133,6 +1136,61 @@ Failed Jobs (Lifecycle DLQ)                        [↻ Обновить]
 
                   [↻ Обновить]
 ```
+
+---
+
+### 5.17 `/system/kaspi` — Kaspi конфиг + версионный гейт
+
+**Цель:** один на всю платформу конфиг Kaspi-клиента + SMS-free проверка билда против гейта. Kaspi периодически блокирует устаревший **билд** (`OldVersionToUpdate`) → оплата ломается у ВСЕХ садиков. Super-admin чинит **без передеплоя**, подняв `app_build`.
+
+**Backend:** `GET/PUT /saas/kaspi/config`, `POST /saas/kaspi/version-probe`, `GET /health/ready` (`checks.kaspi` + `kaspi_detail`). См. [`endpoints.md §13`](endpoints.md#13-kaspi-config--version-gate--saaskaspi).
+
+**Layout:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Kaspi конфиг                            [Проверить билд ↻]   │
+│  Глобальный конфиг платёжного клиента Kaspi (один на платформу)│
+├──────────────────────────────────────────────────────────────┤
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ ⛔ Kaspi блокирует текущий билд — оплата не работает    │  │  ← banner, только если checks.kaspi='down'
+│  │    у садиков. Обнови app_build до актуального.          │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                               │
+│  Состояние гейта                                              │
+│  ● up / ● down / ◌ unknown    Билд: 1071   Проверено: 10:00   │  ← из /health/ready (checks.kaspi + kaspi_detail)
+│                                                               │
+│  ┌─────────────── Результат пробы ──────────────────────┐    │
+│  │ Билд 1077 → ✅ принят   (или ⛔ OldVersionToUpdate)   │    │  ← после нажатия «Проверить билд»
+│  └──────────────────────────────────────────────────────┘    │
+│                                                               │
+│  Параметры конфига                                            │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ app_build *      [ 1076          ]  ← ключевое поле   │    │
+│  │ app_version      [ 4.110.1       ]                    │    │
+│  │ platform_ver     [ 18.5          ]                    │    │
+│  │ model            [ iPhone17,3    ]                    │    │
+│  │ brand            [ Apple         ]                    │    │
+│  │ ua_native        [ Kaspi%20Pay/… ]  (textarea)        │    │
+│  │ ua_browser       [ Mozilla/5.0 … ]  (textarea)        │    │
+│  │ entrance_url     [ https://entrance-pay.kaspi.kz ]    │    │
+│  │ mtoken_url       [ https://mtoken.kaspi.kz       ]    │    │
+│  │ qrpay_url        [ https://qrpay.kaspi.kz        ]    │    │
+│  │                                                      │    │
+│  │ Обновлено: 2026-06-01 12:00 · by 0000…0001           │    │
+│  │                              [Отмена] [Сохранить]    │    │
+│  └──────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Поведение:**
+
+- **Состояние гейта** — pulse-dot из `checks.kaspi` (green `up` / red `down` / grey `unknown`), `kaspi_detail.build` + relative `checked_at`. Polling `/health/ready` 30s (reuse health-хук).
+- **Баннер «down»** — destructive alert, виден только при `checks.kaspi='down'`. Текст: «Kaspi блокирует текущий билд — оплата не работает у садиков. Обнови app_build до актуального из App Store (Kaspi Pay iOS)».
+- **«Проверить билд»** → `POST /saas/kaspi/version-probe` без body (= текущий билд). Loading на кнопке. Результат — inline-блок: `accepted:true` → success («Билд N принят»), `accepted:false` → warning/error c `alarm` («OldVersionToUpdate»). Probe SMS не тратит — жать можно сколько угодно, но это реальный сетевой вызов, **не** авто-polling.
+- **Форма** (RHF + Zod): все поля строковые, `app_build` — обязательное и визуально выделено (ключевое для гейта). `app_version` опц. подсказка «на гейт не влияет». URL-поля — Zod `url()`. Submit → `PUT /saas/kaspi/config` (шлём только изменённые поля — partial; минимум — `app_build`). 200 → success-тост + рефетч конфига. 422 → `setError(field)`. После сохранения — подсказка «нажми Проверить билд».
+- **Состояния:** loading (skeleton конфига), error (load fail → retry), 403 (не super_admin — но раз попал на роут, токен валиден).
+- Доступ — пункт сайдбара «Kaspi конфиг» (`Wallet`), секция системного статуса.
 
 ---
 

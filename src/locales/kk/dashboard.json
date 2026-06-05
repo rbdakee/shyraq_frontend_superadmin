@@ -6,8 +6,13 @@
     "ok": "Барлық жүйелер қалыпты жұмыс істейді",
     "degraded": "Қызметтер тұрақсыз",
     "error": "Health қолжетімсіз",
-    "components": { "db": "PostgreSQL", "redis": "Redis", "api": "API process" },
-    "status": { "up": "up", "down": "down" },
+    "components": {
+      "db": "PostgreSQL",
+      "redis": "Redis",
+      "api": "API process",
+      "kaspi": "Kaspi gate"
+    },
+    "status": { "up": "up", "down": "down", "unknown": "unknown" },
     "updated_ago": "{{seconds}} сек бұрын жаңартылды",
     "updated_now": "жаңа ғана жаңартылды",
     "details": "Толығырақ →"
@@ -31,6 +36,7 @@
     "history_empty": "Деректер күтілуде…",
     "refresh": "Жаңарту",
     "result_ok": "OK",
-    "result_degraded": "Degraded"
+    "result_degraded": "Degraded",
+    "kaspi_link": "Kaspi конфигін ашу"
   }
 }

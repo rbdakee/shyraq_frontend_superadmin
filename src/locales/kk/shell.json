@@ -12,7 +12,9 @@
     "content": "Контент",
     "schedule_rollout": "Апта роллауты",
     "lifecycle_dlq": "Failed jobs",
-    "system_status": "Жүйе күйі"
+    "system_status": "Жүйе күйі",
+    "system": "Жүйе",
+    "kaspi": "Kaspi конфигі"
   },
   "user_menu": {
     "profile": "Менің профилім",

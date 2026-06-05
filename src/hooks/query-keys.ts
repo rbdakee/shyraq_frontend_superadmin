@@ -16,4 +16,5 @@ export const queryKeys = {
       ['lifecycle', 'failed-jobs', params] as const,
   },
   health: { ready: () => ['health', 'ready'] as const },
+  kaspi: { config: () => ['kaspi', 'config'] as const },
 };

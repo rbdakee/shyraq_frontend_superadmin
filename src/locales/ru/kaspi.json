@@ -1,0 +1,78 @@
+{
+  "page_title": "Kaspi конфиг",
+  "page_subtitle": "Глобальный конфиг платёжного клиента Kaspi — один на всю платформу.",
+  "gate": {
+    "title": "Состояние гейта",
+    "status": {
+      "up": "Билд принят",
+      "down": "Билд заблокирован",
+      "unknown": "Фоновая проверка ещё не выполнялась"
+    },
+    "hint": "Это результат фоновой проверки бэкенда (по расписанию). Кнопка «Проверить билд» делает разовую проверку прямо сейчас — её результат показан ниже и не меняет этот индикатор.",
+    "build": "Билд: {{build}}",
+    "checked_at": "Проверено {{when}}",
+    "down_banner": "Kaspi блокирует текущий билд — оплата не работает у садиков. Подними app_build до актуального из App Store (Kaspi Pay iOS) и проверь пробу."
+  },
+  "probe": {
+    "cta": "Проверить билд",
+    "running": "Проверяем…",
+    "accepted": "Билд {{build}} принят гейтом Kaspi.",
+    "blocked": "Билд {{build}} заблокирован: {{alarm}}.",
+    "blocked_unknown": "неожиданный ответ Kaspi"
+  },
+  "form": {
+    "title": "Параметры конфига",
+    "load_error": "Не удалось загрузить конфиг.",
+    "retry": "Повторить",
+    "toast_saved": "Конфиг сохранён. Нажми «Проверить билд», чтобы убедиться, что гейт пускает.",
+    "updated_at": "Обновлено {{when}}",
+    "btn_reset": "Сбросить",
+    "btn_save": "Сохранить",
+    "btn_saving": "Сохраняем…",
+    "err_required": "Поле обязательно",
+    "err_url": "Некорректный URL",
+    "err_internal_url": "Внутренние / loopback-адреса запрещены"
+  },
+  "fields": {
+    "app_build": {
+      "label": "app_build",
+      "hint": "Ключевое поле гейта. Поднимай при ошибке OldVersionToUpdate."
+    },
+    "app_version": {
+      "label": "app_version",
+      "hint": "Косметическая строка версии — на гейт не влияет."
+    },
+    "platform_ver": {
+      "label": "platform_ver",
+      "hint": "Версия iOS, уходит в Cookie и тело запроса к Kaspi."
+    },
+    "model": {
+      "label": "model",
+      "hint": "Идентификатор модели устройства."
+    },
+    "brand": {
+      "label": "brand",
+      "hint": "Бренд устройства."
+    },
+    "ua_native": {
+      "label": "ua_native",
+      "hint": "User-Agent нативного приложения Kaspi."
+    },
+    "ua_browser": {
+      "label": "ua_browser",
+      "hint": "User-Agent WebView / браузера."
+    },
+    "entrance_url": {
+      "label": "entrance_url",
+      "hint": "Базовый URL Kaspi entrance (вход / онбординг)."
+    },
+    "mtoken_url": {
+      "label": "mtoken_url",
+      "hint": "Базовый URL Kaspi mtoken (сессионный токен)."
+    },
+    "qrpay_url": {
+      "label": "qrpay_url",
+      "hint": "Базовый URL Kaspi QR-pay."
+    }
+  }
+}

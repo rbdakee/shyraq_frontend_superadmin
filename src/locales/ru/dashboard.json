@@ -6,8 +6,13 @@
     "ok": "Все системы работают нормально",
     "degraded": "Сервисы нестабильны",
     "error": "Health недоступен",
-    "components": { "db": "PostgreSQL", "redis": "Redis", "api": "API process" },
-    "status": { "up": "up", "down": "down" },
+    "components": {
+      "db": "PostgreSQL",
+      "redis": "Redis",
+      "api": "API process",
+      "kaspi": "Kaspi gate"
+    },
+    "status": { "up": "up", "down": "down", "unknown": "unknown" },
     "updated_ago": "обновлено {{seconds}} сек назад",
     "updated_now": "обновлено только что",
     "details": "Подробнее →"
@@ -31,6 +36,7 @@
     "history_empty": "Ожидание данных…",
     "refresh": "Обновить",
     "result_ok": "OK",
-    "result_degraded": "Degraded"
+    "result_degraded": "Degraded",
+    "kaspi_link": "Открыть Kaspi конфиг"
   }
 }

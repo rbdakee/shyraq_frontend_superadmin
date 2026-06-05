@@ -1,0 +1,78 @@
+{
+  "page_title": "Kaspi конфигі",
+  "page_subtitle": "Kaspi төлем клиентінің жаһандық конфигі — бүкіл платформаға біреу.",
+  "gate": {
+    "title": "Гейт күйі",
+    "status": {
+      "up": "Билд қабылданды",
+      "down": "Билд бұғатталған",
+      "unknown": "Фондық тексеру әлі орындалмаған"
+    },
+    "hint": "Бұл — бэкендтің фондық тексеруінің нәтижесі (кесте бойынша). «Билдті тексеру» батырмасы дәл қазір бір реттік тексеру жасайды — оның нәтижесі төменде көрсетіледі әрі бұл индикаторды өзгертпейді.",
+    "build": "Билд: {{build}}",
+    "checked_at": "Тексерілді {{when}}",
+    "down_banner": "Kaspi ағымдағы билдті бұғаттап тұр — балабақшаларда төлем жұмыс істемейді. app_build-ті App Store-дағы өзекті нұсқаға (Kaspi Pay iOS) дейін көтеріп, тексеруді орындаңыз."
+  },
+  "probe": {
+    "cta": "Билдті тексеру",
+    "running": "Тексерілуде…",
+    "accepted": "{{build}} билдті Kaspi гейті қабылдады.",
+    "blocked": "{{build}} билд бұғатталды: {{alarm}}.",
+    "blocked_unknown": "Kaspi-дің күтпеген жауабы"
+  },
+  "form": {
+    "title": "Конфиг параметрлері",
+    "load_error": "Конфигті жүктеу мүмкін болмады.",
+    "retry": "Қайталау",
+    "toast_saved": "Конфиг сақталды. Гейттің өткізетінін тексеру үшін «Билдті тексеру» батырмасын басыңыз.",
+    "updated_at": "Жаңартылды {{when}}",
+    "btn_reset": "Қалпына келтіру",
+    "btn_save": "Сақтау",
+    "btn_saving": "Сақталуда…",
+    "err_required": "Өріс міндетті",
+    "err_url": "Қате URL",
+    "err_internal_url": "Ішкі / loopback мекенжайларға тыйым салынған"
+  },
+  "fields": {
+    "app_build": {
+      "label": "app_build",
+      "hint": "Гейттің негізгі өрісі. OldVersionToUpdate қатесінде көтеріңіз."
+    },
+    "app_version": {
+      "label": "app_version",
+      "hint": "Косметикалық нұсқа жолы — гейтке әсер етпейді."
+    },
+    "platform_ver": {
+      "label": "platform_ver",
+      "hint": "iOS нұсқасы, Cookie мен Kaspi сұраныс денесіне жіберіледі."
+    },
+    "model": {
+      "label": "model",
+      "hint": "Құрылғы моделінің идентификаторы."
+    },
+    "brand": {
+      "label": "brand",
+      "hint": "Құрылғы бренді."
+    },
+    "ua_native": {
+      "label": "ua_native",
+      "hint": "Kaspi нативті қосымшасының User-Agent-і."
+    },
+    "ua_browser": {
+      "label": "ua_browser",
+      "hint": "WebView / браузердің User-Agent-і."
+    },
+    "entrance_url": {
+      "label": "entrance_url",
+      "hint": "Kaspi entrance базалық URL-і (кіру / онбординг)."
+    },
+    "mtoken_url": {
+      "label": "mtoken_url",
+      "hint": "Kaspi mtoken базалық URL-і (сессиялық токен)."
+    },
+    "qrpay_url": {
+      "label": "qrpay_url",
+      "hint": "Kaspi QR-pay базалық URL-і."
+    }
+  }
+}

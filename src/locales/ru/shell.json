@@ -12,7 +12,9 @@
     "content": "Контент",
     "schedule_rollout": "Rollout недели",
     "lifecycle_dlq": "Failed jobs",
-    "system_status": "Статус системы"
+    "system_status": "Статус системы",
+    "system": "Система",
+    "kaspi": "Kaspi конфиг"
   },
   "user_menu": {
     "profile": "Мой профиль",

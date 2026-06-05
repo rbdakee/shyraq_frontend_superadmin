@@ -854,18 +854,21 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 ```json
 {
   "status": "ok",
-  "checks": { "db": "up", "redis": "up" }
+  "checks": { "db": "up", "redis": "up", "kaspi": "up" },
+  "kaspi_detail": { "build": "1071", "checked_at": "2026-06-04T10:00:00.000Z" }
 }
 ```
 
-Где `checks.db` / `checks.redis` — enum `["up","down"]`.
+- `checks.db` / `checks.redis` — enum `["up","down"]`.
+- `checks.kaspi` — enum `["up","down","unknown"]` (K9, добавлено 2026-06-05). `up` = текущий билд принят гейтом, `down` = Kaspi блокирует (`OldVersionToUpdate`), `unknown` = cron-проба ещё не отрабатывала. **`kaspi=down` НЕ роняет top-level `status`** (остаётся `ok`) — это информационный сигнал, а не readiness-failure.
+- `kaspi_detail` — опционально (`{ build, checked_at }`), появляется после первой cron-пробы. Последний кэшированный снапшот версионного гейта. См. [§13](#13-kaspi-config--version-gate--saaskaspi).
 
 > Swagger декларирует только `200` для этого пути; backend код может возвращать `503` при degraded — фронт должен принимать оба и читать `status`. Поднять уточнение в OPEN_QUESTIONS если важно.
 
 **Frontend UX:**
 
 - Дашборд: pulse-indicator (green/red) для DB и Redis. Polling каждые 30 секунд через TanStack Query `refetchInterval: 30_000`.
-- Отдельная страница `/system-status` с историей последних 10 проверок (in-memory state, не персистится).
+- Отдельная страница `/system-status` с историей последних 10 проверок (in-memory state, не персистится). Добавить третью строку — `Kaspi gate` (green `up` / red `down` / grey `unknown`) — читая `checks.kaspi`; `down` не делает общий статус degraded.
 - Показывать `version` и `uptime_seconds` в footer / системной плашке.
 
 ---
@@ -919,32 +922,118 @@ Re-enqueue в `lifecycle` queue с тем же payload.
 
 Сводная таблица: какие routes покрывает SuperAdmin frontend. Жирным помечены routes, у которых backend-эндпойнты **отсутствуют сегодня** — реализация откладывается.
 
-| Frontend route                        | HTTP methods  | Backend endpoints                                                                                     | Примечание                                                                                                       |
-| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `/login`                              | POST          | `/saas/auth/login`                                                                                    |                                                                                                                  |
-| `/` (dashboard)                       | GET           | `/health`, `/health/ready` + агрегированный счётчик из `/saas/kindergartens?limit=1` (читаем `total`) |                                                                                                                  |
-| `/kindergartens`                      | GET           | `/saas/kindergartens`                                                                                 | offset-pagination                                                                                                |
-| `/kindergartens/new`                  | POST          | `/saas/kindergartens`                                                                                 |                                                                                                                  |
-| **`/kindergartens/:id`**              | —             | — нет endpoint'а                                                                                      | **Заблокировано:** нет `GET /saas/kindergartens/:id` (overview tab)                                              |
-| **`/kindergartens/:id/settings`**     | —             | — нет endpoint'а                                                                                      | **Заблокировано:** нет `PATCH /saas/kindergartens/:id`                                                           |
-| `/kindergartens/:id/admins`           | GET, POST     | `/saas/kindergartens/:id/admins`                                                                      | **вкладка «Администраторы»** — list (plain array, фильтр `is_active`) + add-модалка. См. §1.7. Независима от B.8 |
-| `/kindergartens/:id/archive`          | POST          | `/saas/kindergartens/:id/archive`                                                                     | dialog из списка                                                                                                 |
-| `/kindergartens/:id/restore`          | POST          | `/saas/kindergartens/:id/restore`                                                                     | dialog из списка с фильтром archived                                                                             |
-| `/kindergartens/:id/admin/invite`     | POST          | `/saas/kindergartens/:id/admin/invite`                                                                | dialog из списка + row-action «переотправить приглашение» во вкладке «Администраторы»                            |
-| **`/kindergartens/:id/subscription`** | —             | — нет модуля `/saas/saas-subscriptions`                                                               | **Заблокировано**                                                                                                |
-| **`/kindergartens/:id/flags`**        | —             | — нет модуля `/saas/feature-flags`                                                                    | **Заблокировано**                                                                                                |
-| **`/kindergartens/:id/view-as`**      | (placeholder) | —                                                                                                     | informational stub                                                                                               |
-| **`/subscriptions`**                  | —             | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
-| **`/feature-flags`**                  | —             | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
-| **`/users`**                          | —             | — нет модуля `/saas/users`                                                                            | **Заблокировано**                                                                                                |
-| **`/users/new`**                      | —             | —                                                                                                     | **Заблокировано**                                                                                                |
-| **`/users/:id`**                      | —             | —                                                                                                     | **Заблокировано**                                                                                                |
-| `/operations/billing`                 | POST          | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}`                                       | все async (202)                                                                                                  |
-| `/operations/content`                 | POST          | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}`                              | sync (200)                                                                                                       |
-| `/operations/schedule-rollout`        | POST          | `/admin/schedule/week-rollout/run`                                                                    | sync (200), camelCase body/response                                                                              |
-| `/operations/lifecycle-dlq`           | GET, POST     | `/admin/lifecycle/failed-jobs`, `/admin/lifecycle/failed-jobs/:id/retry`                              | opaque base64 cursor                                                                                             |
-| `/system-status`                      | GET           | `/health`, `/health/ready` (polling)                                                                  |                                                                                                                  |
+| Frontend route                        | HTTP methods   | Backend endpoints                                                                                     | Примечание                                                                                                       |
+| ------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `/login`                              | POST           | `/saas/auth/login`                                                                                    |                                                                                                                  |
+| `/` (dashboard)                       | GET            | `/health`, `/health/ready` + агрегированный счётчик из `/saas/kindergartens?limit=1` (читаем `total`) |                                                                                                                  |
+| `/kindergartens`                      | GET            | `/saas/kindergartens`                                                                                 | offset-pagination                                                                                                |
+| `/kindergartens/new`                  | POST           | `/saas/kindergartens`                                                                                 |                                                                                                                  |
+| **`/kindergartens/:id`**              | —              | — нет endpoint'а                                                                                      | **Заблокировано:** нет `GET /saas/kindergartens/:id` (overview tab)                                              |
+| **`/kindergartens/:id/settings`**     | —              | — нет endpoint'а                                                                                      | **Заблокировано:** нет `PATCH /saas/kindergartens/:id`                                                           |
+| `/kindergartens/:id/admins`           | GET, POST      | `/saas/kindergartens/:id/admins`                                                                      | **вкладка «Администраторы»** — list (plain array, фильтр `is_active`) + add-модалка. См. §1.7. Независима от B.8 |
+| `/kindergartens/:id/archive`          | POST           | `/saas/kindergartens/:id/archive`                                                                     | dialog из списка                                                                                                 |
+| `/kindergartens/:id/restore`          | POST           | `/saas/kindergartens/:id/restore`                                                                     | dialog из списка с фильтром archived                                                                             |
+| `/kindergartens/:id/admin/invite`     | POST           | `/saas/kindergartens/:id/admin/invite`                                                                | dialog из списка + row-action «переотправить приглашение» во вкладке «Администраторы»                            |
+| **`/kindergartens/:id/subscription`** | —              | — нет модуля `/saas/saas-subscriptions`                                                               | **Заблокировано**                                                                                                |
+| **`/kindergartens/:id/flags`**        | —              | — нет модуля `/saas/feature-flags`                                                                    | **Заблокировано**                                                                                                |
+| **`/kindergartens/:id/view-as`**      | (placeholder)  | —                                                                                                     | informational stub                                                                                               |
+| **`/subscriptions`**                  | —              | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
+| **`/feature-flags`**                  | —              | — нет модуля                                                                                          | **Заблокировано**                                                                                                |
+| **`/users`**                          | —              | — нет модуля `/saas/users`                                                                            | **Заблокировано**                                                                                                |
+| **`/users/new`**                      | —              | —                                                                                                     | **Заблокировано**                                                                                                |
+| **`/users/:id`**                      | —              | —                                                                                                     | **Заблокировано**                                                                                                |
+| `/operations/billing`                 | POST           | `/saas/billing/{monthly-run, discount-expire-run, overdue-run}`                                       | все async (202)                                                                                                  |
+| `/operations/content`                 | POST           | `/saas/content/{birthday-run, story-cleanup-run, publish-scheduled-run}`                              | sync (200)                                                                                                       |
+| `/operations/schedule-rollout`        | POST           | `/admin/schedule/week-rollout/run`                                                                    | sync (200), camelCase body/response                                                                              |
+| `/operations/lifecycle-dlq`           | GET, POST      | `/admin/lifecycle/failed-jobs`, `/admin/lifecycle/failed-jobs/:id/retry`                              | opaque base64 cursor                                                                                             |
+| `/system-status`                      | GET            | `/health`, `/health/ready` (polling)                                                                  | `/health/ready` теперь включает `checks.kaspi` + `kaspi_detail` (§9.2)                                           |
+| `/system/kaspi`                       | GET, PUT, POST | `/saas/kaspi/config`, `/saas/kaspi/version-probe`, `/health/ready`                                    | Kaspi глобальный конфиг + версионный гейт (§13). `app_build` — строка                                            |
 
 ---
 
 Backend-side TODO для разблокировки заблокированных routes (детали садика / settings PATCH / saas-subscriptions / feature-flags / saas-users / single-kg billing trigger) — вынесены в [`OPEN_QUESTIONS.md` раздел B](OPEN_QUESTIONS.md#b-endpoints--backend-api-contracts).
+
+---
+
+## 13. Kaspi config & version gate — `/saas/kaspi`
+
+**Что это.** Глобальный (один на всю платформу, **не** per-садик) конфиг Kaspi-клиента + SMS-free проверка версионного гейта. Kaspi периодически блокирует устаревший **билд** приложения (`OldVersionToUpdate`) — тогда оплата ломается у ВСЕХ садиков сразу. Super-admin чинит это **без передеплоя backend'а**, подняв `app_build`. Гейт смотрит на `app_build`, строку версии (`app_version`) игнорирует.
+
+**Auth:** все три эндпоинта — `bearer` (super_admin / support), как и остальной `/saas/*`. Tag: `SaaS / Kaspi`. Деплой на dev: 2026-06-05.
+
+> ⚠️ `app_build` и `app_version` — **строки**, не числа (`"1077"`, не `1077`). Backend хранит и сравнивает их как строки. Форма редактирования должна слать строку.
+
+### 13.1 `GET /saas/kaspi/config` — текущий конфиг
+
+**Response 200** (`KaspiGlobalConfigResponseDto`) — single-row, все поля `required` (кроме nullable `updated_by`):
+
+```json
+{
+  "app_version": "4.110.1",
+  "app_build": "1076",
+  "platform_ver": "18.5",
+  "model": "iPhone17,3",
+  "brand": "Apple",
+  "ua_native": "Kaspi%20Pay/1076 CFNetwork/3826.500.131 Darwin/24.5.0",
+  "ua_browser": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+  "entrance_url": "https://entrance-pay.kaspi.kz",
+  "mtoken_url": "https://mtoken.kaspi.kz",
+  "qrpay_url": "https://qrpay.kaspi.kz",
+  "updated_by": "00000000-0000-0000-0000-000000000001",
+  "updated_at": "2026-06-01T12:00:00.000Z"
+}
+```
+
+| Поле                                                  | Назначение                                                                         |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `app_build` **(ключевое)**                            | Билд-номер, который смотрит гейт. Поднимаем при `OldVersionToUpdate`.              |
+| `app_version`                                         | Косметическая строка версии. На гейт не влияет.                                    |
+| `platform_ver`, `model`, `brand`                      | iOS-версия / модель / бренд устройства, уходят в Cookie и тело запроса к Kaspi.    |
+| `ua_native`, `ua_browser`                             | User-Agent'ы (нативный Kaspi-app и WebView).                                       |
+| `entrance_url`, `mtoken_url`, `qrpay_url`             | Базовые URL Kaspi API (entrance / mtoken / qrpay).                                 |
+| `updated_by` (nullable UUID), `updated_at` (ISO-8601) | Кто и когда правил конфиг последним. `updated_by:null` — если ни разу не правился. |
+
+### 13.2 `PUT /saas/kaspi/config` — частичное обновление
+
+**Body** (`UpdateKaspiGlobalConfigDto`) — **все поля опциональны** (partial update), любое подмножество полей из 13.1 (кроме `updated_by`/`updated_at` — их ставит backend). Обычный кейс — только `app_build`:
+
+```json
+{ "app_build": "1077" }
+```
+
+**Response 200** — обновлённый `KaspiGlobalConfigResponseDto` (как 13.1). Инвалидирует кэш конфига во всех садиках.
+
+**Ошибки:** `401` (нет/битый токен), `403` (не super_admin/support), `422` (class-validator — поля в envelope, см. §11 / §1.7 для shape).
+
+> ⚠️ **SSRF:** `entrance_url` / `mtoken_url` / `qrpay_url` backend дёргает server-side. Frontend ставит Zod-refinement против внутренних хостов (defense-in-depth, **не** граница безопасности). Authoritative валидация (post-DNS-resolution + DNS-rebinding) — на backend, см. [`OPEN_QUESTIONS.md#b20`](OPEN_QUESTIONS.md#b20-ssrf-backend-валидация-kaspi-url-полей--open-backend-ask).
+
+### 13.3 `POST /saas/kaspi/version-probe` — SMS-free проверка билда
+
+Дёргает Kaspi entrance/init с заданным (или текущим) билдом и смотрит, пустит ли гейт. **SMS не тратит** — можно жать сколько угодно.
+
+**Body** (`KaspiVersionProbeDto`) — оба поля опциональны, по умолчанию берутся текущие из конфига:
+
+```json
+{ "app_build": "1077", "app_version": "4.111.0" }
+```
+
+**Response 200** (`KaspiVersionProbeResponseDto`):
+
+```json
+{ "build": "1077", "accepted": true, "alarm": null }
+```
+
+- `build` — какой билд пробили.
+- `accepted` — `true` если Kaspi пустил (появился экран ввода телефона); `false` если заблокировал/неожиданный ответ.
+- `alarm` (nullable) — присутствует только когда Kaspi явно заблокировал: `"OldVersionToUpdate"`.
+
+**Ошибки:** `401`, `403`, `422`.
+
+> ⚠️ Probe дёргает **реальный** Kaspi entrance API. SMS не шлёт, но это внешний сетевой вызов — не ставить на агрессивный авто-polling. Жмётся вручную по кнопке.
+
+### 13.4 Frontend UX (см. [`DESIGN.md §5.17`](DESIGN.md#517-systemkaspi--kaspi-конфиг--версионный-гейт))
+
+- Экран «Kaspi конфиг» (`/system/kaspi`): текущий `app_build` + индикатор `checks.kaspi` (green `up` / red `down` / grey `unknown`) из `GET /health/ready` + `kaspi_detail` (последняя проба + время).
+- Кнопка «Проверить билд» → `version-probe` (без body = текущий билд), показать `accepted` / `alarm`.
+- Редактирование `app_build` (и опц. остальных полей) → `PUT /saas/kaspi/config`. Подсказка: «Если Kaspi выдаёт OldVersionToUpdate — подними билд до актуального из App Store (Kaspi Pay iOS) и проверь probe».
+- Алерт-баннер если `checks.kaspi='down'`: «Kaspi блокирует текущий билд — оплата не работает у садиков. Обнови app_build». **Полноценного push-алерта суперадмину пока нет** (канала нотификаций для saas-юзеров нет) — мониторим через баннер / `/health/ready`. См. [`OPEN_QUESTIONS.md#b19`](OPEN_QUESTIONS.md#b19-нет-push-канала-для-super-admin-алертов-kaspi-down--open).

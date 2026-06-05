@@ -23,6 +23,7 @@ export const routes = {
     detail: (id: string) => `/users/${id}`,
   },
   systemStatus: () => '/system-status',
+  systemKaspi: () => '/system/kaspi',
   dashboard: () => '/',
   login: () => '/login',
 };

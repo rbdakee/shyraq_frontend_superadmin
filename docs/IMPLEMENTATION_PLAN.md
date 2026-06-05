@@ -95,7 +95,10 @@ VITE_APP_VERSION=0.1.0
 | POST   | `/api/v1/admin/lifecycle/failed-jobs/{id}/retry` | Bearer | 202 async                               |
 | POST   | `/api/v1/admin/schedule/week-rollout/run`        | Bearer | sync (минуты)                           |
 | GET    | `/api/v1/health`                                 | public | sync                                    |
-| GET    | `/api/v1/health/ready`                           | public | sync                                    |
+| GET    | `/api/v1/health/ready`                           | public | sync (+`checks.kaspi`/`kaspi_detail`)   |
+| GET    | `/api/v1/saas/kaspi/config`                      | Bearer | sync (single-row)                       |
+| PUT    | `/api/v1/saas/kaspi/config`                      | Bearer | sync (partial update)                   |
+| POST   | `/api/v1/saas/kaspi/version-probe`               | Bearer | sync (real Kaspi call, SMS-free)        |
 
 ### NOT available (blocker'ы, см. OPEN_QUESTIONS)
 
@@ -157,7 +160,15 @@ VITE_APP_VERSION=0.1.0
 **Health:**
 
 - `HealthStatusDto` (`/health`): `{ status, version, uptime_seconds, timestamp }` — всегда 200.
-- `HealthReadyDto` (`/health/ready`): `{ status: 'ok' | 'degraded', checks: object }` — Swagger декларирует только 200; 503 не подтверждён ([B.13](OPEN_QUESTIONS.md#b13-healthready-503-contract--open)). Frontend смотрит на `status` поле, **не** на HTTP-код.
+- `HealthReadyDto` (`/health/ready`): `{ status: 'ok' | 'degraded', checks: { db, redis, kaspi }, kaspi_detail? }` — Swagger декларирует только 200; 503 не подтверждён ([B.13](OPEN_QUESTIONS.md#b13-healthready-503-contract--open)). Frontend смотрит на `status` поле, **не** на HTTP-код. `checks.kaspi` — `'up'|'down'|'unknown'`; `kaspi=down` **не** делает top-level `status` degraded (инфо-сигнал). `kaspi_detail` — опц. `{ build, checked_at }` (после первой cron-пробы).
+
+**Kaspi config (B10 — `§13`):**
+
+- `KaspiGlobalConfigResponseDto` (GET): single-row, все поля `required`. `{ app_version, app_build, platform_ver, model, brand, ua_native, ua_browser, entrance_url, mtoken_url, qrpay_url, updated_by (nullable UUID), updated_at (ISO) }`. **`app_build` и `app_version` — строки** (`"1076"`, не число).
+- `UpdateKaspiGlobalConfigDto` (PUT body): **все поля опциональны** (partial), подмножество полей выше кроме `updated_by`/`updated_at`. Обычный кейс — `{ app_build: "1077" }`. Ответ — обновлённый `KaspiGlobalConfigResponseDto`. Инвалидирует кэш во всех садиках.
+- `KaspiVersionProbeDto` (POST body): `{ app_build?, app_version? }` — оба опц., default = текущие из конфига. SMS-free, но дёргает реальный Kaspi — не авто-polling.
+- `KaspiVersionProbeResponseDto`: `{ build: string, accepted: boolean, alarm?: 'OldVersionToUpdate' | null }`.
+- Auth: все три — Bearer (super_admin/support). Ошибки: 401/403; PUT и probe также 422 (class-validator envelope).
 
 ---
 
@@ -1491,6 +1502,56 @@ Refs: docs/IMPLEMENTATION_PLAN.md §BF1, OPEN_QUESTIONS#b8, #b18
 
 ---
 
+## B10 — Kaspi config screen (version gate)
+
+**Goal:** экран `/system/kaspi` — глобальный (один на платформу) конфиг Kaspi-клиента + SMS-free проверка версионного гейта. Kaspi периодически блокирует устаревший **билд** (`OldVersionToUpdate`) → оплата ломается у ВСЕХ садиков; super-admin чинит без передеплоя, подняв `app_build`. Разблокирован backend'ом 2026-06-05 (`GET/PUT /saas/kaspi/config`, `POST /saas/kaspi/version-probe`, `/health/ready` + `checks.kaspi`).
+
+**Time:** 2–3 часа
+
+### Inputs
+
+- [`docs/endpoints.md §13`](endpoints.md#13-kaspi-config--version-gate--saaskaspi) — контракт трёх эндпоинтов + `app_build` строка
+- [`docs/endpoints.md §9.2`](endpoints.md#92-get-healthready--readiness) — `checks.kaspi` + `kaspi_detail` в readiness
+- [`docs/DESIGN.md §5.17`](DESIGN.md#517-systemkaspi--kaspi-конфиг--версионный-гейт) — UI-спека экрана
+- [`docs/OPEN_QUESTIONS.md#b19`](OPEN_QUESTIONS.md#b19-нет-push-канала-для-super-admin-алертов-kaspi-down--open) — нет push-канала, мониторинг через баннер
+- Existing infra (reuse): health-хук (`useHealthReady` / system-status polling), forms (RHF+Zod из B5/B6), `error-map` / `api/client.ts`, `lib/routes.ts`, sidebar nav, `lib/format.ts` (relative time)
+
+### Tasks (субагентные слайсы)
+
+1. **`pnpm gen:api` + типы (Sonnet, первый, блокирующий):** убедиться что `KaspiGlobalConfigResponseDto` / `UpdateKaspiGlobalConfigDto` / `KaspiVersionProbeDto` / `KaspiVersionProbeResponseDto` + обновлённый `HealthReadyDto` (`checks.kaspi`, `kaspi_detail`) есть в `openapi.d.ts` без `any`. `pnpm typecheck` exit 0. _(уже прогнано при апдейте docs — verify diff.)_
+2. **API + hooks (Sonnet, после 1):** `src/api/kaspi.ts` — `getKaspiConfig()`, `updateKaspiConfig(body)`, `probeKaspiVersion(body?)` (типы из openapi). `src/hooks/use-kaspi.ts` — `useKaspiConfig()` (query), `useUpdateKaspiConfig()` (mutation, invalidate config + health/ready), `useProbeKaspiVersion()` (mutation, без авто-retry). Query-keys в `query-keys.ts`. Расширить health-хук (или добавить selector) для `checks.kaspi` + `kaspi_detail`. `routes.systemKaspi()` в `lib/routes.ts`.
+3. **i18n (Sonnet, параллельно 2):** namespace `kaspi.json` RU+KK — заголовок/описание, лейблы полей (`app_build` … `qrpay_url`), подсказки (build ключевой / version косметика / OldVersionToUpdate hint), статусы гейта (up/down/unknown), кнопка «Проверить билд», результат пробы (принят / заблокирован), down-баннер, тосты success/error. `errors.json` — если probe/PUT дают новые коды (verify; вероятно generic validation). Nav-строка «Kaspi конфиг».
+4. **Screen + route (Opus, после 2+3):** `src/routes/system/kaspi.tsx` — page header + «Проверить билд» CTA; блок «Состояние гейта» (pulse-dot из `checks.kaspi`, `kaspi_detail.build` + relative `checked_at`, polling 30s); destructive-баннер при `checks.kaspi='down'`; inline-результат пробы (`accepted`/`alarm`); форма конфига (RHF+Zod, все строковые, `app_build` required + выделено, URL-поля `url()`, partial-submit изменённых полей → `PUT`, 200→тост+рефетч, 422→`setError`); состояния loading/error. Зарегистрировать роут в router + пункт sidebar nav (icon `Wallet`). Добавить строку `Kaspi gate` в `/system-status` (§5.15).
+
+### Acceptance criteria
+
+- [ ] `pnpm gen:api` → Kaspi DTO + `HealthReadyDto.checks.kaspi` в `openapi.d.ts` без `any`; `pnpm typecheck` exit 0
+- [ ] `/system/kaspi` доступен из сайдбара; конфиг грузится через `GET /saas/kaspi/config` (DevTools)
+- [ ] Блок «Состояние гейта» показывает `checks.kaspi` (up/down/unknown) + `kaspi_detail` (build, время) из `/health/ready`
+- [ ] `checks.kaspi='down'` → destructive-баннер «оплата не работает» виден; общий статус системы при этом **не** degraded
+- [ ] «Проверить билд» → `POST /saas/kaspi/version-probe` → inline-результат: `accepted:true` success / `accepted:false`+`alarm` warning; SMS не уходит
+- [ ] Правка `app_build` → `PUT /saas/kaspi/config` (partial, только изменённые поля, строкой) → 200 → success-тост → конфиг рефетчится
+- [ ] 422 на PUT → подсветка поля (`setError`); никаких сырых `err.message` в UI
+- [ ] Нет hardcoded путей/строк (routes-helper + i18n RU/KK); `pnpm lint` + `pnpm test` exit 0
+
+### Commit
+
+```
+B10: Kaspi config screen — global config + version-gate probe
+
+Экран /system/kaspi: глобальный Kaspi-конфиг (GET/PUT /saas/kaspi/config),
+SMS-free проба билда (version-probe), индикатор checks.kaspi + kaspi_detail
+из /health/ready, down-баннер. app_build — строка, PUT partial. Без push-
+канала алертов (OPEN_QUESTIONS#b19) — мониторинг через баннер.
+
+Acceptance:
+- [x] ...
+
+Refs: docs/IMPLEMENTATION_PLAN.md §B10, endpoints.md §13, DESIGN.md §5.17
+```
+
+---
+
 ## Tracker
 
 Отмечай батчи по мере завершения:
@@ -1506,8 +1567,9 @@ Refs: docs/IMPLEMENTATION_PLAN.md §BF1, OPEN_QUESTIONS#b8, #b18
 - [x] **B8** Polish (command palette, i18n, a11y, build) — _Playwright e2e (task 13) deferred: §B8 acceptance `pnpm test:e2e` + artifacts bullets remain open_
 - [x] **B9** Kindergarten Admins tab (list + add + resend invite) — частично снимает [B.8](OPEN_QUESTIONS.md#b8); overview/settings табы остаются заблокированы
 - [ ] **BF1** Post-B9 bugfixes — refresh resilience (персист кэша + `useKindergarten(id)`), drop `/users/me` (403 super-admin), phone mask cap
+- [x] **B10** Kaspi config screen (`/system/kaspi`) — глобальный конфиг + version-gate probe + `checks.kaspi` индикатор _(gate=`up`/`down` индикатор полноценно проверяется только после первого прогона backend-cron; на dev `checks.kaspi=unknown`)_
 
-Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8). B9 — post-deploy фича-батч (backend разблокировал 2026-05-18). BF1 — post-B9 bugfix-батч (browser walk 2026-05-19).
+Когда все 8 батчей `[x]` → готов к production deploy (сессия Post-B8). B9 — post-deploy фича-батч (backend разблокировал 2026-05-18). BF1 — post-B9 bugfix-батч (browser walk 2026-05-19). B10 — Kaspi version-gate фича-батч (backend разблокировал 2026-06-05).
 
 ---
 

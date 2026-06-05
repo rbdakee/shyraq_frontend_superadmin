@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCcw, AlertCircle } from 'lucide-react';
+
+import { routes } from '@/lib/routes';
 
 import { useHealthReady } from '@/hooks/use-health';
 import { useNow } from '@/hooks/use-now';
@@ -91,6 +94,9 @@ export default function SystemStatusPage() {
     }
   }
 
+  const kaspiStatus = data?.checks.kaspi ?? 'unknown';
+  const kaspiTone = kaspiStatus === 'up' ? 'success' : kaspiStatus === 'down' ? 'error' : 'neutral';
+
   const isInitialLoading = isLoading && !data;
 
   return (
@@ -151,6 +157,19 @@ export default function SystemStatusPage() {
                 status={data?.checks.redis ?? 'down'}
                 lastCheckedAt={dataUpdatedAt || null}
               />
+              {/* Kaspi gate — three-state (up/down/unknown), does NOT degrade overall status */}
+              <div className="flex items-center gap-3">
+                <PulseDot tone={kaspiTone} />
+                <span className="flex-1 text-sm text-text-primary">
+                  {t('dashboard:health.components.kaspi')}
+                </span>
+                <span className="text-xs text-text-secondary">
+                  {t(`dashboard:health.status.${kaspiStatus}`)}
+                </span>
+                <Link to={routes.systemKaspi()} className="text-xs text-brand hover:underline">
+                  {t('dashboard:system_status.kaspi_link')}
+                </Link>
+              </div>
             </div>
           )}
         </CardContent>

@@ -13,6 +13,7 @@ import {
   CalendarSync,
   AlertTriangle,
   Activity,
+  Wallet,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -217,6 +218,16 @@ export function Sidebar() {
               labelKey: 'system_status',
               to: '/system-status',
               icon: <Activity className="size-4" />,
+            }}
+            collapsed={collapsed}
+          />
+
+          {/* Kaspi config */}
+          <SidebarNavLink
+            item={{
+              labelKey: 'kaspi',
+              to: '/system/kaspi',
+              icon: <Wallet className="size-4" />,
             }}
             collapsed={collapsed}
           />
