@@ -10,8 +10,8 @@ const pkg = JSON.parse(
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const backendOrigin = env.BACKEND_ORIGIN;
-  if (!backendOrigin) throw new Error('BACKEND_ORIGIN is not set in .env.local');
+  // Strip trailing slash so http://host:port/ doesn't produce //api/... in proxy
+  const backendOrigin = env.BACKEND_ORIGIN?.replace(/\/$/, '');
 
   return {
     plugins: [react(), tailwindcss()],
@@ -22,7 +22,10 @@ export default defineConfig(({ mode }) => {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
     server: {
-      proxy: { '/api': { target: backendOrigin, changeOrigin: true } },
+      // Proxy only applies in dev; build mode doesn't need BACKEND_ORIGIN
+      ...(backendOrigin && {
+        proxy: { '/api': { target: backendOrigin, changeOrigin: true } },
+      }),
     },
   };
 });
