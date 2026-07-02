@@ -1,6 +1,6 @@
 # Shyraq SuperAdmin Frontend — Endpoints Reference
 
-Полный референс эндпойнтов backend'а, используемых SuperAdmin frontend'ом. Извлечено из [`backend_shyraq_v2/docs/endpoints.md`](../../backend_shyraq_v2/docs/endpoints.md) и сверено с live Swagger (`http://194.32.140.219:5678/docs-json`) с фокусом на роль `super_admin`.
+Полный референс эндпойнтов backend'а, используемых SuperAdmin frontend'ом. Извлечено из [`backend_shyraq_v2/docs/endpoints.md`](../../backend_shyraq_v2/docs/endpoints.md) и сверено с live Swagger (`$BACKEND_ORIGIN/docs-json`) с фокусом на роль `super_admin`.
 
 **База:** все пути относительно `VITE_API_BASE_URL` (например, `https://api.shyraq.kz/api/v1` или `/api/v1` при same-origin через Vite-proxy).
 

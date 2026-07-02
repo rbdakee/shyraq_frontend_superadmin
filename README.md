@@ -6,7 +6,7 @@
 
 1. `pnpm install`
 2. `cp .env.example .env.local` — fill in `VITE_API_BASE_URL` (default `/api/v1`, served via Vite dev proxy to the live dev backend).
-3. `pnpm dev` — Vite dev server on `http://localhost:5173`. Backend dev: `http://194.32.140.219:5678` (proxied).
+3. `pnpm dev` — Vite dev server on `http://localhost:5173`. The backend configured in `BACKEND_ORIGIN` is proxied automatically.
 
 ## Scripts
 
@@ -34,8 +34,8 @@ SPA on Vite 8 + React 19 + TypeScript (strict). TanStack Query for server state,
 **Vercel** (Git integration) + **GitHub Actions** quality gate.
 
 - **CI gate** (`.github/workflows/ci.yml`): on push/PR to `main` runs `typecheck → lint → test → build` (Node 20, pnpm frozen lockfile).
-- **Vercel** (`vercel.json`): framework `vite`, builds `dist/`; `/api/*` is reverse-proxied to the backend (same-origin, no CORS, no mixed-content); SPA fallback for deep links; security headers (CSP/HSTS/nosniff/X-Frame-Options) + cache-control (`/assets/*` immutable, `index.html` no-store).
-- **One-time Vercel setup** (manual): import the GitHub repo, set `VITE_API_BASE_URL=/api/v1` in Project → Environment Variables, production branch = `main`. Backend origin lives in `vercel.json` rewrites (Vercel can't interpolate env vars there) — change = 1 line + push.
+- **Vercel**: framework `vite`, builds `dist/`; Routing Middleware reverse-proxies `/api/*` to `BACKEND_ORIGIN` (same-origin, no CORS, no mixed-content); `vercel.json` provides the SPA fallback, security headers, and cache-control.
+- **One-time Vercel setup** (manual): import the GitHub repo, set `VITE_API_BASE_URL=/api/v1` and `BACKEND_ORIGIN=https://your-backend.example.com` in Project → Environment Variables for Production and Preview, production branch = `main`. Routing Middleware proxies `/api/*` to that backend at runtime.
 - ⚠️ Network perimeter (IP-allowlist / Vercel Deployment Protection) is **deferred** — see [`docs/OPEN_QUESTIONS.md#a3`](docs/OPEN_QUESTIONS.md). Until then the only gate is app-login.
 
 Full rationale: [`docs/architecture.md §11`](docs/architecture.md) and "Post-B8 — Deployment" in [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).

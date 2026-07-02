@@ -1,9 +1,11 @@
 import ky, { HTTPError } from 'ky';
 import i18n from '@/lib/i18n';
 import { tokenStorage } from '@/lib/token-storage';
+import { env } from '@/env';
 import { AppError } from './errors';
 
 const AUTH_FREE_PATHS = ['saas/auth/login', 'saas/auth/refresh'];
+const API_PREFIX = `${env.VITE_API_BASE_URL.replace(/\/+$/, '')}/`;
 
 function isAuthFree(url: string): boolean {
   return AUTH_FREE_PATHS.some((p) => url.includes(p));
@@ -24,7 +26,7 @@ async function tryRefreshOnce(): Promise<void> {
     try {
       const res = await ky
         .post('saas/auth/refresh', {
-          prefix: '/api/v1/',
+          prefix: API_PREFIX,
           json: { refreshToken: r },
         })
         .json<{ access_token: string; refresh_token: string }>();
@@ -67,7 +69,7 @@ function parseErrorData(data: unknown): { error: string; details?: unknown } | n
 }
 
 export const apiClient = ky.create({
-  prefix: '/api/v1/',
+  prefix: API_PREFIX,
   retry: { limit: 1 },
   hooks: {
     beforeRequest: [
