@@ -98,6 +98,7 @@
     "tabs": {
       "overview": "Шолу",
       "admins": "Әкімшілер",
+      "bcc": "Эквайринг (BCC)",
       "settings": "Параметрлер",
       "subscription": "Жазылым",
       "flags": "Feature Flags",

@@ -28,6 +28,7 @@ const KindergartensListPage = lazy(() => import('./routes/kindergartens'));
 const KindergartenCreatePage = lazy(() => import('./routes/kindergartens/new'));
 const KindergartenDetailPage = lazy(() => import('./routes/kindergartens/$id'));
 const KindergartenAdminsPage = lazy(() => import('./routes/kindergartens/$id/admins'));
+const KindergartenBccPage = lazy(() => import('./routes/kindergartens/$id/bcc'));
 const OperationsBillingPage = lazy(() => import('./routes/operations/billing'));
 const OperationsContentPage = lazy(() => import('./routes/operations/content'));
 const OperationsScheduleRolloutPage = lazy(() => import('./routes/operations/schedule-rollout'));
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
                 children: [
                   { index: true, element: <KindergartenDetailPage /> },
                   { path: 'admins', element: <KindergartenAdminsPage /> },
+                  { path: 'bcc', element: <KindergartenBccPage /> },
                   { path: 'settings', element: <KindergartenSettingsPage /> },
                   { path: 'subscription', element: <KindergartenSubscriptionPage /> },
                   { path: 'flags', element: <KindergartenFlagsPage /> },

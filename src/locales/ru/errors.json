@@ -18,6 +18,11 @@
   "lifecycle_job_not_in_failed_state": "Задача не в состоянии ошибки",
   "invalid_date_range": "Некорректный диапазон дат",
   "service_unavailable": "Сервис временно недоступен",
+  "bcc_account_not_found": "Эквайринг BCC ещё не подключён для этого садика",
+  "bcc_account_active": "Счёт уже активирован. Чтобы изменить реквизиты, сначала отключите его.",
+  "bcc_mac_components_invalid": "Неверный формат MAC-компонента (нужно 32 hex-символа)",
+  "bcc_gateway_unavailable": "Шлюз BCC недоступен. Попробуйте позже.",
+  "bcc_connection_check_failed": "Проверка связи с BCC не прошла",
   "internal_error": "Внутренняя ошибка сервера",
   "unknown_error": "Неизвестная ошибка",
   "not_found": {

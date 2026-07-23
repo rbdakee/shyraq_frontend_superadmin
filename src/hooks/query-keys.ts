@@ -17,4 +17,5 @@ export const queryKeys = {
   },
   health: { ready: () => ['health', 'ready'] as const },
   kaspi: { config: () => ['kaspi', 'config'] as const },
+  bcc: { account: (kindergartenId: string) => ['bcc-account', kindergartenId] as const },
 };

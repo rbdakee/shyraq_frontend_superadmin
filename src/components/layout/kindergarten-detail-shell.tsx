@@ -9,7 +9,7 @@ import { formatPhoneE164 } from '@/lib/format';
 import type { components } from '@/api/types/openapi';
 
 type Kindergarten = components['schemas']['KindergartenDto'];
-type TabKey = 'overview' | 'admins' | 'settings' | 'subscription' | 'flags' | 'view-as';
+type TabKey = 'overview' | 'admins' | 'bcc' | 'settings' | 'subscription' | 'flags' | 'view-as';
 
 interface KindergartenDetailShellProps {
   kg: Kindergarten;
@@ -18,7 +18,15 @@ interface KindergartenDetailShellProps {
   children: ReactNode;
 }
 
-const TAB_KEYS: TabKey[] = ['overview', 'admins', 'settings', 'subscription', 'flags', 'view-as'];
+const TAB_KEYS: TabKey[] = [
+  'overview',
+  'admins',
+  'bcc',
+  'settings',
+  'subscription',
+  'flags',
+  'view-as',
+];
 
 function tabPath(kgId: string, tab: TabKey): string {
   if (tab === 'overview') return `/kindergartens/${kgId}`;

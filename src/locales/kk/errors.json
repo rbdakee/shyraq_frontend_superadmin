@@ -18,6 +18,11 @@
   "lifecycle_job_not_in_failed_state": "Тапсырма қате күйінде емес",
   "invalid_date_range": "Күн ауқымы қате",
   "service_unavailable": "Қызмет уақытша қолжетімсіз",
+  "bcc_account_not_found": "Бұл балабақшаға BCC эквайрингі әлі қосылмаған",
+  "bcc_account_active": "Шот белсендірілген. Деректемелерді өзгерту үшін алдымен оны өшіріңіз.",
+  "bcc_mac_components_invalid": "MAC-компонент форматы қате (32 hex таңба қажет)",
+  "bcc_gateway_unavailable": "BCC шлюзі қолжетімсіз. Кейінірек қайталаңыз.",
+  "bcc_connection_check_failed": "BCC байланысын тексеру сәтсіз аяқталды",
   "internal_error": "Сервердің ішкі қатесі",
   "unknown_error": "Белгісіз қате",
   "not_found": {

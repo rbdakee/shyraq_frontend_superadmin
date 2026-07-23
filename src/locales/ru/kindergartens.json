@@ -93,6 +93,7 @@
     "tabs": {
       "overview": "Обзор",
       "admins": "Администраторы",
+      "bcc": "Эквайринг (BCC)",
       "settings": "Настройки",
       "subscription": "Подписка",
       "flags": "Feature Flags",
